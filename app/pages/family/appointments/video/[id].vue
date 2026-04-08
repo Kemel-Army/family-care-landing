@@ -161,9 +161,10 @@ async function submitReview() {
   if (!user.value || !appointmentId) return
 
   if (rating.value > 0) {
-    await supabase.from('appointment_reviews').insert({
+    const { data: appt } = await supabase.from('appointments').select('family_id').eq('id', appointmentId).single()
+    await supabase.from('visit_ratings').insert({
       appointment_id: appointmentId,
-      user_id: user.value.id,
+      family_id: appt?.family_id,
       rating: rating.value,
       comment: reviewComment.value || null,
     })
@@ -178,16 +179,16 @@ onMounted(async () => {
   if (appointmentId) {
     const { data } = await supabase
       .from('appointments')
-      .select('*, doctors(full_name)')
+      .select('*, doctors(user_id, specialty, users(first_name, last_name))')
       .eq('id', appointmentId)
       .single()
 
     if (data) {
+      const doc = (data as Record<string, unknown>).doctors as Record<string, unknown> | null
+      const docUser = doc?.users as Record<string, unknown> | null
       appointment.value = {
         ...data,
-        doctor_name: (data as Record<string, unknown>).doctors
-          ? ((data as Record<string, unknown>).doctors as Record<string, unknown>).full_name
-          : 'Врач',
+        doctor_name: docUser ? `${docUser.first_name || ''} ${docUser.last_name || ''}`.trim() : 'Врач',
       }
     }
   }

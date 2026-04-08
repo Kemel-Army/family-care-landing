@@ -5,10 +5,10 @@ interface CoordinatorState {
   tasks: CoordinatorTask[]
   families: Family[]
   stats: {
-    activeFamilies: number
-    overdueToday: number
+    total_families: number
+    overdue_today: number
+    today_appointments: number
     avgAdherence: number
-    monthlyConversion: number
   }
   loading: boolean
 }
@@ -18,10 +18,10 @@ export const useCoordinatorStore = defineStore('coordinator', {
     tasks: [],
     families: [],
     stats: {
-      activeFamilies: 0,
-      overdueToday: 0,
+      total_families: 0,
+      overdue_today: 0,
+      today_appointments: 0,
       avgAdherence: 0,
-      monthlyConversion: 0,
     },
     loading: false,
   }),
@@ -142,26 +142,63 @@ export const useCoordinatorStore = defineStore('coordinator', {
     async fetchStats(clinicId: string) {
       const supabase = useSupabaseClient()
 
-      // Active families count
-      const { count: activeFamilies } = await supabase
-        .from('families')
-        .select('*', { count: 'exact', head: true })
-        .eq('clinic_id', clinicId)
-        .eq('status', 'active')
-
-      // Overdue events today
       const today = new Date().toISOString().split('T')[0]
-      const { count: overdueToday } = await supabase
-        .from('journey_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'overdue')
-        .lte('due_date', today)
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString()
+
+      // Get clinic family IDs first (needed for dose_logs adherence calc)
+      const { data: clinicFamilies } = await supabase
+        .from('families')
+        .select('id')
+        .eq('clinic_id', clinicId)
+
+      const familyIds = clinicFamilies?.map(f => f.id) || []
+
+      const [familiesRes, overdueRes, appointmentsRes, doseTotal, doseConfirmed] = await Promise.all([
+        supabase
+          .from('families')
+          .select('*', { count: 'exact', head: true })
+          .eq('clinic_id', clinicId)
+          .eq('status', 'active'),
+
+        supabase
+          .from('journey_events')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'overdue')
+          .lte('due_date', today),
+
+        supabase
+          .from('appointments')
+          .select('*', { count: 'exact', head: true })
+          .eq('clinic_id', clinicId)
+          .gte('scheduled_at', today)
+          .lt('scheduled_at', `${today}T23:59:59`),
+
+        familyIds.length
+          ? supabase
+              .from('dose_logs')
+              .select('*', { count: 'exact', head: true })
+              .in('family_id', familyIds)
+              .gte('scheduled_at', thirtyDaysAgo)
+          : Promise.resolve({ count: 0 }),
+
+        familyIds.length
+          ? supabase
+              .from('dose_logs')
+              .select('*', { count: 'exact', head: true })
+              .in('family_id', familyIds)
+              .eq('status', 'confirmed')
+              .gte('scheduled_at', thirtyDaysAgo)
+          : Promise.resolve({ count: 0 }),
+      ])
+
+      const totalDoses = doseTotal.count || 0
+      const confirmedDoses = doseConfirmed.count || 0
 
       this.stats = {
-        activeFamilies: activeFamilies || 0,
-        overdueToday: overdueToday || 0,
-        avgAdherence: 0, // Calculated via SQL view
-        monthlyConversion: 0, // Calculated via SQL view
+        total_families: familiesRes.count || 0,
+        overdue_today: overdueRes.count || 0,
+        today_appointments: appointmentsRes.count || 0,
+        avgAdherence: totalDoses > 0 ? Math.round((confirmedDoses / totalDoses) * 100) : 0,
       }
     },
   },

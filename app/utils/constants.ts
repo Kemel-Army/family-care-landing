@@ -7,7 +7,7 @@ export const FAMILY_ROLES: UserRole[] = ['mother', 'father']
 export const COORDINATOR_ROLES: UserRole[] = ['coordinator']
 
 // Roles that access the doctor panel
-export const DOCTOR_ROLES: UserRole[] = ['gynecologist', 'pediatrician', 'doctor']
+export const DOCTOR_ROLES: UserRole[] = ['gynecologist', 'pediatrician', 'doctor', 'nurse']
 
 // Roles that access the admin panel
 export const ADMIN_ROLES: UserRole[] = ['clinic_admin', 'clinic_manager', 'platform_admin', 'admin', 'superadmin']

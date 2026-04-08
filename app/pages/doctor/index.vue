@@ -72,12 +72,15 @@ onMounted(async () => {
   // Fetch today's appointments for this doctor
   const { data: apts } = await supabase
     .from('appointments')
-    .select('*, family:families(id)')
+    .select('*, family:families(id, primary_parent:users!families_primary_parent_id_fkey(first_name, last_name))')
     .eq('doctor_id', authStore.profile?.id)
     .eq('appointment_date', today)
     .order('start_time')
 
-  todayAppointments.value = apts || []
+  todayAppointments.value = (apts || []).map(a => {
+    const parent = (a.family as Record<string, unknown>)?.primary_parent as Record<string, unknown> | null
+    return { ...a, patient_name: parent ? `${parent.first_name || ''} ${parent.last_name || ''}`.trim() : null }
+  })
 
   // Fetch distinct patients
   const { data: pts } = await supabase

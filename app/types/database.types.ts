@@ -410,6 +410,8 @@ export type Database = {
           logo_url: string | null
           name: string
           phone: string | null
+          review_link_2gis: string | null
+          review_link_google: string | null
           settings_json: Json | null
           slug: string
           theme_json: Json | null
@@ -424,6 +426,8 @@ export type Database = {
           logo_url?: string | null
           name: string
           phone?: string | null
+          review_link_2gis?: string | null
+          review_link_google?: string | null
           settings_json?: Json | null
           slug: string
           theme_json?: Json | null
@@ -438,6 +442,8 @@ export type Database = {
           logo_url?: string | null
           name?: string
           phone?: string | null
+          review_link_2gis?: string | null
+          review_link_google?: string | null
           settings_json?: Json | null
           slug?: string
           theme_json?: Json | null
@@ -1923,6 +1929,41 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_clinic_dashboard"
             referencedColumns: ["clinic_id"]
+          },
+        ]
+      }
+      push_tokens: {
+        Row: {
+          created_at: string | null
+          device_type: string | null
+          id: string
+          token: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          token: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          token?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
           },
         ]
       }

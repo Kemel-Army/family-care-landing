@@ -111,9 +111,17 @@ onMounted(() => {
   }
 })
 
-function handleSubmit() {
-  console.log('Final CTA submitted:', { ...form })
-  submitted.value = true
+async function handleSubmit() {
+  try {
+    await $fetch('/api/demo-request', {
+      method: 'POST',
+      body: { name: form.name, contact: form.contact, source: 'landing-final' },
+    })
+    submitted.value = true
+  }
+  catch {
+    submitted.value = true
+  }
 }
 </script>
 

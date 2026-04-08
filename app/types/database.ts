@@ -1,6 +1,6 @@
 // Family Care OS — Database Types (mirrors Supabase schema)
 
-export type UserRole = 'mother' | 'father' | 'coordinator' | 'gynecologist' | 'pediatrician' | 'clinic_admin' | 'clinic_manager' | 'platform_admin' | 'doctor' | 'nurse' | 'admin' | 'superadmin'
+export type UserRole = 'mother' | 'father' | 'grandmother' | 'coordinator' | 'gynecologist' | 'pediatrician' | 'clinic_admin' | 'clinic_manager' | 'platform_admin' | 'doctor' | 'nurse' | 'admin' | 'superadmin'
 
 export type JourneyType = 'pregnancy' | 'postpartum' | 'infant' | 'toddler'
 export type JourneyStatus = 'active' | 'completed' | 'cancelled'
@@ -10,7 +10,7 @@ export type EventType = 'consultation' | 'screening' | 'analysis' | 'ultrasound'
 
 export type AppointmentStatus = 'requested' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' | 'rescheduled'
 
-export type DoseStatus = 'scheduled' | 'confirmed' | 'missed' | 'skipped'
+export type DoseStatus = 'pending' | 'confirmed' | 'missed' | 'skipped'
 
 export type VaccinationStatus = 'scheduled' | 'completed' | 'skipped' | 'postponed'
 
@@ -39,11 +39,16 @@ export interface Clinic {
   name: string
   slug: string
   logo_url: string | null
-  theme: Record<string, string>
-  settings: Record<string, unknown>
+  theme_json: Record<string, string>
+  settings_json: Record<string, unknown>
   timezone: string
-  language: string
+  phone: string | null
+  address: string | null
+  is_active: boolean
+  review_link_2gis: string | null
+  review_link_google: string | null
   created_at: string
+  updated_at: string
 }
 
 export interface User {
@@ -199,7 +204,7 @@ export interface Prescription {
   medication: string
   dosage: string
   frequency: string
-  times_of_day: string[]
+  time_of_day: string[]
   start_date: string
   end_date: string | null
   prescribed_by: string
@@ -470,7 +475,121 @@ export interface Integration {
   id: string
   clinic_id: string
   provider: string
-  config: Record<string, unknown>
-  sync_status: 'active' | 'paused' | 'error'
+  type: 'mis' | '1c' | 'lab' | 'sms' | 'whatsapp' | 'calendar' | 'custom'
+  config_encrypted: string | null
+  sync_status: 'inactive' | 'active' | 'error' | 'syncing'
   last_sync_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+// Migration 009 additional types
+
+export interface OutreachLog {
+  id: string
+  scenario_id: string
+  family_id: string
+  status: 'pending' | 'sent' | 'delivered' | 'opened' | 'converted' | 'failed'
+  result: string | null
+  sent_at: string | null
+  created_at: string
+}
+
+export interface ReviewRequest {
+  id: string
+  family_id: string
+  event_type: string | null
+  nps_score: number | null
+  review_url: string | null
+  status: 'pending' | 'sent' | 'completed' | 'skipped'
+  created_at: string
+}
+
+export interface TrainingProgress {
+  id: string
+  user_id: string
+  module_id: string
+  completed_at: string | null
+  score: number | null
+  attempts: number
+  created_at: string
+}
+
+export interface ClinicNetwork {
+  id: string
+  name: string
+  created_at: string
+}
+
+export interface ClinicNetworkMember {
+  network_id: string
+  clinic_id: string
+  joined_at: string
+}
+
+export interface SyncLog {
+  id: string
+  integration_id: string
+  direction: 'inbound' | 'outbound'
+  entity: string
+  records_processed: number
+  records_failed: number
+  error_log: string | null
+  created_at: string
+}
+
+export interface RevenueForecast {
+  id: string
+  clinic_id: string
+  month: string
+  predicted_revenue: number
+  actual_revenue: number | null
+  model_version: string | null
+  created_at: string
+}
+
+export interface NpsResponse {
+  id: string
+  family_id: string
+  score: number
+  event_type: string | null
+  comment: string | null
+  created_at: string
+}
+
+// Migration 011 types
+
+export interface Webhook {
+  id: string
+  clinic_id: string
+  event: string
+  url: string
+  is_active: boolean
+  created_at: string
+}
+
+export interface DemoRequest {
+  id: string
+  name: string
+  contact: string
+  clinic_name: string | null
+  email: string | null
+  phone: string | null
+  families_count: string | null
+  source: string | null
+  status: 'new' | 'contacted' | 'demo_scheduled' | 'converted' | 'rejected'
+  notes: string | null
+  created_at: string
+}
+
+// Migration 012 types
+
+export interface PushToken {
+  id: string
+  user_id: string
+  token: string
+  platform: 'ios' | 'android' | 'web'
+  is_active: boolean
+  created_at: string
+  updated_at: string
 }

@@ -115,19 +115,24 @@ onMounted(async () => {
 
   // Recent reviews
   const { data: rev } = await supabase
-    .from('nps_surveys')
-    .select('*, users(full_name)')
-    .eq('clinic_id', authStore.clinicId)
+    .from('nps_responses')
+    .select('*, families!inner(clinic_id, primary_parent:users!families_primary_parent_id_fkey(first_name, last_name))')
+    .eq('families.clinic_id', authStore.clinicId)
     .order('created_at', { ascending: false })
     .limit(10)
 
-  reviews.value = (rev || []).map((r: Record<string, unknown>) => ({
-    id: String(r.id),
-    rating: Math.round(Number(r.score) / 2),
-    comment: String(r.comment || ''),
-    date: new Date(r.created_at as string).toLocaleDateString('ru-RU'),
-    author: (r.users as Record<string, unknown>)?.full_name as string || 'Аноним',
-  }))
+  reviews.value = (rev || []).map((r: Record<string, unknown>) => {
+    const family = r.families as Record<string, unknown> | null
+    const parent = family?.primary_parent as Record<string, unknown> | null
+    const name = parent ? `${parent.first_name || ''} ${parent.last_name || ''}`.trim() : 'Аноним'
+    return {
+      id: String(r.id),
+      rating: Math.round(Number(r.score) / 2),
+      comment: String(r.comment || ''),
+      date: new Date(r.created_at as string).toLocaleDateString('ru-RU'),
+      author: name,
+    }
+  })
 })
 </script>
 

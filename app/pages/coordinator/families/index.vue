@@ -54,7 +54,7 @@ const filteredFamilies = computed(() => {
   if (!q) return coordinatorStore.families
   return coordinatorStore.families.filter(f =>
     (f.mother_name as string || '').toLowerCase().includes(q)
-    || (f.father_name as string || '').toLowerCase().includes(q),
+    || (f.mother_phone as string || '').toLowerCase().includes(q),
   )
 })
 

@@ -28,14 +28,14 @@
         <div class="task-priority" :class="task.priority" />
         <div class="task-content">
           <h3>{{ task.title }}</h3>
-          <p v-if="task.description" class="task-desc">{{ task.description }}</p>
+          <p v-if="task.notes" class="task-desc">{{ task.notes }}</p>
           <div class="task-meta">
             <span class="task-type">{{ taskTypeLabel(task.type) }}</span>
             <span v-if="task.due_date">· {{ task.due_date }}</span>
           </div>
         </div>
         <div class="task-actions">
-          <button class="btn-sm done" @click="coordinatorStore.completeTask(task.id)">Выплнено</button>
+          <button class="btn-sm done" @click="coordinatorStore.completeTask(task.id)">Выполнено</button>
           <button class="btn-sm dismiss" @click="coordinatorStore.dismissTask(task.id)">Отклонить</button>
         </div>
       </div>

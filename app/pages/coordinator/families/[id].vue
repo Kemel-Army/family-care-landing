@@ -180,7 +180,7 @@ async function handleCreateTask() {
         priority: taskForm.priority,
         status: 'pending',
         title: taskForm.title,
-        description: taskForm.description || null,
+        notes: taskForm.description || null,
         assigned_to: authStore.profile?.id || null,
         due_date: taskForm.dueDate || null,
       })

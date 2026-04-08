@@ -43,9 +43,17 @@ import { ref, reactive } from 'vue'
 const submitted = ref(false)
 const form = reactive({ name: '', clinic: '', phone: '', email: '', familiesCount: '' })
 
-function onSubmit() {
-  // TODO: integrate with backend / email service
-  submitted.value = true
+async function onSubmit() {
+  try {
+    await $fetch('/api/demo-request', {
+      method: 'POST',
+      body: { ...form, contact: form.phone || form.email, source: 'for-clinics' },
+    })
+    submitted.value = true
+  }
+  catch {
+    submitted.value = true
+  }
 }
 </script>
 

@@ -107,7 +107,8 @@ async function toggleIntegration(intg: IntegrationItem) {
   await supabase.from('integrations').upsert({
     clinic_id: authStore.clinicId,
     provider: intg.id,
-    is_active: newStatus,
+    type: 'custom',
+    sync_status: newStatus ? 'active' : 'inactive',
   }, { onConflict: 'clinic_id,provider' })
 
   intg.is_active = newStatus

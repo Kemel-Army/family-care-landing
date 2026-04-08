@@ -37,30 +37,30 @@
           <h3>Пользователи</h3>
           <p>Управление учётными записями</p>
         </NuxtLink>
-        <NuxtLink to="/admin/families" class="nav-card">
-          <Icon name="lucide:home" size="24" />
-          <h3>Семьи</h3>
-          <p>Просмотр и управление семьями</p>
-        </NuxtLink>
         <NuxtLink to="/admin/templates" class="nav-card">
           <Icon name="lucide:clipboard-list" size="24" />
           <h3>Шаблоны маршрутов</h3>
           <p>Настройка шаблонов care-маршрутов</p>
         </NuxtLink>
         <NuxtLink to="/admin/clinic" class="nav-card">
-          <Icon name="lucide:settings" size="24" />
-          <h3>Настройки клиники</h3>
-          <p>Брендинг, тарифы, интеграции</p>
+          <Icon name="lucide:building-2" size="24" />
+          <h3>Клиника</h3>
+          <p>Профиль и настройки клиники</p>
         </NuxtLink>
         <NuxtLink to="/admin/analytics" class="nav-card">
           <Icon name="lucide:line-chart" size="24" />
           <h3>Аналитика</h3>
           <p>Дашборд метрик и KPI</p>
         </NuxtLink>
-        <NuxtLink to="/admin/notifications" class="nav-card">
-          <Icon name="lucide:bell" size="24" />
-          <h3>Уведомления</h3>
-          <p>Массовые рассылки и шаблоны</p>
+        <NuxtLink to="/admin/outreach" class="nav-card">
+          <Icon name="lucide:phone-call" size="24" />
+          <h3>Outreach</h3>
+          <p>Сценарии и массовые рассылки</p>
+        </NuxtLink>
+        <NuxtLink to="/admin/settings" class="nav-card">
+          <Icon name="lucide:settings" size="24" />
+          <h3>Настройки</h3>
+          <p>Рабочие часы, ссылки, параметры</p>
         </NuxtLink>
       </div>
     </section>

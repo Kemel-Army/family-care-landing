@@ -198,9 +198,17 @@ const navItems = computed(() => {
   return [
     { to: '/admin', label: 'Дашборд', icon: 'lucide:layout-dashboard' },
     { to: '/admin/users', label: 'Пользователи', icon: 'lucide:users' },
+    { to: '/admin/clinic', label: 'Клиника', icon: 'lucide:building-2' },
     { to: '/admin/templates', label: 'Шаблоны', icon: 'lucide:file-text' },
+    { to: '/admin/packages', label: 'Пакеты', icon: 'lucide:package' },
     { to: '/admin/analytics', label: 'Аналитика', icon: 'lucide:bar-chart-3' },
-    { to: '/admin/packages', label: 'Пакеты', icon: 'lucide:settings' },
+    { to: '/admin/capacity', label: 'Загрузка', icon: 'lucide:calendar-range' },
+    { to: '/admin/compliance', label: 'Комплаенс', icon: 'lucide:shield-check' },
+    { to: '/admin/reputation', label: 'Репутация', icon: 'lucide:star' },
+    { to: '/admin/outreach', label: 'Outreach', icon: 'lucide:phone-call' },
+    { to: '/admin/training', label: 'Обучение', icon: 'lucide:graduation-cap' },
+    { to: '/admin/integrations', label: 'Интеграции', icon: 'lucide:plug' },
+    { to: '/admin/network', label: 'Сеть клиник', icon: 'lucide:network' },
     { to: '/admin/settings', label: 'Настройки', icon: 'lucide:settings' },
   ]
 })
