@@ -53,16 +53,16 @@
         <div v-for="child in children" :key="child.id" class="child-card">
           <div class="child-header">
             <strong>{{ child.name }}</strong>
-            <span v-if="child.date_of_birth" class="child-age">{{ formatAge(child.date_of_birth) }}</span>
+            <span v-if="child.dob" class="child-age">{{ formatAge(child.dob) }}</span>
           </div>
           <div class="info-grid compact">
-            <div v-if="child.birth_weight_g" class="info-item">
+            <div v-if="child.birth_weight" class="info-item">
               <span class="info-label">Вес при рождении</span>
-              <span class="info-value">{{ child.birth_weight_g }} г</span>
+              <span class="info-value">{{ child.birth_weight }} кг</span>
             </div>
-            <div v-if="child.birth_height_cm" class="info-item">
+            <div v-if="child.birth_height" class="info-item">
               <span class="info-label">Рост при рождении</span>
-              <span class="info-value">{{ child.birth_height_cm }} см</span>
+              <span class="info-value">{{ child.birth_height }} см</span>
             </div>
             <div v-if="child.blood_type" class="info-item">
               <span class="info-label">Группа крови</span>

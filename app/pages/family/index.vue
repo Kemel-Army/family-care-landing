@@ -136,8 +136,8 @@ definePageMeta({
 })
 
 const journeyStore = useJourneyStore()
-const prescriptionsStore = usePrescriptionsStore()
-const appointmentsStore = useAppointmentsStore()
+const prescriptionsStore = usePrescriptionStore()
+const appointmentsStore = useAppointmentStore()
 const authStore = useAuthStore()
 
 const stageTitle = computed(() => {

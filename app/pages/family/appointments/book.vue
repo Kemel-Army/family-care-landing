@@ -106,7 +106,7 @@ definePageMeta({ layout: 'app' })
 
 const supabase = useSupabaseClient()
 const authStore = useAuthStore()
-const appointmentsStore = useAppointmentsStore()
+const appointmentsStore = useAppointmentStore()
 
 const step = ref(1)
 const doctors = ref<Array<Record<string, unknown>>>([])

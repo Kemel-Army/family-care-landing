@@ -44,7 +44,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const appointmentsStore = useAppointmentsStore()
+const appointmentsStore = useAppointmentStore()
 const authStore = useAuthStore()
 
 onMounted(async () => {

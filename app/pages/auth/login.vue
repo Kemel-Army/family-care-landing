@@ -96,8 +96,11 @@ async function handleLogin() {
     }
 
     if (data.user) {
-      const role = (data.user.user_metadata?.role as UserRole) || 'mother'
-      navigateTo(ROLE_HOME_MAP[role])
+      // Initialize auth store to load profile from public.users
+      const authStore = useAuthStore()
+      await authStore.initialize()
+      const role = authStore.role
+      navigateTo(ROLE_HOME_MAP[role] || '/family')
     }
   }
   finally {

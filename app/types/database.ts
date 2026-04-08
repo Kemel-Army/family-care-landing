@@ -1,6 +1,6 @@
 // Family Care OS — Database Types (mirrors Supabase schema)
 
-export type UserRole = 'mother' | 'father' | 'coordinator' | 'gynecologist' | 'pediatrician' | 'clinic_admin' | 'clinic_manager' | 'platform_admin'
+export type UserRole = 'mother' | 'father' | 'coordinator' | 'gynecologist' | 'pediatrician' | 'clinic_admin' | 'clinic_manager' | 'platform_admin' | 'doctor' | 'nurse' | 'admin' | 'superadmin'
 
 export type JourneyType = 'pregnancy' | 'postpartum' | 'infant' | 'toddler'
 export type JourneyStatus = 'active' | 'completed' | 'cancelled'
@@ -85,14 +85,16 @@ export interface ChildProfile {
   id: string
   family_id: string
   name: string
-  date_of_birth: string | null
+  dob: string | null
   gender: 'male' | 'female' | null
-  birth_weight_g: number | null
-  birth_height_cm: number | null
-  apgar_score: number | null
+  birth_weight: number | null
+  birth_height: number | null
+  apgar_1min: number | null
+  apgar_5min: number | null
   blood_type: string | null
   allergies: string[]
-  chronic_conditions: string[]
+  photo_url: string | null
+  is_active: boolean
 }
 
 export interface Journey {

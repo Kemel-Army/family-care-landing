@@ -23,7 +23,7 @@ export const useNotificationStore = defineStore('notifications', {
     async fetchNotifications() {
       const supabase = useSupabaseClient()
       const user = useSupabaseUser()
-      if (!user.value) return
+      if (!user.value?.id) return
 
       this.loading = true
       try {
@@ -64,7 +64,7 @@ export const useNotificationStore = defineStore('notifications', {
     async markAllAsRead() {
       const supabase = useSupabaseClient()
       const user = useSupabaseUser()
-      if (!user.value) return
+      if (!user.value?.id) return
 
       const { error } = await supabase
         .from('notifications')
@@ -84,10 +84,11 @@ export const useNotificationStore = defineStore('notifications', {
     subscribeToNotifications() {
       const supabase = useSupabaseClient()
       const user = useSupabaseUser()
-      if (!user.value) return
+      if (!user.value?.id) return
 
+      const channelName = `notifications:${user.value.id}`
       const channel = supabase
-        .channel('notifications')
+        .channel(channelName)
         .on(
           'postgres_changes',
           {

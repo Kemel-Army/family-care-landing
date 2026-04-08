@@ -146,8 +146,8 @@ async function sendMessage(text?: string) {
     const childContext = activeChild
       ? {
           name: activeChild.name,
-          age_months: activeChild.date_of_birth
-            ? Math.floor((Date.now() - new Date(activeChild.date_of_birth).getTime()) / (30.44 * 24 * 60 * 60 * 1000))
+          age_months: activeChild.dob
+            ? Math.floor((Date.now() - new Date(activeChild.dob).getTime()) / (30.44 * 24 * 60 * 60 * 1000))
             : undefined,
           gender: activeChild.gender,
         }

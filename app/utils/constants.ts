@@ -7,10 +7,10 @@ export const FAMILY_ROLES: UserRole[] = ['mother', 'father']
 export const COORDINATOR_ROLES: UserRole[] = ['coordinator']
 
 // Roles that access the doctor panel
-export const DOCTOR_ROLES: UserRole[] = ['gynecologist', 'pediatrician']
+export const DOCTOR_ROLES: UserRole[] = ['gynecologist', 'pediatrician', 'doctor']
 
 // Roles that access the admin panel
-export const ADMIN_ROLES: UserRole[] = ['clinic_admin', 'clinic_manager', 'platform_admin']
+export const ADMIN_ROLES: UserRole[] = ['clinic_admin', 'clinic_manager', 'platform_admin', 'admin', 'superadmin']
 
 // All staff roles (web console)
 export const STAFF_ROLES: UserRole[] = [...COORDINATOR_ROLES, ...DOCTOR_ROLES, ...ADMIN_ROLES]
@@ -24,15 +24,19 @@ export const ROUTE_ROLE_MAP: Record<string, UserRole[]> = {
 }
 
 // Default redirect after login based on role
-export const ROLE_HOME_MAP: Record<UserRole, string> = {
+export const ROLE_HOME_MAP: Record<string, string> = {
   mother: '/family',
   father: '/family',
   coordinator: '/coordinator',
   gynecologist: '/doctor',
   pediatrician: '/doctor',
+  doctor: '/doctor',
+  nurse: '/doctor',
   clinic_admin: '/admin',
   clinic_manager: '/admin',
   platform_admin: '/admin',
+  admin: '/admin',
+  superadmin: '/admin',
 }
 
 // Kazakh national vaccination calendar (0-24 months)

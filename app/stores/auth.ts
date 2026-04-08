@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('auth', {
     homeRoute(): string {
       return ROLE_HOME_MAP[this.role]
     },
-    activeChildren: (state) => state.children.filter(c => c.date_of_birth),
+    activeChildren: (state) => state.children.filter(c => c.dob),
     hasConsent: (state) => (type: string) => {
       return state.consents.find(c => c.type === type)?.granted ?? false
     },
@@ -46,14 +46,18 @@ export const useAuthStore = defineStore('auth', {
       try {
         const supabase = useSupabaseClient()
         const user = useSupabaseUser()
-        if (!user.value) return
+        if (!user.value?.id) return
 
-        // Fetch user profile
-        const { data: profile } = await supabase
+        // Fetch user profile from public.users
+        const { data: profile, error: profileError } = await supabase
           .from('users')
           .select('*')
           .eq('id', user.value.id)
           .single()
+
+        if (profileError) {
+          console.error('[AuthStore] Failed to load profile:', profileError.message)
+        }
 
         if (profile) {
           this.profile = profile as User
@@ -61,12 +65,16 @@ export const useAuthStore = defineStore('auth', {
 
         // Fetch family if family role
         if (this.profile && ['mother', 'father'].includes(this.profile.role)) {
-          const { data: family } = await supabase
+          const { data: family, error: familyError } = await supabase
             .from('families')
             .select('*')
             .or(`primary_parent_id.eq.${user.value.id},secondary_parent_id.eq.${user.value.id}`)
             .eq('status', 'active')
             .single()
+
+          if (familyError) {
+            console.error('[AuthStore] Failed to load family:', familyError.message)
+          }
 
           if (family) {
             this.family = family as Family

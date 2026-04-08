@@ -75,10 +75,10 @@
         <span>Family Care</span>
       </div>
       <div class="topbar-actions">
-        <NuxtLink to="/family/notifications" class="topbar-bell">
+        <button class="topbar-bell" @click="bellOpen = !bellOpen">
           <Icon name="lucide:bell" size="22" />
           <span v-if="notifStore.unreadCount > 0" class="topbar-badge">{{ notifStore.unreadCount > 9 ? '9+' : notifStore.unreadCount }}</span>
-        </NuxtLink>
+        </button>
       </div>
     </header>
 
@@ -117,25 +117,29 @@ const route = useRoute()
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const notifStore = useNotificationStore()
+const authStore = useAuthStore()
 
 const sidebarCollapsed = ref(false)
 const mobileMenuOpen = ref(false)
 const bellOpen = ref(false)
 
-// Get user metadata
-const userMeta = computed(() => user.value?.user_metadata ?? {})
+// Use auth store profile (populated from public.users table) with fallback to user_metadata
 const userName = computed(() => {
-  const first = userMeta.value.first_name || ''
-  const last = userMeta.value.last_name || ''
+  if (authStore.profile) {
+    return authStore.fullName || user.value?.email || 'Пользователь'
+  }
+  const meta = user.value?.user_metadata ?? {}
+  const first = meta.first_name || ''
+  const last = meta.last_name || ''
   return `${first} ${last}`.trim() || user.value?.email || 'Пользователь'
 })
 const userInitials = computed(() => {
   const parts = userName.value.split(' ')
   return parts.map(p => p[0]).join('').toUpperCase().slice(0, 2)
 })
-const userRole = computed<UserRole>(() => userMeta.value.role || 'mother')
+const userRole = computed<UserRole>(() => authStore.role)
 const roleLabel = computed(() => {
-  const labels: Record<UserRole, string> = {
+  const labels: Record<string, string> = {
     mother: 'Мама',
     father: 'Папа',
     coordinator: 'Координатор',
@@ -144,8 +148,12 @@ const roleLabel = computed(() => {
     clinic_admin: 'Администратор',
     clinic_manager: 'Руководитель',
     platform_admin: 'Platform Admin',
+    doctor: 'Врач',
+    nurse: 'Медсестра',
+    admin: 'Администратор',
+    superadmin: 'Суперадмин',
   }
-  return labels[userRole.value]
+  return labels[userRole.value] || userRole.value
 })
 
 // Navigation items based on role
@@ -172,14 +180,21 @@ const navItems = computed(() => {
       { to: '/coordinator/outreach', label: 'Outreach', icon: 'lucide:phone-call' },
     ]
   }
-  if (role === 'gynecologist' || role === 'pediatrician') {
+  if (role === 'doctor' || role === 'gynecologist' || role === 'pediatrician') {
     return [
       { to: '/doctor', label: 'Дашборд', icon: 'lucide:layout-dashboard' },
       { to: '/doctor/patients', label: 'Пациенты', icon: 'lucide:users' },
       { to: '/doctor/schedule', label: 'Расписание', icon: 'lucide:calendar-check' },
     ]
   }
-  // Admin roles
+  if (role === 'nurse') {
+    return [
+      { to: '/doctor', label: 'Дашборд', icon: 'lucide:layout-dashboard' },
+      { to: '/doctor/patients', label: 'Пациенты', icon: 'lucide:users' },
+      { to: '/doctor/schedule', label: 'Расписание', icon: 'lucide:calendar-check' },
+    ]
+  }
+  // Admin roles (admin, superadmin, clinic_admin, clinic_manager, platform_admin)
   return [
     { to: '/admin', label: 'Дашборд', icon: 'lucide:layout-dashboard' },
     { to: '/admin/users', label: 'Пользователи', icon: 'lucide:users' },
@@ -202,7 +217,7 @@ async function handleLogout() {
   navigateTo('/auth/login')
 }
 
-const isFamily = computed(() => userRole.value === 'mother' || userRole.value === 'father')
+const isFamily = computed(() => ['mother', 'father'].includes(userRole.value))
 
 function formatNotifTime(dt: string) {
   const d = dayjs(dt)
@@ -215,8 +230,9 @@ watch(() => route.path, () => {
   bellOpen.value = false
 })
 
-// Init notifications for family users
+// Init auth store + notifications
 onMounted(async () => {
+  await authStore.initialize()
   if (isFamily.value) {
     await notifStore.fetchNotifications()
     notifStore.subscribeToNotifications()

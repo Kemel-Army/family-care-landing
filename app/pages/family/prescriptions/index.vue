@@ -55,7 +55,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const prescriptionsStore = usePrescriptionsStore()
+const prescriptionsStore = usePrescriptionStore()
 const authStore = useAuthStore()
 
 onMounted(async () => {
