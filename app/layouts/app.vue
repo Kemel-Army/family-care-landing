@@ -1,5 +1,5 @@
 <template>
-  <div class="app-layout" :class="{ 'has-collapsed-sidebar': sidebarCollapsed }">
+  <div class="app-layout" :class="{ 'has-collapsed-sidebar': sidebarCollapsed }" :data-role="userRole">
     <!-- Ambient gradient blob -->
     <div class="app-ambient" aria-hidden="true" />
 
@@ -180,9 +180,23 @@
     </Transition>
 
     <!-- Main content -->
-    <main class="app-main" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
+    <main class="app-main" :class="{ 'sidebar-collapsed': sidebarCollapsed, 'has-bottom-nav': isFamily }">
       <slot />
     </main>
+
+    <!-- Mobile bottom nav for family role -->
+    <nav v-if="isFamily" class="app-bottom-nav">
+      <NuxtLink
+        v-for="tab in familyBottomTabs"
+        :key="tab.to"
+        :to="tab.to"
+        class="bottom-tab"
+        :class="{ active: isActive(tab.to) }"
+      >
+        <Icon :name="tab.icon" size="20" />
+        <span>{{ tab.label }}</span>
+      </NuxtLink>
+    </nav>
   </div>
 </template>
 
@@ -261,6 +275,13 @@ const roleLabel = computed(() => {
 
 const isFamily = computed(() => ['mother', 'father'].includes(userRole.value))
 
+const familyBottomTabs = [
+  { to: '/family', label: 'Маршрут', icon: 'lucide:route' },
+  { to: '/family/appointments', label: 'Записи', icon: 'lucide:calendar-check' },
+  { to: '/family/documents', label: 'Документы', icon: 'lucide:folder-open' },
+  { to: '/family/settings', label: 'Профиль', icon: 'lucide:user' },
+]
+
 // Navigation with groups
 const navGroups = computed<NavGroup[]>(() => {
   const role = userRole.value
@@ -307,9 +328,26 @@ const navGroups = computed<NavGroup[]>(() => {
       {
         items: [
           { to: '/coordinator', label: 'Дашборд', icon: 'lucide:layout-dashboard' },
-          { to: '/coordinator/families', label: 'Семьи', icon: 'lucide:users' },
-          { to: '/coordinator/tasks', label: 'Задачи', icon: 'lucide:check-circle' },
+          { to: '/coordinator/families', label: 'Мои семьи', icon: 'lucide:users' },
+          { to: '/coordinator/tasks', label: 'Задачи', icon: 'lucide:clipboard-list' },
+          { to: '/coordinator/calendar', label: 'Календарь', icon: 'lucide:calendar' },
+        ],
+      },
+      {
+        label: 'Маршруты',
+        items: [
+          { to: '/coordinator/care-plans', label: 'Маршруты', icon: 'lucide:route' },
+          { to: '/coordinator/prescriptions', label: 'Назначения', icon: 'lucide:pill' },
+          { to: '/coordinator/vaccinations', label: 'Вакцинация', icon: 'lucide:shield-check' },
+        ],
+      },
+      {
+        label: 'Ещё',
+        items: [
+          { to: '/coordinator/documents', label: 'Документы', icon: 'lucide:folder-open' },
+          { to: '/coordinator/timeline', label: 'Хронология', icon: 'lucide:scroll-text' },
           { to: '/coordinator/outreach', label: 'Outreach', icon: 'lucide:phone-call' },
+          { to: '/coordinator/settings', label: 'Настройки', icon: 'lucide:settings' },
         ],
       },
     ]
@@ -318,9 +356,12 @@ const navGroups = computed<NavGroup[]>(() => {
     return [
       {
         items: [
-          { to: '/doctor', label: 'Дашборд', icon: 'lucide:layout-dashboard' },
-          { to: '/doctor/patients', label: 'Пациенты', icon: 'lucide:users' },
-          { to: '/doctor/schedule', label: 'Расписание', icon: 'lucide:calendar-check' },
+          { to: '/doctor', label: 'Мои пациенты', icon: 'lucide:users' },
+          { to: '/doctor/today', label: 'Сегодня', icon: 'lucide:calendar-clock' },
+          { to: '/doctor/care-plans', label: 'Маршруты', icon: 'lucide:route' },
+          { to: '/doctor/prescriptions', label: 'Назначения', icon: 'lucide:pill' },
+          { to: '/doctor/documents', label: 'Документы', icon: 'lucide:folder-open' },
+          { to: '/doctor/settings', label: 'Настройки', icon: 'lucide:settings' },
         ],
       },
     ]
@@ -328,35 +369,30 @@ const navGroups = computed<NavGroup[]>(() => {
   return [
     {
       items: [
-        { to: '/admin', label: 'Дашборд', icon: 'lucide:layout-dashboard' },
-      ],
-    },
-    {
-      label: 'Управление',
-      items: [
-        { to: '/admin/users', label: 'Пользователи', icon: 'lucide:users' },
-        { to: '/admin/clinic', label: 'Клиника', icon: 'lucide:building-2' },
-        { to: '/admin/templates', label: 'Шаблоны', icon: 'lucide:file-text' },
-        { to: '/admin/packages', label: 'Пакеты', icon: 'lucide:package' },
+        { to: '/admin', label: 'Dashboard', icon: 'lucide:layout-dashboard' },
+        { to: '/admin/families', label: 'Семьи', icon: 'lucide:users' },
+        { to: '/admin/coordinators', label: 'Координаторы', icon: 'lucide:headphones' },
+        { to: '/admin/doctors', label: 'Врачи', icon: 'lucide:stethoscope' },
       ],
     },
     {
       label: 'Аналитика',
       items: [
-        { to: '/admin/analytics', label: 'Аналитика', icon: 'lucide:bar-chart-3' },
-        { to: '/admin/capacity', label: 'Загрузка', icon: 'lucide:calendar-range' },
-        { to: '/admin/compliance', label: 'Комплаенс', icon: 'lucide:shield-check' },
-        { to: '/admin/reputation', label: 'Репутация', icon: 'lucide:star' },
+        { to: '/admin/analytics/retention', label: 'Удержание', icon: 'lucide:user-check' },
+        { to: '/admin/analytics/funnel', label: 'Воронка', icon: 'lucide:filter' },
+        { to: '/admin/analytics/ltv', label: 'LTV', icon: 'lucide:trending-up' },
+        { to: '/admin/analytics/nps', label: 'NPS', icon: 'lucide:star' },
+        { to: '/admin/analytics/adherence', label: 'Adherence', icon: 'lucide:check-circle' },
       ],
     },
     {
-      label: 'Операции',
+      label: 'Настройки',
       items: [
-        { to: '/admin/outreach', label: 'Outreach', icon: 'lucide:phone-call' },
-        { to: '/admin/training', label: 'Обучение', icon: 'lucide:graduation-cap' },
-        { to: '/admin/integrations', label: 'Интеграции', icon: 'lucide:plug' },
-        { to: '/admin/network', label: 'Сеть клиник', icon: 'lucide:network' },
-        { to: '/admin/settings', label: 'Настройки', icon: 'lucide:settings' },
+        { to: '/admin/settings/clinic', label: 'Клиника', icon: 'lucide:building-2' },
+        { to: '/admin/settings/brand', label: 'Бренд', icon: 'lucide:palette' },
+        { to: '/admin/settings/care-plans', label: 'Маршруты', icon: 'lucide:route' },
+        { to: '/admin/settings/notifications', label: 'Уведомления', icon: 'lucide:bell' },
+        { to: '/admin/settings/users', label: 'Пользователи', icon: 'lucide:shield' },
       ],
     },
   ]
@@ -1033,6 +1069,56 @@ onUnmounted(() => {
 
   .mobile-drawer .sidebar-footer {
     border-top: 1px solid rgba(139, 126, 200, 0.08);
+  }
+
+  /* Bottom nav for family */
+  .app-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(139, 126, 200, 0.1);
+    padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+    justify-content: space-around;
+  }
+
+  .bottom-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    min-width: 60px;
+  }
+
+  .bottom-tab.active {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .has-bottom-nav {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Hide bottom nav on desktop */
+.app-bottom-nav {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .app-bottom-nav {
+    display: none !important;
   }
 }
 </style>

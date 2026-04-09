@@ -86,13 +86,13 @@ const clinic = reactive({
 })
 
 const weekDays = [
-  { key: 'mon', label: 'Пн' }, { key: 'tue', label: 'Вт' },
-  { key: 'wed', label: 'Ср' }, { key: 'thu', label: 'Чт' },
-  { key: 'fri', label: 'Пт' }, { key: 'sat', label: 'Сб' },
-  { key: 'sun', label: 'Вс' },
+  { key: 'mon' as const, label: 'Пн' }, { key: 'tue' as const, label: 'Вт' },
+  { key: 'wed' as const, label: 'Ср' }, { key: 'thu' as const, label: 'Чт' },
+  { key: 'fri' as const, label: 'Пт' }, { key: 'sat' as const, label: 'Сб' },
+  { key: 'sun' as const, label: 'Вс' },
 ]
 
-const workingHours = reactive<Record<string, { start: string; end: string; active: boolean }>>({
+const workingHours = reactive({
   mon: { start: '08:00', end: '18:00', active: true },
   tue: { start: '08:00', end: '18:00', active: true },
   wed: { start: '08:00', end: '18:00', active: true },

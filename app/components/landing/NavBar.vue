@@ -24,6 +24,10 @@
 
       <!-- Auth + CTA -->
       <div class="navbar-actions">
+        <button class="navbar-demo font-heading" @click="demoModalOpen = true">
+          <Icon name="lucide:play-circle" size="16" />
+          Смотреть демо
+        </button>
         <NuxtLink to="/auth/login" class="navbar-login font-heading">Войти</NuxtLink>
         <a href="#contact" class="navbar-cta font-heading">Запросить демо</a>
       </div>
@@ -52,10 +56,17 @@
             <NuxtLink to="/auth/login" class="mobile-auth-btn mobile-auth-login font-heading" @click="menuOpen = false">Войти</NuxtLink>
             <NuxtLink to="/auth/register" class="mobile-auth-btn mobile-auth-register font-heading" @click="menuOpen = false">Регистрация</NuxtLink>
           </div>
+          <button class="mobile-demo font-heading" @click="menuOpen = false; demoModalOpen = true">
+            <Icon name="lucide:play-circle" size="18" />
+            Смотреть демо
+          </button>
           <a href="#contact" class="mobile-cta font-heading" @click="menuOpen = false">Запросить демо</a>
         </nav>
       </div>
     </Transition>
+
+    <!-- Demo Modal -->
+    <LandingDemoModal v-model="demoModalOpen" />
   </header>
 </template>
 
@@ -63,6 +74,7 @@
 const route = useRoute()
 const menuOpen = ref(false)
 const isScrolled = ref(false)
+const demoModalOpen = ref(false)
 
 const tabs = [
   { to: '/', label: 'Платформа' },
@@ -208,6 +220,48 @@ onMounted(() => {
 
 .navbar-login:hover {
   background: rgba(139, 126, 200, 0.08);
+}
+
+/* Demo button */
+.navbar-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.navbar-demo:hover {
+  background: var(--color-primary-ultralight);
+}
+
+/* Mobile demo button */
+.mobile-demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mobile-demo:hover {
+  background: var(--color-primary-ultralight);
 }
 
 /* CTA button */

@@ -3,8 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { init as echartsInit } from 'echarts'
-import type { EChartsOption, ECharts } from 'echarts'
+import type { EChartsOption } from 'echarts'
 
 const props = withDefaults(defineProps<{
   option: EChartsOption
@@ -16,7 +15,7 @@ const props = withDefaults(defineProps<{
 })
 
 const chartRef = ref<HTMLElement>()
-let chart: ECharts | null = null
+let chart: any = null
 
 const themeColors = {
   color: ['#8B7EC8', '#E8A0BF', '#A8C8E8', '#F2C4A0', '#7CB8D4', '#E9C46A', '#B8ADE8', '#D4727C'],
@@ -38,8 +37,9 @@ function mergeTheme(opt: EChartsOption): EChartsOption {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!chartRef.value) return
+  const { init: echartsInit } = await import('echarts')
   chart = echartsInit(chartRef.value)
   chart.setOption(mergeTheme(props.option))
 

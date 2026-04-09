@@ -1,30 +1,32 @@
-import Lenis from 'lenis'
-import { useGsap } from './useGsap'
+import { initGsap } from './useGsap'
 
-let lenisInstance: Lenis | null = null
+let lenisInstance: any = null
 
 export function useLenis() {
+  return { lenis: lenisInstance }
+}
+
+export async function initLenis() {
   if (!import.meta.client) return { lenis: null }
+  if (lenisInstance) return { lenis: lenisInstance }
 
-  if (!lenisInstance) {
-    const { gsap, ScrollTrigger } = useGsap()
+  const { gsap, ScrollTrigger } = await initGsap()
+  const { default: Lenis } = await import('lenis')
 
-    lenisInstance = new Lenis({
-      duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      touchMultiplier: 1.5,
-      infinite: false,
-    })
+  lenisInstance = new Lenis({
+    duration: 1.2,
+    easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    touchMultiplier: 1.5,
+    infinite: false,
+  })
 
-    // Connect Lenis → GSAP ScrollTrigger
-    lenisInstance.on('scroll', ScrollTrigger.update)
+  lenisInstance.on('scroll', ScrollTrigger.update)
 
-    gsap.ticker.add((time: number) => {
-      lenisInstance?.raf(time * 1000)
-    })
+  gsap.ticker.add((time: number) => {
+    lenisInstance?.raf(time * 1000)
+  })
 
-    gsap.ticker.lagSmoothing(0)
-  }
+  gsap.ticker.lagSmoothing(0)
 
   return { lenis: lenisInstance }
 }

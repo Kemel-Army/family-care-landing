@@ -6,38 +6,18 @@
     <!-- 2. Знакомые проблемы (4 боли) -->
     <LandingFamilyEmotionSection />
 
-    <!-- 3. Цифры доверия -->
-    <LandingFamilyStatsSection />
-
-    <!-- 4. Как подключиться за 3 минуты (онбординг) -->
-    <LandingFamilyOnboardingSection />
-
-    <!-- 5. Что даёт приложение (3 phones) -->
+    <!-- 3. Что даёт приложение (3 экрана) -->
     <LandingFamilyAppShowcaseSection />
 
-    <!-- 6. Все 9 модулей с интерактивными экранами -->
-    <LandingFamilyModulesSection />
-
-    <!-- 7. День с приложением (24h timeline) -->
+    <!-- 4. День с приложением (24h timeline) -->
     <LandingFamilyDayInLifeSection />
 
-    <!-- 8. Документы — глубокий дайв в архив -->
-    <LandingFamilyDocumentsSection />
-
-    <!-- 9. Маршрут ребёнка (GrowingChild morph) -->
-    <LandingFamilyGrowingChildSection />
-
-    <!-- 10. Вакцинация (ImmunityShield) -->
+    <!-- 5. Вакцинация (щит иммунитета) -->
     <LandingFamilyVaccinationSection />
 
-    <!-- 11. Безопасность (lock + 3 points) -->
-    <LandingFamilySecuritySection />
-
-    <!-- 12. FAQ (5 вопросов) -->
+    <!-- 6. Как подключиться + FAQ -->
+    <LandingFamilyOnboardingSection />
     <LandingFamilyFaqSection />
-
-    <!-- 13. CTA -->
-    <LandingFamilyCtaSection />
   </div>
 </template>
 

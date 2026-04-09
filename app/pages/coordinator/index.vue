@@ -59,26 +59,49 @@
       </div>
     </div>
 
-    <!-- Task distribution chart -->
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title"><Icon name="lucide:pie-chart" size="16" /> Распределение задач</h2>
-      </div>
-      <AppSharedEChart :option="taskPieOption" height="220px" />
-    </div>
+    <!-- Two column layout -->
+    <div class="coord-columns">
+      <!-- Left: tasks + chart -->
+      <div class="coord-left">
+        <!-- Task distribution chart -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title"><Icon name="lucide:bar-chart-3" size="16" /> Распределение задач</h2>
+          </div>
+          <AppSharedEChart :option="taskPieOption" height="220px" />
+        </div>
 
-    <!-- Quick links -->
-    <div class="quick-grid">
-      <NuxtLink to="/coordinator/families" class="quick-card">
-        <Icon name="lucide:users" size="20" style="color:var(--color-primary)" />
-        <span>Все семьи</span>
-        <Icon name="lucide:chevron-right" size="14" class="quick-arrow" />
-      </NuxtLink>
-      <NuxtLink to="/coordinator/tasks" class="quick-card">
-        <Icon name="lucide:clipboard-list" size="20" style="color:var(--color-accent-peach)" />
-        <span>Все задачи</span>
-        <Icon name="lucide:chevron-right" size="14" class="quick-arrow" />
-      </NuxtLink>
+        <!-- Quick links -->
+        <div class="quick-grid">
+          <NuxtLink to="/coordinator/families" class="quick-card">
+            <Icon name="lucide:users" size="20" style="color:var(--color-primary)" />
+            <span>Все семьи</span>
+            <Icon name="lucide:chevron-right" size="14" class="quick-arrow" />
+          </NuxtLink>
+          <NuxtLink to="/coordinator/tasks" class="quick-card">
+            <Icon name="lucide:clipboard-list" size="20" style="color:var(--color-accent-blue)" />
+            <span>Все задачи</span>
+            <Icon name="lucide:chevron-right" size="14" class="quick-arrow" />
+          </NuxtLink>
+        </div>
+      </div>
+
+      <!-- Right: day timeline + activity feed -->
+      <div class="coord-right">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title"><Icon name="lucide:calendar-clock" size="16" /> Расписание на день</h2>
+          </div>
+          <AppCoordinatorDayTimeline :schedule="daySchedule" />
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title"><Icon name="lucide:activity" size="16" /> Последние события</h2>
+          </div>
+          <AppCoordinatorActivityFeed :items="activityItems" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -114,6 +137,22 @@ function timeAgo(iso: string) {
   if (h < 24) return `${h}ч назад`
   return `${Math.floor(h / 24)}д назад`
 }
+
+const daySchedule = [
+  { time: '09:00', event: 'Звонок — Каримова А.', detail: 'УЗИ просрочено', active: true },
+  { time: '10:00', event: 'Подключение — Жумабаева К.', detail: 'Новая семья', active: false },
+  { time: '11:30', event: 'Напоминание — Нурланова С.', detail: 'Автоматическое', active: false, past: false },
+  { time: '14:00', event: 'Проверка adherence — 5 семей', detail: null, active: false },
+  { time: '16:00', event: 'Отчёт для руководителя', detail: null, active: false },
+]
+
+const activityItems = [
+  { id: 1, text: 'Каримова А. подтвердила запись на УЗИ', time: '2 мин назад' },
+  { id: 2, text: 'Push-уведомление отправлено Алиевой Д.', time: '15 мин назад' },
+  { id: 3, text: 'Новая семья: Жумабаева К. зарегистрирована', time: '1 час назад' },
+  { id: 4, text: 'Нурланова С. отметила приём витамина D3', time: '2 часа назад' },
+  { id: 5, text: 'Сулейменова М. загрузила результат ОАК', time: '3 часа назад' },
+]
 
 const palette = ['#8B7EC8', '#E8A0BF', '#F2C4A0', '#A8C8E8', '#E9C46A', '#D4727C']
 const taskPieOption = computed(() => ({
@@ -175,4 +214,8 @@ const taskPieOption = computed(() => ({
 .quick-card:hover { border-color: rgba(139,126,200,0.2); transform: translateY(-1px); }
 .quick-card span { flex: 1; font-size: 0.85rem; font-weight: 500; }
 .quick-arrow { color: var(--color-text-muted); }
+
+.coord-columns { display: grid; grid-template-columns: 3fr 2fr; gap: 18px; }
+.coord-left, .coord-right { display: flex; flex-direction: column; gap: 18px; }
+@media (max-width: 768px) { .coord-columns { grid-template-columns: 1fr; } }
 </style>

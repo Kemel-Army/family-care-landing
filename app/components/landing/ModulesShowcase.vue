@@ -42,8 +42,19 @@
                 <span class="illust-task-status" :style="{ color: task.color }">{{ task.status }}</span>
               </div>
             </div>
-            <!-- Analytics: bar chart -->
+            <!-- Analytics: bar chart + trend line -->
             <div v-if="i === 3" class="illust-chart">
+              <svg ref="trendLineRef" class="illust-trend-line" viewBox="0 0 160 60" fill="none" preserveAspectRatio="none">
+                <polyline
+                  points="10,48 50,30 100,36 150,8"
+                  stroke="var(--color-primary)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-dasharray="200"
+                  stroke-dashoffset="200"
+                />
+              </svg>
               <div v-for="(bar, b) in chartBars" :key="b" :ref="(el) => { if (el) barRefs.push(el as HTMLElement) }" class="illust-bar-col">
                 <div class="illust-bar" :style="{ '--bar-h': bar.h + '%', background: bar.color }" />
                 <span class="illust-bar-label font-mono">{{ bar.label }}</span>
@@ -74,6 +85,7 @@ const ringRef = ref<SVGCircleElement | null>(null)
 const ringTextRef = ref<HTMLElement | null>(null)
 const taskRowRefs = ref<HTMLElement[]>([])
 const barRefs = ref<HTMLElement[]>([])
+const trendLineRef = ref<SVGElement | null>(null)
 
 const modules = [
   {
@@ -153,39 +165,59 @@ onMounted(() => {
         ease: 'back.out(1.5)',
       })
 
-      // Event chain animation (module 0)
+      // Event chain animation (module 0) — cascade from top
       if (eventLineRefs.value.length) {
-        gsap.set(eventLineRefs.value, { opacity: 0, scale: 0 })
+        gsap.set(eventLineRefs.value, { opacity: 0, y: -20, scale: 0.5 })
         gsap.to(eventLineRefs.value, {
           opacity: 1,
+          y: 0,
           scale: 1,
-          duration: 0.4,
-          stagger: 0.12,
-          ease: 'back.out(2)',
+          duration: 0.35,
+          stagger: 0.1,
+          ease: 'back.out(2.5)',
           delay: 0.5,
+        })
+        // Connectors grow after dots land
+        const connectors = eventLineRefs.value.map(el => el.querySelector('.illust-connector')).filter(Boolean)
+        gsap.set(connectors, { scaleY: 0, transformOrigin: 'top' })
+        gsap.to(connectors, {
+          scaleY: 1,
+          duration: 0.25,
+          stagger: 0.1,
+          ease: 'power2.out',
+          delay: 0.7,
         })
       }
 
-      // Progress ring (module 1) — 94%
+      // Progress ring (module 1) — from 45% to 94%
       if (ringRef.value) {
         const circumference = 213.6
+        const start = circumference * (1 - 0.45)
         const target = circumference * (1 - 0.94)
+        gsap.set(ringRef.value, { strokeDashoffset: start })
         gsap.to(ringRef.value, {
           strokeDashoffset: target,
-          duration: 1.2,
-          ease: 'power3.out',
+          duration: 1.8,
+          ease: 'power2.out',
           delay: 0.6,
         })
       }
       if (ringTextRef.value) {
-        gsap.to({ val: 0 }, {
+        ringTextRef.value.textContent = '45%'
+        gsap.to({ val: 45 }, {
           val: 94,
-          duration: 1.2,
-          ease: 'power3.out',
+          duration: 1.8,
+          ease: 'power2.out',
           delay: 0.6,
           onUpdate() {
             if (ringTextRef.value) {
               ringTextRef.value.textContent = Math.round(this.targets()[0].val) + '%'
+            }
+          },
+          onComplete() {
+            if (ringTextRef.value) {
+              ringTextRef.value.classList.add('number-pulse')
+              setTimeout(() => ringTextRef.value?.classList.remove('number-pulse'), 600)
             }
           },
         })
@@ -215,6 +247,18 @@ onMounted(() => {
           ease: 'back.out(1.5)',
           delay: 0.8,
         })
+      }
+      // Trend line draw
+      if (trendLineRef.value) {
+        const line = trendLineRef.value.querySelector('polyline')
+        if (line) {
+          gsap.to(line, {
+            strokeDashoffset: 0,
+            duration: 1.2,
+            ease: 'power2.out',
+            delay: 1.2,
+          })
+        }
       }
     },
   })
@@ -435,6 +479,16 @@ onMounted(() => {
   align-items: flex-end;
   gap: 8px;
   height: 70px;
+  position: relative;
+}
+
+.illust-trend-line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .illust-bar-col {

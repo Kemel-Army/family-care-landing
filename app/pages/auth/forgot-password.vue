@@ -99,29 +99,3 @@ async function handleReset() {
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: var(--font-body);
-  cursor: pointer;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.auth-switch {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.auth-success {
-  text-align: center;
-  color: var(--color-success);
-  padding: 16px;
-  background: rgba(124, 184, 212, 0.1);
-  border-radius: var(--radius-sm);
-}
-</style>

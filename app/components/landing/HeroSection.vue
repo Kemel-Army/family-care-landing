@@ -14,24 +14,39 @@
         </h1>
 
         <p ref="heroSubRef" class="hero-subtitle font-body">
-          Цифровая платформа сопровождения семьи от&nbsp;зачатия до&nbsp;2&nbsp;лет&nbsp;— для клиник, которые не&nbsp;теряют семьи после выписки
+          Цифровая платформа сопровождения семьи от&nbsp;зачатия до&nbsp;2&nbsp;лет&nbsp;—
+          <span class="hero-typewriter" :class="{ 'typewriter-active': isTyping, 'typewriter-done': isDone }">{{ displayText }}</span>
         </p>
 
         <div class="hero-stats">
           <div class="hero-stat">
-            <span class="hero-stat-number font-display">87%</span>
+            <span ref="stat1Ref" class="hero-stat-number font-display">87%</span>
             <span class="hero-stat-label">удержание семей</span>
           </div>
           <div class="hero-stat-divider" />
           <div class="hero-stat">
-            <span class="hero-stat-number font-display">94%</span>
+            <span ref="stat2Ref" class="hero-stat-number font-display">94%</span>
             <span class="hero-stat-label">соблюдение назначений</span>
           </div>
           <div class="hero-stat-divider" />
           <div class="hero-stat">
-            <span class="hero-stat-number font-display">×4.2</span>
+            <span ref="stat3Ref" class="hero-stat-number font-display">×4.2</span>
             <span class="hero-stat-label">рост LTV на семью</span>
           </div>
+        </div>
+
+        <!-- Smart segment banner -->
+        <div class="hero-segment-banner">
+          <NuxtLink to="/for-clinics" class="segment-link segment-link--clinic">
+            <Icon name="lucide:building-2" size="16" />
+            <span>Вы руководитель клиники?</span>
+            <Icon name="lucide:arrow-right" size="14" class="segment-arrow" />
+          </NuxtLink>
+          <NuxtLink to="/for-families" class="segment-link segment-link--family">
+            <Icon name="lucide:heart" size="16" />
+            <span>Вы ждёте малыша?</span>
+            <Icon name="lucide:arrow-right" size="14" class="segment-arrow" />
+          </NuxtLink>
         </div>
 
         <div ref="heroActionsRef" class="hero-actions">
@@ -83,7 +98,7 @@
                 <!-- App header -->
                 <div class="screen-header">
                   <span class="screen-title font-heading">Мой маршрут</span>
-                  <span class="screen-week font-mono">16 неделя</span>
+                  <span ref="weekBadgeRef" class="screen-week font-mono">{{ phoneWeek }} неделя</span>
                 </div>
                 <!-- Progress -->
                 <div class="screen-progress">
@@ -235,6 +250,28 @@ const heroTitleRef = ref<HTMLElement | null>(null)
 const heroSubRef = ref<HTMLElement | null>(null)
 const heroActionsRef = ref<HTMLElement | null>(null)
 const scrollIndicatorRef = ref<HTMLElement | null>(null)
+
+// Counter-up refs
+const stat1Ref = ref<HTMLElement | null>(null)
+const stat2Ref = ref<HTMLElement | null>(null)
+const stat3Ref = ref<HTMLElement | null>(null)
+
+// Week badge ref
+const weekBadgeRef = ref<HTMLElement | null>(null)
+
+// Counter-up for hero stats
+useCountUp(stat1Ref, 87, { suffix: '%', delay: 0.3 })
+useCountUp(stat2Ref, 94, { suffix: '%', delay: 0.5 })
+useCountUp(stat3Ref, 4.2, { prefix: '×', decimals: 1, delay: 0.7 })
+
+// Typewriter for subtitle
+const { displayText, isTyping, isDone } = useTypewriter(
+  ['для клиник', 'для семей', 'для врачей'],
+  { typeSpeed: 70, deleteSpeed: 40, pauseAfterType: 2500 }
+)
+
+// Reactive phone week counter
+const phoneWeek = ref(16)
 
 // Phone refs
 const phoneWrapperRef = ref<HTMLElement | null>(null)
@@ -431,6 +468,51 @@ onMounted(() => {
       duration: 0.5,
       delay: 1.4,
     })
+  }
+
+  // ScrollTrigger: phone timeline animation on scroll
+  if (heroRef.value && isDesktop) {
+    // Animate week counter from 16 to 24 on scroll
+    const weekObj = { val: 16 }
+    gsap.to(weekObj, {
+      val: 24,
+      duration: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: heroRef.value,
+        start: 'top top',
+        end: '60% top',
+        scrub: 1,
+      },
+      onUpdate: () => {
+        phoneWeek.value = Math.round(weekObj.val)
+      },
+    })
+
+    // Animate screen items appearing sequentially
+    const screenItems = heroRef.value.querySelectorAll('.s-item')
+    screenItems.forEach((item, i) => {
+      gsap.from(item, {
+        opacity: 0,
+        x: -20,
+        duration: 0.5,
+        delay: 1.2 + i * 0.15,
+        ease: 'power2.out',
+      })
+    })
+
+    // Animate "Принять" button pulse on the vitamin item
+    const actionTag = heroRef.value.querySelector('.s-item-tag--action')
+    if (actionTag) {
+      gsap.to(actionTag, {
+        scale: 1.1,
+        duration: 0.4,
+        delay: 2.5,
+        ease: 'power2.out',
+        yoyo: true,
+        repeat: 1,
+      })
+    }
   }
 
   // ScrollTrigger: hero parallax scroll-out
@@ -704,6 +786,58 @@ onBeforeUnmount(() => {
 .hero-cta-secondary:hover {
   border-color: var(--color-primary);
   box-shadow: 0 2px 12px rgba(139, 126, 200, 0.15);
+}
+
+/* Typewriter in subtitle */
+.hero-typewriter {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Smart segment banner */
+.hero-segment-banner {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.segment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.segment-link:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-ultralight);
+}
+
+.segment-link--clinic .iconify {
+  color: var(--color-primary);
+}
+
+.segment-link--family .iconify {
+  color: var(--color-secondary);
+}
+
+.segment-arrow {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.segment-link:hover .segment-arrow {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* Auth hint below CTA */
@@ -1124,6 +1258,7 @@ onBeforeUnmount(() => {
   .hero-subtitle { margin-left: auto; margin-right: auto; }
   .hero-stats { justify-content: center; }
   .hero-actions { justify-content: center; }
+  .hero-segment-banner { justify-content: center; }
   .hero-visual { order: -1; min-height: 440px; }
   .hero-float--doc { left: -4%; }
   .hero-float--adherence { left: 0; }
@@ -1171,5 +1306,9 @@ onBeforeUnmount(() => {
     justify-content: center;
   }
   .hero-float { display: none; }
+  .hero-segment-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>

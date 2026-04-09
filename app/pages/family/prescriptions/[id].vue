@@ -95,7 +95,7 @@ onMounted(async () => {
     .eq('id', rxId)
     .single()
 
-  if (data) rx.value = data as Prescription
+  if (data) rx.value = data as unknown as Prescription
 
   const sevenDaysAgo = dayjs().subtract(7, 'day').toISOString()
   const { data: doseData } = await supabase

@@ -1,51 +1,51 @@
 <template>
   <div>
+    <!-- Sticky section navigation -->
+    <LandingUiSectionNav :sections="sectionNavItems" />
+
     <!-- 1. Hero — Воронка восстановления -->
-    <LandingClinicHeroSection />
+    <LandingClinicHeroSection id="clinic-hero" />
 
-    <!-- 2. Проблема — Burning Money -->
-    <LandingClinicProblemsSection />
+    <!-- 2. Проблема + До/После (merged) -->
+    <LandingClinicProblemsSection id="clinic-problem" />
 
-    <!-- 3. До и После — сравнение + день координатора -->
-    <LandingClinicBeforeAfterSection />
+    <!-- 3. Три рабочих стола (координатор / руководитель / врач) -->
+    <LandingClinicWhatIsSection id="clinic-solution" />
 
-    <!-- 4. Три рабочих стола (координатор / руководитель / врач) -->
-    <LandingClinicWhatIsSection />
+    <!-- 4. ROI калькулятор -->
+    <LandingClinicUnitEconomicsSection id="clinic-roi" />
 
-    <!-- 5. Интерактивный тур — онбординг демо -->
-    <LandingClinicOnboardingDemo />
+    <!-- 5. Кейсы клиник — Testimonials (анонимизированные) -->
+    <LandingClinicTestimonialsSection id="clinic-cases" />
 
-    <!-- 6. Модули — Deep Dive Cards -->
-    <LandingClinicModulesDeepDiveSection />
+    <!-- 6. Внедрение — 4 шага -->
+    <LandingClinicImplementationSection id="clinic-launch" />
 
-    <!-- 7. Аналитика — Dashboard Demo -->
-    <LandingClinicAnalyticsShowcase />
+    <!-- 7. White-label -->
+    <LandingClinicCustomizationSection id="clinic-brand" />
 
-    <!-- 8. ROI калькулятор -->
-    <LandingClinicUnitEconomicsSection />
+    <!-- 8. FAQ (+ безопасность) -->
+    <LandingClinicFaqSection id="clinic-faq" />
 
-    <!-- 9. Кейсы клиник — Testimonials -->
-    <LandingClinicTestimonialsSection />
-
-    <!-- 10. Внедрение — 4 шага -->
-    <LandingClinicImplementationSection />
-
-    <!-- 11. White-label -->
-    <LandingClinicCustomizationSection />
-
-    <!-- 12. Безопасность -->
-    <LandingClinicSecuritySection />
-
-    <!-- 13. FAQ -->
-    <LandingClinicFaqSection />
-
-    <!-- 14. CTA — форма -->
-    <LandingClinicCtaSection />
+    <!-- 9. CTA — форма -->
+    <LandingClinicCtaSection id="clinic-cta" />
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'landing' })
+
+const sectionNavItems = [
+  { id: 'clinic-hero', label: 'Главная' },
+  { id: 'clinic-problem', label: 'Проблема' },
+  { id: 'clinic-solution', label: 'Решение' },
+  { id: 'clinic-roi', label: 'ROI' },
+  { id: 'clinic-cases', label: 'Кейсы' },
+  { id: 'clinic-launch', label: 'Запуск' },
+  { id: 'clinic-brand', label: 'Бренд' },
+  { id: 'clinic-faq', label: 'FAQ' },
+  { id: 'clinic-cta', label: 'Контакт' },
+]
 
 useSeoMeta({
   title: 'Family Care OS для клиник — удержание семей, рост дохода',

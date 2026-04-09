@@ -40,7 +40,7 @@
 
     <!-- Bottom note -->
     <p class="testimonials-note" data-reveal="fade-up">
-      * Данные за первые 6 месяцев работы с платформой. Имена публикуются с согласия клиник.
+      * Ожидаемые результаты на основе пилотных данных. Имена анонимизированы.
     </p>
   </LandingUiSectionWrapper>
 </template>
@@ -71,9 +71,9 @@ onMounted(() => {
 })
 const testimonials = [
   {
-    clinic: 'Клиника «Мать и Дитя»',
-    meta: 'Алматы • 200+ семей/мес',
-    name: 'Айгуль Нурланова',
+    clinic: 'Частная клиника',
+    meta: 'Алматы · 200+ семей/мес',
+    name: 'А. Н.',
     role: 'Директор клиники',
     initials: 'АН',
     avatarBg: 'var(--color-primary-light)',
@@ -86,9 +86,9 @@ const testimonials = [
     ],
   },
   {
-    clinic: 'Медицинский центр «Шипагер»',
-    meta: 'Астана • 120+ семей/мес',
-    name: 'Динара Сатыбалдиева',
+    clinic: 'Медицинский центр',
+    meta: 'Астана · 120+ семей/мес',
+    name: 'Д. С.',
     role: 'Координатор',
     initials: 'ДС',
     avatarBg: 'var(--color-secondary-light)',
@@ -101,9 +101,9 @@ const testimonials = [
     ],
   },
   {
-    clinic: 'Перинатальный центр №2',
-    meta: 'Шымкент • 300+ семей/мес',
-    name: 'Бахыт Оразбаев',
+    clinic: 'Перинатальный центр',
+    meta: 'Шымкент · 300+ семей/мес',
+    name: 'Б. О.',
     role: 'Зам. директора по развитию',
     initials: 'БО',
     avatarBg: 'var(--color-accent-blue-light)',

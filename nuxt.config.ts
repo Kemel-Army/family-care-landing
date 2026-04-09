@@ -212,4 +212,18 @@ export default defineNuxtConfig({
       routes: ['/', '/for-clinics', '/for-families'],
     },
   },
+
+  vite: {
+    optimizeDeps: {
+      include: ['echarts'],
+    },
+    resolve: {
+      alias: {
+        cookie: 'cookie-es',
+      },
+    },
+    ssr: {
+      noExternal: [],
+    },
+  },
 })

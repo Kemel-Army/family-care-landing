@@ -1,5 +1,4 @@
 import { ref, onMounted, onBeforeUnmount, type Ref } from 'vue'
-import * as THREE from 'three'
 
 interface UseThreePhoneOptions {
   container: Ref<HTMLElement | null>
@@ -10,16 +9,17 @@ interface UseThreePhoneOptions {
 
 export function useThreePhone({ container, mouseX, mouseY }: UseThreePhoneOptions) {
   const isReady = ref(false)
-  let renderer: THREE.WebGLRenderer | null = null
-  let scene: THREE.Scene | null = null
-  let camera: THREE.PerspectiveCamera | null = null
-  let phoneMesh: THREE.Group | null = null
+  let THREE: any = null
+  let renderer: any = null
+  let scene: any = null
+  let camera: any = null
+  let phoneMesh: any = null
   let animFrameId: number | null = null
 
   const targetRotX = ref(0)
   const targetRotY = ref(0)
 
-  function createPhoneGeometry(): THREE.Group {
+  function createPhoneGeometry(): any {
     const group = new THREE.Group()
 
     // Phone body — rounded box approximation
@@ -161,9 +161,10 @@ export function useThreePhone({ container, mouseX, mouseY }: UseThreePhoneOption
     camera.updateProjectionMatrix()
   }
 
-  onMounted(() => {
+  onMounted(async () => {
     // Only init on desktop (skip on mobile for performance)
     if (window.innerWidth < 768) return
+    THREE = await import('three')
     init()
     window.addEventListener('resize', handleResize, { passive: true })
   })

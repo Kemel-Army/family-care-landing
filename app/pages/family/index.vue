@@ -64,13 +64,15 @@
         icon="lucide:check-circle"
         variant="blue"
       />
-      <AppSharedStatCard
-        title="Серия (дни)"
-        :value="mock.streaks.doses.current"
-        :trend="0"
-        icon="lucide:flame"
-        variant="success"
-      />
+      <div class="streak-stat-wrap" :class="{ 'streak-fire': mock.streaks.doses.current > 3 }">
+        <AppSharedStatCard
+          title="Серия (дни)"
+          :value="mock.streaks.doses.current"
+          :trend="0"
+          icon="lucide:flame"
+          variant="success"
+        />
+      </div>
     </section>
 
     <!-- Quick Actions -->
