@@ -1,111 +1,67 @@
 <template>
-  <div class="users-page">
-    <header class="page-header">
-      <NuxtLink to="/admin" class="back-link">
-        <Icon name="lucide:chevron-left" size="16" /> Назад
-      </NuxtLink>
-      <h1 class="page-title">Пользователи</h1>
-      <button class="btn-add-user" @click="openCreate">
-        <Icon name="lucide:user-plus" size="14" /> Добавить
-      </button>
-    </header>
+  <div class="usr-page">
+    <div class="usr-hero">
+      <NuxtLink to="/admin" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Назад</NuxtLink>
+      <div class="hero-row">
+        <div>
+          <h1 class="hero-title">Пользователи</h1>
+          <p class="hero-sub">Управление доступами и ролями</p>
+        </div>
+        <button class="btn-create" @click="openCreate"><Icon name="lucide:user-plus" size="14" /> Добавить</button>
+      </div>
+    </div>
 
     <div class="search-box">
-      <Icon name="lucide:search" size="16" />
+      <Icon name="lucide:search" size="16" class="search-icon" />
       <input v-model="search" type="text" placeholder="Поиск по имени, email..." class="search-input" />
     </div>
 
-    <!-- Role filter -->
     <div class="filter-row">
-      <button
-        v-for="r in roleFilters"
-        :key="r.value"
-        class="filter-btn"
-        :class="{ active: roleFilter === r.value }"
-        @click="roleFilter = r.value"
-      >
-        {{ r.label }}
-      </button>
+      <button v-for="r in roleFilters" :key="r.value" class="filter-btn" :class="{ active: roleFilter === r.value }" @click="roleFilter = r.value">{{ r.label }}</button>
     </div>
 
-    <!-- Users table -->
-    <div v-if="filteredUsers.length" class="user-list">
+    <div class="user-list">
       <div v-for="u in filteredUsers" :key="u.id" class="user-row">
-        <div class="user-avatar">{{ initials(u) }}</div>
+        <div class="user-avatar">{{ u.initials }}</div>
         <div class="user-info">
-          <h3>{{ u.first_name }} {{ u.last_name }}</h3>
+          <h3>{{ u.name }}</h3>
           <p>{{ u.email }}</p>
         </div>
-        <span class="role-badge" :class="roleBadgeClass(u.role as string)">{{ roleLabel(u.role as string) }}</span>
-        <span class="user-status" :class="{ active: u.is_active }">
-          {{ u.is_active ? 'Активен' : 'Неактивен' }}
-        </span>
+        <span class="role-badge" :class="u.badgeClass">{{ u.roleLabel }}</span>
+        <span class="user-status" :class="{ active: u.active }">{{ u.active ? 'Активен' : 'Неактивен' }}</span>
         <div class="user-actions">
-          <button class="btn-icon" title="Редактировать" @click="openEdit(u)">
-            <Icon name="lucide:pencil" size="14" />
-          </button>
-          <button
-            class="btn-icon"
-            :class="{ danger: u.is_active }"
-            :title="u.is_active ? 'Деактивировать' : 'Активировать'"
-            @click="toggleActive(u)"
-          >
-            <Icon :name="u.is_active ? 'lucide:user-x' : 'lucide:user-check'" size="14" />
+          <button class="btn-icon" title="Редактировать"><Icon name="lucide:pencil" size="14" /></button>
+          <button class="btn-icon" :class="{ danger: u.active }" @click="u.active = !u.active">
+            <Icon :name="u.active ? 'lucide:user-x' : 'lucide:user-check'" size="14" />
           </button>
         </div>
       </div>
     </div>
 
-    <div v-else class="empty-state"><p>Нет пользователей</p></div>
-
-    <!-- Create/Edit Modal -->
     <Teleport to="body">
       <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
         <div class="modal-card">
-          <h2 class="modal-title">{{ editingUser ? 'Редактировать пользователя' : 'Новый пользователь' }}</h2>
-          <form class="modal-form" @submit.prevent="handleSave">
-            <div class="form-row-2">
-              <div class="form-group">
-                <label class="form-label">Имя</label>
-                <input v-model="userForm.firstName" type="text" class="form-input" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Фамилия</label>
-                <input v-model="userForm.lastName" type="text" class="form-input" required />
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Email</label>
-              <input v-model="userForm.email" type="email" class="form-input" required :disabled="!!editingUser" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Телефон</label>
-              <input v-model="userForm.phone" type="tel" class="form-input" placeholder="+7XXXXXXXXXX" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Роль</label>
-              <select v-model="userForm.role" class="form-input" required>
-                <option value="coordinator">Координатор</option>
-                <option value="gynecologist">Гинеколог</option>
-                <option value="pediatrician">Педиатр</option>
-                <option value="clinic_admin">Администратор клиники</option>
-                <option value="clinic_manager">Руководитель клиники</option>
-              </select>
-            </div>
-            <div v-if="!editingUser" class="form-group">
-              <label class="form-label">Пароль</label>
-              <input v-model="userForm.password" type="password" class="form-input" minlength="8" required />
-            </div>
-
-            <p v-if="formError" class="form-error-global">{{ formError }}</p>
-
-            <div class="modal-actions">
-              <button type="button" class="btn-cancel" @click="showModal = false">Отмена</button>
-              <button type="submit" class="btn-submit" :disabled="saving">
-                {{ saving ? 'Сохранение...' : editingUser ? 'Сохранить' : 'Создать' }}
-              </button>
-            </div>
-          </form>
+          <h2 class="modal-title">Новый пользователь</h2>
+          <div class="form-row-2">
+            <div class="fg"><label class="fl">Имя</label><input v-model="form.first" class="fi" /></div>
+            <div class="fg"><label class="fl">Фамилия</label><input v-model="form.last" class="fi" /></div>
+          </div>
+          <div class="fg"><label class="fl">Email</label><input v-model="form.email" type="email" class="fi" /></div>
+          <div class="fg"><label class="fl">Телефон</label><input v-model="form.phone" class="fi" placeholder="+7XXXXXXXXXX" /></div>
+          <div class="fg">
+            <label class="fl">Роль</label>
+            <select v-model="form.role" class="fi">
+              <option value="coordinator">Координатор</option>
+              <option value="gynecologist">Гинеколог</option>
+              <option value="pediatrician">Педиатр</option>
+              <option value="clinic_admin">Администратор</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Пароль</label><input v-model="form.password" type="password" class="fi" /></div>
+          <div class="modal-actions">
+            <button class="btn-cancel" @click="showModal = false">Отмена</button>
+            <button class="btn-submit" @click="showModal = false">Создать</button>
+          </div>
         </div>
       </div>
     </Teleport>
@@ -113,249 +69,110 @@
 </template>
 
 <script setup lang="ts">
-import type { UserRole } from '~/types/database'
-
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
 const search = ref('')
 const roleFilter = ref('all')
-const users = ref<Array<Record<string, unknown>>>([])
-
-// Modal state
 const showModal = ref(false)
-const editingUser = ref<Record<string, unknown> | null>(null)
-const saving = ref(false)
-const formError = ref('')
-const userForm = reactive({
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  role: 'coordinator' as UserRole,
-  password: '',
-})
+const form = reactive({ first: '', last: '', email: '', phone: '', role: 'coordinator', password: '' })
 
 const roleFilters = [
   { label: 'Все', value: 'all' },
-  { label: 'Мамы', value: 'mother' },
   { label: 'Координаторы', value: 'coordinator' },
   { label: 'Гинекологи', value: 'gynecologist' },
   { label: 'Педиатры', value: 'pediatrician' },
   { label: 'Админы', value: 'clinic_admin' },
 ]
 
-const filteredUsers = computed(() => {
-  let result = users.value
-  if (roleFilter.value !== 'all') {
-    result = result.filter(u => u.role === roleFilter.value)
-  }
-  const q = search.value.toLowerCase()
-  if (q) {
-    result = result.filter(u =>
-      (u.first_name as string || '').toLowerCase().includes(q)
-      || (u.last_name as string || '').toLowerCase().includes(q)
-      || (u.email as string || '').toLowerCase().includes(q),
-    )
-  }
-  return result
-})
+const rawUsers = reactive([
+  { id: 1, first: 'Айгерим', last: 'Касымова', email: 'aigerim@familycare.kz', role: 'coordinator', active: true },
+  { id: 2, first: 'Марат', last: 'Ибрагимов', email: 'marat@familycare.kz', role: 'gynecologist', active: true },
+  { id: 3, first: 'Динара', last: 'Нуртаева', email: 'dinara@familycare.kz', role: 'pediatrician', active: true },
+  { id: 4, first: 'Алия', last: 'Жумабаева', email: 'aliya@familycare.kz', role: 'coordinator', active: true },
+  { id: 5, first: 'Ержан', last: 'Темiрбеков', email: 'erzhan@familycare.kz', role: 'clinic_admin', active: true },
+  { id: 6, first: 'Сауле', last: 'Бектурганова', email: 'saule@familycare.kz', role: 'gynecologist', active: false },
+  { id: 7, first: 'Бакыт', last: 'Оспанов', email: 'bakyt@familycare.kz', role: 'pediatrician', active: true },
+])
 
-function initials(u: Record<string, unknown>) {
-  return `${(u.first_name as string || '')[0] || ''}${(u.last_name as string || '')[0] || ''}`.toUpperCase()
+function roleLabel(r: string) {
+  return { coordinator: 'Координатор', gynecologist: 'Гинеколог', pediatrician: 'Педиатр', clinic_admin: 'Админ' }[r] || r
 }
-
-function roleLabel(role: string) {
-  const map: Record<string, string> = {
-    mother: 'Мама', father: 'Папа',
-    coordinator: 'Координатор', gynecologist: 'Гинеколог', pediatrician: 'Педиатр',
-    clinic_admin: 'Админ', clinic_manager: 'Руководитель', platform_admin: 'Platform Admin',
-  }
-  return map[role] || role
-}
-
-function roleBadgeClass(role: string) {
-  if (['mother', 'father'].includes(role)) return 'family'
-  if (role === 'coordinator') return 'coordinator'
-  if (['gynecologist', 'pediatrician'].includes(role)) return 'doctor'
+function badgeClass(r: string) {
+  if (r === 'coordinator') return 'coordinator'
+  if (['gynecologist', 'pediatrician'].includes(r)) return 'doctor'
   return 'admin'
 }
 
+const filteredUsers = computed(() => {
+  let result = rawUsers.map(u => ({
+    ...u,
+    name: `${u.first} ${u.last}`,
+    initials: `${u.first[0]}${u.last[0]}`,
+    roleLabel: roleLabel(u.role),
+    badgeClass: badgeClass(u.role),
+  }))
+  if (roleFilter.value !== 'all') result = result.filter(u => u.role === roleFilter.value)
+  const q = search.value.toLowerCase()
+  if (q) result = result.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+  return result
+})
+
 function openCreate() {
-  editingUser.value = null
-  Object.assign(userForm, { firstName: '', lastName: '', email: '', phone: '', role: 'coordinator', password: '' })
-  formError.value = ''
+  Object.assign(form, { first: '', last: '', email: '', phone: '', role: 'coordinator', password: '' })
   showModal.value = true
 }
-
-function openEdit(u: Record<string, unknown>) {
-  editingUser.value = u
-  Object.assign(userForm, {
-    firstName: u.first_name || '',
-    lastName: u.last_name || '',
-    email: u.email || '',
-    phone: u.phone || '',
-    role: u.role || 'coordinator',
-    password: '',
-  })
-  formError.value = ''
-  showModal.value = true
-}
-
-async function handleSave() {
-  formError.value = ''
-  saving.value = true
-
-  try {
-    if (editingUser.value) {
-      // Update existing user
-      const { error } = await supabase
-        .from('users')
-        .update({
-          first_name: userForm.firstName,
-          last_name: userForm.lastName,
-          phone: userForm.phone || null,
-          role: userForm.role,
-        })
-        .eq('id', editingUser.value.id)
-
-      if (error) { formError.value = error.message; return }
-
-      // Update local state
-      const idx = users.value.findIndex(u => u.id === editingUser.value!.id)
-      if (idx >= 0) {
-        users.value[idx] = { ...users.value[idx], first_name: userForm.firstName, last_name: userForm.lastName, phone: userForm.phone, role: userForm.role }
-      }
-    }
-    else {
-      // Create new user via Supabase Auth (admin invite)
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: userForm.email,
-        password: userForm.password,
-        email_confirm: true,
-        user_metadata: {
-          first_name: userForm.firstName,
-          last_name: userForm.lastName,
-          phone: userForm.phone || null,
-          role: userForm.role,
-          clinic_id: authStore.clinicId,
-        },
-      })
-
-      if (authError) { formError.value = authError.message; return }
-
-      // Refresh list
-      if (authData.user) {
-        await loadUsers()
-      }
-    }
-
-    showModal.value = false
-  }
-  finally {
-    saving.value = false
-  }
-}
-
-async function toggleActive(u: Record<string, unknown>) {
-  const newStatus = !u.is_active
-  const { error } = await supabase
-    .from('users')
-    .update({ is_active: newStatus })
-    .eq('id', u.id)
-
-  if (!error) {
-    const idx = users.value.findIndex(x => x.id === u.id)
-    if (idx >= 0) users.value[idx] = { ...users.value[idx], is_active: newStatus }
-  }
-}
-
-async function loadUsers() {
-  const { data } = await supabase
-    .from('users')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-    .order('created_at', { ascending: false })
-
-  users.value = data || []
-}
-
-onMounted(loadUsers)
 </script>
 
 <style scoped>
-.users-page { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-.page-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
-.back-link { display: flex; align-items: center; gap: 4px; color: var(--color-text-secondary); text-decoration: none; font-size: 0.85rem; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; flex: 1; }
+.usr-page { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
-.btn-add-user {
-  display: flex; align-items: center; gap: 4px; padding: 8px 16px;
-  background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-sm);
-  font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font-body);
+.usr-hero {
+  background: linear-gradient(135deg, rgba(139,126,200,0.08), rgba(232,160,191,0.06));
+  border: 1px solid rgba(139,126,200,0.12); border-radius: 16px; padding: 24px 28px;
 }
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
+.btn-create { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--gradient-cta); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 0.82rem; cursor: pointer; font-family: var(--font-body); }
 
-.search-box { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); margin-bottom: 12px; }
+.search-box { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid var(--color-border-light); border-radius: 12px; background: white; }
+.search-icon { color: var(--color-text-muted); flex-shrink: 0; }
 .search-input { border: none; outline: none; font-size: 0.85rem; font-family: var(--font-body); background: transparent; flex: 1; }
 
-.filter-row { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
-.filter-btn { padding: 6px 14px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-surface); font-size: 0.8rem; cursor: pointer; font-family: var(--font-body); white-space: nowrap; }
-.filter-btn.active { border-color: var(--color-primary); background: var(--color-primary-ultralight); color: var(--color-primary); font-weight: 600; }
+.filter-row { display: flex; gap: 6px; overflow-x: auto; }
+.filter-btn { padding: 6px 14px; border: 1px solid var(--color-border-light); border-radius: 20px; background: white; font-size: 0.78rem; cursor: pointer; font-family: var(--font-body); white-space: nowrap; }
+.filter-btn.active { border-color: var(--color-primary); background: rgba(139,126,200,0.08); color: var(--color-primary); font-weight: 600; }
 
 .user-list { display: flex; flex-direction: column; gap: 6px; }
-.user-row {
-  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-  background: var(--color-surface); border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm);
-}
-
-.user-avatar {
-  width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary-ultralight);
-  color: var(--color-primary); display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
-}
-
+.user-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: white; border: 1px solid var(--color-border-light); border-radius: 12px; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(139,126,200,0.1); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
 .user-info { flex: 1; min-width: 0; }
-.user-info h3 { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-info p { font-size: 0.8rem; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-info h3 { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-info p { font-size: 0.78rem; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.role-badge {
-  font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 4px; flex-shrink: 0;
-}
-.role-badge.family { background: rgba(232, 160, 191, 0.15); color: var(--color-secondary); }
-.role-badge.coordinator { background: rgba(139, 126, 200, 0.15); color: var(--color-primary); }
-.role-badge.doctor { background: rgba(124, 184, 212, 0.15); color: var(--color-success); }
-.role-badge.admin { background: rgba(233, 196, 106, 0.15); color: var(--color-warning); }
+.role-badge { font-size: 0.68rem; font-weight: 600; padding: 3px 10px; border-radius: 6px; flex-shrink: 0; }
+.role-badge.coordinator { background: rgba(139,126,200,0.12); color: var(--color-primary); }
+.role-badge.doctor { background: rgba(124,184,212,0.12); color: var(--color-success); }
+.role-badge.admin { background: rgba(233,196,106,0.12); color: var(--color-warning); }
 
-.user-status { font-size: 0.75rem; color: var(--color-text-muted); flex-shrink: 0; }
+.user-status { font-size: 0.72rem; color: var(--color-text-muted); flex-shrink: 0; }
 .user-status.active { color: var(--color-success); }
 
 .user-actions { display: flex; gap: 4px; flex-shrink: 0; }
-.btn-icon {
-  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--color-border); border-radius: 6px; background: none;
-  cursor: pointer; color: var(--color-text-muted); transition: all var(--transition-fast);
-}
-.btn-icon:hover { background: var(--color-primary-ultralight); color: var(--color-primary); }
-.btn-icon.danger:hover { background: rgba(231, 111, 81, 0.1); color: var(--color-danger); border-color: var(--color-danger); }
+.btn-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-border-light); border-radius: 8px; background: none; cursor: pointer; color: var(--color-text-muted); }
+.btn-icon:hover { background: rgba(139,126,200,0.06); color: var(--color-primary); }
+.btn-icon.danger:hover { background: rgba(212,114,124,0.08); color: var(--color-danger); border-color: var(--color-danger); }
 
-.empty-state { text-align: center; padding: 48px; color: var(--color-text-muted); }
-
-/* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-.modal-card { background: var(--color-surface); border-radius: var(--radius-md); padding: 24px; width: 100%; max-width: 460px; }
-.modal-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
-.modal-form { display: flex; flex-direction: column; gap: 14px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 0.85rem; font-weight: 600; }
-.form-input { padding: 10px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font-body); outline: none; }
-.form-input:focus { border-color: var(--color-primary); }
-.form-input:disabled { opacity: 0.5; cursor: not-allowed; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.modal-card { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 14px; }
+.modal-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
 .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-error-global { text-align: center; font-size: 0.85rem; color: var(--color-danger); padding: 8px; background: rgba(231, 111, 81, 0.08); border-radius: var(--radius-sm); }
+.fg { display: flex; flex-direction: column; gap: 4px; }
+.fl { font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); }
+.fi { padding: 9px 12px; border: 1px solid var(--color-border-light); border-radius: 10px; font-size: 0.88rem; font-family: var(--font-body); outline: none; background: white; }
+.fi:focus { border-color: var(--color-primary); }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; font-family: var(--font-body); }
-.btn-submit { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: var(--font-body); }
-.btn-submit:disabled { opacity: 0.6; }
+.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--color-border-light); border-radius: 10px; cursor: pointer; font-family: var(--font-body); }
+.btn-submit { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
 </style>

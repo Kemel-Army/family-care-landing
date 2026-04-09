@@ -1,120 +1,81 @@
 <template>
-  <div class="network-page">
-    <header class="page-header">
-      <h1 class="page-title">Сеть филиалов</h1>
-    </header>
-
-    <!-- Network overview -->
-    <div class="network-grid">
-      <div class="net-card">
-        <span class="net-value">{{ branches.length }}</span>
-        <span class="net-label">Филиалов</span>
-      </div>
-      <div class="net-card">
-        <span class="net-value">{{ totalFamilies }}</span>
-        <span class="net-label">Семей всего</span>
-      </div>
-      <div class="net-card">
-        <span class="net-value">{{ avgCompletion }}%</span>
-        <span class="net-label">Ср. выполнение</span>
-      </div>
+  <div class="net-page">
+    <div class="net-hero">
+      <NuxtLink to="/admin" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Назад</NuxtLink>
+      <h1 class="hero-title">Сеть филиалов</h1>
+      <p class="hero-sub">Рейтинг и метрики по филиалам</p>
     </div>
 
-    <!-- Branch ranking -->
-    <section class="section">
-      <h2 class="section-title">Рейтинг филиалов</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card"><span class="kpi-value">{{ branches.length }}</span><span class="kpi-label">Филиалов</span></div>
+      <div class="kpi-card"><span class="kpi-value">{{ totalFamilies }}</span><span class="kpi-label">Семей</span></div>
+      <div class="kpi-card"><span class="kpi-value">{{ avgCompletion }}%</span><span class="kpi-label">Ср. выполнение</span></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title"><Icon name="lucide:trophy" size="16" /> Рейтинг филиалов</h2>
       <div class="branch-list">
-        <div v-for="(branch, idx) in branches" :key="branch.id" class="branch-card">
+        <div v-for="(b, idx) in branches" :key="idx" class="branch-row">
           <span class="branch-rank">{{ idx + 1 }}</span>
           <div class="branch-info">
-            <h3>{{ branch.name }}</h3>
-            <p>{{ branch.city }}</p>
+            <span class="branch-name">{{ b.name }}</span>
+            <span class="branch-city">{{ b.city }}</span>
           </div>
           <div class="branch-metrics">
-            <div class="bm">
-              <span class="bm-value">{{ branch.families }}</span>
-              <span class="bm-label">семей</span>
-            </div>
-            <div class="bm">
-              <span class="bm-value">{{ branch.completion }}%</span>
-              <span class="bm-label">выполн.</span>
-            </div>
-            <div class="bm">
-              <span class="bm-value">{{ branch.nps }}</span>
-              <span class="bm-label">NPS</span>
-            </div>
-            <div class="bm">
-              <span class="bm-value">{{ branch.revenue }}</span>
-              <span class="bm-label">доход</span>
-            </div>
+            <div class="bm"><span class="bm-val">{{ b.families }}</span><span class="bm-lbl">семей</span></div>
+            <div class="bm"><span class="bm-val">{{ b.completion }}%</span><span class="bm-lbl">выполн.</span></div>
+            <div class="bm"><span class="bm-val">{{ b.nps }}</span><span class="bm-lbl">NPS</span></div>
+            <div class="bm"><span class="bm-val">{{ b.revenue }}</span><span class="bm-lbl">доход</span></div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
+const branches = [
+  { name: 'Family Care Центр', city: 'Алматы', families: 47, completion: 88, nps: 72, revenue: '4.2M' },
+  { name: 'Family Care Бостандык', city: 'Алматы', families: 31, completion: 82, nps: 65, revenue: '2.8M' },
+  { name: 'Family Care Астана', city: 'Астана', families: 28, completion: 79, nps: 68, revenue: '3.1M' },
+]
 
-interface Branch {
-  id: string; name: string; city: string
-  families: number; completion: number; nps: number; revenue: string
-}
-
-const branches = ref<Branch[]>([])
-const totalFamilies = computed(() => branches.value.reduce((s, b) => s + b.families, 0))
-const avgCompletion = computed(() => {
-  if (!branches.value.length) return 0
-  return Math.round(branches.value.reduce((s, b) => s + b.completion, 0) / branches.value.length)
-})
-
-onMounted(async () => {
-  if (!authStore.clinicId) return
-
-  const { data } = await supabase
-    .from('v_network_branches')
-    .select('*')
-    .eq('network_id', authStore.clinicId)
-    .order('completion_rate', { ascending: false })
-
-  branches.value = (data || []).map((b: Record<string, unknown>) => ({
-    id: String(b.branch_id),
-    name: String(b.name || 'Филиал'),
-    city: String(b.city || ''),
-    families: Number(b.active_families) || 0,
-    completion: Number(b.completion_rate) || 0,
-    nps: Number(b.nps_score) || 0,
-    revenue: `${Math.round(Number(b.monthly_revenue || 0) / 1000)}K`,
-  }))
-})
+const totalFamilies = computed(() => branches.reduce((s, b) => s + b.families, 0))
+const avgCompletion = computed(() => Math.round(branches.reduce((s, b) => s + b.completion, 0) / branches.length))
 </script>
 
 <style scoped>
-.network-page { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-.page-header { margin-bottom: 24px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.net-page { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-.network-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
-.net-card { padding: 20px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); text-align: center; }
-.net-value { font-size: 1.5rem; font-weight: 700; font-family: var(--font-mono); display: block; }
-.net-label { font-size: 0.75rem; color: var(--color-text-secondary); }
+.net-hero {
+  background: linear-gradient(135deg, rgba(232,160,191,0.08), rgba(139,126,200,0.06));
+  border: 1px solid rgba(232,160,191,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
 
-.section { margin-bottom: 28px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kpi-card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 16px; text-align: center; }
+.kpi-value { display: block; font-size: 1.4rem; font-weight: 800; font-family: var(--font-mono); }
+.kpi-label { font-size: 0.7rem; color: var(--color-text-muted); }
+
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.card-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 
 .branch-list { display: flex; flex-direction: column; gap: 8px; }
-.branch-card { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); }
-.branch-rank { width: 28px; height: 28px; border-radius: 50%; background: var(--color-primary-ultralight); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+.branch-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: rgba(0,0,0,0.01); border-radius: 12px; }
+.branch-rank { width: 28px; height: 28px; border-radius: 50%; background: rgba(139,126,200,0.08); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.82rem; flex-shrink: 0; }
 .branch-info { flex: 1; }
-.branch-info h3 { font-size: 0.95rem; font-weight: 600; }
-.branch-info p { font-size: 0.8rem; color: var(--color-text-secondary); }
+.branch-name { display: block; font-size: 0.92rem; font-weight: 600; }
+.branch-city { font-size: 0.72rem; color: var(--color-text-muted); }
 
 .branch-metrics { display: flex; gap: 16px; }
 .bm { text-align: center; }
-.bm-value { display: block; font-size: 0.9rem; font-weight: 700; font-family: var(--font-mono); }
-.bm-label { font-size: 0.65rem; color: var(--color-text-muted); }
+.bm-val { display: block; font-size: 0.88rem; font-weight: 700; font-family: var(--font-mono); }
+.bm-lbl { font-size: 0.6rem; color: var(--color-text-muted); }
+
+@media (max-width: 600px) { .branch-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; } }
 </style>

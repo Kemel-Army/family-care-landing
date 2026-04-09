@@ -1,36 +1,41 @@
 <template>
-  <div class="patients-page">
-    <header class="page-header">
-      <NuxtLink to="/doctor" class="back-link">
-        <Icon name="lucide:chevron-left" size="16" /> Назад
-      </NuxtLink>
-      <h1 class="page-title">Пациенты</h1>
-      <div class="search-box">
-        <Icon name="lucide:search" size="16" />
-        <input v-model="search" type="text" placeholder="Поиск..." class="search-input" />
-      </div>
-    </header>
-
-    <div v-if="filteredPatients.length" class="patient-list">
-      <NuxtLink
-        v-for="p in filteredPatients"
-        :key="p.family_id"
-        :to="`/doctor/patients/${p.family_id}`"
-        class="patient-card"
-      >
-        <div class="patient-avatar">
-          <Icon name="lucide:user" size="20" />
-        </div>
-        <div class="patient-info">
-          <h3>{{ p.mother_name || 'Пациент' }}</h3>
-          <p>{{ p.journey_type ? journeyLabel(p.journey_type) : 'Нет маршрута' }}</p>
-        </div>
-        <Icon name="lucide:chevron-right" size="16" class="arrow" />
-      </NuxtLink>
+  <div class="pts-page">
+    <!-- Hero -->
+    <div class="pts-hero">
+      <NuxtLink to="/doctor" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Назад</NuxtLink>
+      <h1 class="pts-hero-title">Пациенты</h1>
+      <p class="pts-hero-sub">{{ mock.doctorPatients.length }} пациентов под наблюдением</p>
     </div>
 
-    <div v-else class="empty-state">
-      <p>Нет пациентов</p>
+    <!-- Search -->
+    <div class="search-wrap">
+      <Icon name="lucide:search" size="16" class="search-icon" />
+      <input v-model="search" type="text" placeholder="Поиск по имени..." class="search-input" />
+    </div>
+
+    <!-- Patient list -->
+    <div v-if="filtered.length" class="pt-list">
+      <div v-for="p in filtered" :key="p.id" class="pt-card">
+        <div class="pt-avatar">
+          <Icon name="lucide:user" size="18" />
+        </div>
+        <div class="pt-info">
+          <span class="pt-name">{{ p.mother_name }}</span>
+          <span class="pt-journey">{{ p.journey_type }}</span>
+          <div class="pt-dates">
+            <span v-if="p.last_visit">Посл. визит: {{ formatDate(p.last_visit) }}</span>
+            <span v-if="p.next_visit"> · След.: {{ formatDate(p.next_visit) }}</span>
+          </div>
+        </div>
+        <div v-if="p.children.length" class="pt-children">
+          <span v-for="c in p.children" :key="c.name" class="child-tag">{{ c.name }}, {{ c.age }}</span>
+        </div>
+        <Icon name="lucide:chevron-right" size="14" class="pt-arrow" />
+      </div>
+    </div>
+    <div v-else class="empty-card">
+      <Icon name="lucide:search-x" size="32" style="opacity:0.3; color:var(--color-primary)" />
+      <p class="empty-text">Нет пациентов по запросу</p>
     </div>
   </div>
 </template>
@@ -38,86 +43,59 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
+const mock = useMockData()
 const search = ref('')
-const patients = ref<Array<Record<string, unknown>>>([])
 
-const filteredPatients = computed(() => {
+const filtered = computed(() => {
   const q = search.value.toLowerCase()
-  if (!q) return patients.value
-  return patients.value.filter(p => (p.mother_name as string || '').toLowerCase().includes(q))
+  if (!q) return mock.doctorPatients
+  return mock.doctorPatients.filter(p => p.mother_name.toLowerCase().includes(q))
 })
 
-function journeyLabel(type: string) {
-  const map: Record<string, string> = { pregnancy: 'Беременность', postpartum: 'Послеродовой', infant: 'Младенец' }
-  return map[type] || type
+function formatDate(iso: string) {
+  if (!iso) return ''
+  const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+  const d = new Date(iso)
+  return `${d.getDate()} ${months[d.getMonth()]}`
 }
-
-onMounted(async () => {
-  // Get all families this doctor has seen via appointments
-  const { data } = await supabase
-    .from('appointments')
-    .select('family_id')
-    .eq('doctor_id', authStore.profile?.id)
-
-  const uniqueIds = [...new Set((data || []).map(r => r.family_id))]
-  if (!uniqueIds.length) return
-
-  // Fetch family details with mother name and active journey
-  const { data: families } = await supabase
-    .from('families')
-    .select('id, primary_parent:users!families_primary_parent_id_fkey(first_name, last_name)')
-    .in('id', uniqueIds)
-
-  const { data: journeys } = await supabase
-    .from('journeys')
-    .select('family_id, type')
-    .in('family_id', uniqueIds)
-    .eq('status', 'active')
-
-  const journeyMap = new Map<string, string>()
-  for (const j of journeys || []) {
-    journeyMap.set(j.family_id, j.type)
-  }
-
-  patients.value = (families || []).map(f => {
-    const parent = f.primary_parent as Record<string, unknown> | null
-    return {
-      family_id: f.id,
-      mother_name: parent ? `${parent.first_name || ''} ${parent.last_name || ''}`.trim() : 'Пациент',
-      journey_type: journeyMap.get(f.id) || null,
-    }
-  })
-})
 </script>
 
 <style scoped>
-.patients-page { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
-.page-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
-.back-link { display: flex; align-items: center; gap: 4px; color: var(--color-text-secondary); text-decoration: none; font-size: 0.85rem; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; flex: 1; }
+.pts-page { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-.search-box {
-  display: flex; align-items: center; gap: 8px; padding: 8px 14px;
-  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
-  background: var(--color-surface); width: 100%; max-width: 240px;
+.pts-hero {
+  background: linear-gradient(135deg, rgba(232,160,191,0.08), rgba(139,126,200,0.06));
+  border: 1px solid rgba(232,160,191,0.12); border-radius: 16px; padding: 24px 28px;
 }
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.pts-hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.pts-hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
+
+.search-wrap {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  background: white; border: 1px solid var(--color-border-light); border-radius: 12px;
+}
+.search-icon { color: var(--color-text-muted); flex-shrink: 0; }
 .search-input { border: none; outline: none; font-size: 0.85rem; font-family: var(--font-body); background: transparent; flex: 1; }
 
-.patient-list { display: flex; flex-direction: column; gap: 8px; }
-.patient-card {
-  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
-  background: var(--color-surface); border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm); text-decoration: none; color: inherit;
+.pt-list { display: flex; flex-direction: column; gap: 6px; }
+.pt-card {
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+  background: white; border: 1px solid var(--color-border-light); border-radius: 14px;
+  transition: all 0.2s; cursor: pointer;
 }
-.patient-card:hover { box-shadow: var(--shadow-sm); }
+.pt-card:hover { border-color: rgba(139,126,200,0.2); transform: translateY(-1px); }
 
-.patient-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--color-primary-ultralight); color: var(--color-primary); display: flex; align-items: center; justify-content: center; }
-.patient-info { flex: 1; }
-.patient-info h3 { font-size: 0.9rem; font-weight: 600; }
-.patient-info p { font-size: 0.8rem; color: var(--color-text-secondary); }
-.arrow { color: var(--color-text-muted); }
+.pt-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: rgba(232,160,191,0.1); color: var(--color-accent-rose); }
+.pt-info { flex: 1; min-width: 0; }
+.pt-name { font-size: 0.85rem; font-weight: 600; display: block; }
+.pt-journey { font-size: 0.72rem; color: var(--color-primary); font-weight: 500; }
+.pt-dates { font-size: 0.65rem; color: var(--color-text-muted); margin-top: 2px; }
 
-.empty-state { text-align: center; padding: 48px; color: var(--color-text-muted); }
+.pt-children { display: flex; gap: 4px; flex-shrink: 0; }
+.child-tag { font-size: 0.6rem; padding: 2px 8px; border-radius: 8px; background: rgba(168,200,232,0.1); color: var(--color-accent-sky); font-weight: 500; }
+.pt-arrow { color: var(--color-text-muted); flex-shrink: 0; }
+
+.empty-card { text-align: center; padding: 48px; background: white; border: 1px solid var(--color-border-light); border-radius: 14px; }
+.empty-text { font-size: 0.85rem; color: var(--color-text-muted); margin-top: 8px; }
 </style>

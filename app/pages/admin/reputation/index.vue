@@ -1,180 +1,117 @@
 <template>
-  <div class="reputation-page">
-    <header class="page-header">
-      <h1 class="page-title">Репутация клиники</h1>
-    </header>
+  <div class="rep-page">
+    <div class="rep-hero">
+      <NuxtLink to="/admin" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Назад</NuxtLink>
+      <h1 class="hero-title">Репутация клиники</h1>
+      <p class="hero-sub">NPS-метрика, отзывы и интеграции</p>
+    </div>
 
-    <!-- NPS Overview -->
-    <div class="nps-overview">
-      <div class="nps-score-card">
-        <div class="nps-circle" :class="npsClass">
-          <span class="nps-num">{{ npsScore }}</span>
-        </div>
-        <div class="nps-details">
-          <h3>NPS Score</h3>
-          <p>На основе {{ totalResponses }} ответов</p>
+    <!-- NPS ring + breakdown -->
+    <div class="nps-row">
+      <div class="nps-ring-card">
+        <svg viewBox="0 0 120 120" class="nps-svg">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(139,126,200,0.1)" stroke-width="10" />
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-primary)" stroke-width="10" stroke-linecap="round"
+            :stroke-dasharray="`${(mock.npsScore / 100) * 327} 327`" transform="rotate(-90 60 60)" />
+        </svg>
+        <div class="nps-center">
+          <span class="nps-num">{{ mock.npsScore }}</span>
+          <span class="nps-label">NPS</span>
         </div>
       </div>
-      <div class="nps-breakdown">
-        <div class="breakdown-bar">
-          <span class="bar-label promoters">Промоутеры (9-10)</span>
-          <div class="bar-track"><div class="bar-fill green" :style="{ width: `${promotersPct}%` }" /></div>
-          <span class="bar-pct">{{ promotersPct }}%</span>
-        </div>
-        <div class="breakdown-bar">
-          <span class="bar-label passives">Нейтральные (7-8)</span>
-          <div class="bar-track"><div class="bar-fill yellow" :style="{ width: `${passivesPct}%` }" /></div>
-          <span class="bar-pct">{{ passivesPct }}%</span>
-        </div>
-        <div class="breakdown-bar">
-          <span class="bar-label detractors">Критики (0-6)</span>
-          <div class="bar-track"><div class="bar-fill red" :style="{ width: `${detractorsPct}%` }" /></div>
-          <span class="bar-pct">{{ detractorsPct }}%</span>
+
+      <div class="nps-bars">
+        <div class="nb"><span class="nb-label">Промоутеры</span><div class="nb-track"><div class="nb-fill promo" :style="{ width: mock.npsSplit.promoters + '%' }" /></div><span class="nb-pct">{{ mock.npsSplit.promoters }}%</span></div>
+        <div class="nb"><span class="nb-label">Нейтральные</span><div class="nb-track"><div class="nb-fill passive" :style="{ width: mock.npsSplit.passives + '%' }" /></div><span class="nb-pct">{{ mock.npsSplit.passives }}%</span></div>
+        <div class="nb"><span class="nb-label">Критики</span><div class="nb-track"><div class="nb-fill detract" :style="{ width: mock.npsSplit.detractors + '%' }" /></div><span class="nb-pct">{{ mock.npsSplit.detractors }}%</span></div>
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="card">
+      <h2 class="card-title">Последние отзывы</h2>
+      <div class="review-list">
+        <div v-for="r in reviews" :key="r.id" class="review">
+          <div class="rv-top">
+            <span class="rv-stars">{{ '★'.repeat(r.stars) }}{{ '☆'.repeat(5 - r.stars) }}</span>
+            <span class="rv-date">{{ r.date }}</span>
+          </div>
+          <p class="rv-text">{{ r.text }}</p>
+          <span class="rv-author">{{ r.author }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Recent reviews -->
-    <section class="section">
-      <h2 class="section-title">Последние отзывы</h2>
-      <div class="review-list">
-        <div v-for="review in reviews" :key="review.id" class="review-card">
-          <div class="review-header">
-            <div class="review-stars">{{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}</div>
-            <span class="review-date">{{ review.date }}</span>
-          </div>
-          <p v-if="review.comment" class="review-text">{{ review.comment }}</p>
-          <span class="review-author">{{ review.author }}</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Review request -->
-    <section class="section">
-      <h2 class="section-title">Запрос отзыва</h2>
-      <p class="hint-text">Автоматически отправляется семьям с NPS ≥ 9 через 24ч после положительного события.</p>
-      <div class="settings-row">
-        <label>Ссылка на 2GIS</label>
-        <input v-model="reviewLink2gis" type="url" class="form-input" placeholder="https://2gis.kz/..." />
-      </div>
-      <div class="settings-row">
-        <label>Ссылка на Google</label>
-        <input v-model="reviewLinkGoogle" type="url" class="form-input" placeholder="https://g.page/..." />
-      </div>
-      <button class="btn-save" @click="saveLinks">Сохранить ссылки</button>
-    </section>
+    <!-- Links -->
+    <div class="card">
+      <h2 class="card-title">Ссылки на отзывы</h2>
+      <p class="hint">Отправляются семьям с NPS ≥ 9 через 24ч после положительного события</p>
+      <div class="fg"><label class="fl">2GIS</label><input v-model="link2gis" class="fi" placeholder="https://2gis.kz/..." /></div>
+      <div class="fg"><label class="fl">Google</label><input v-model="linkGoogle" class="fi" placeholder="https://g.page/..." /></div>
+      <button class="btn-save">Сохранить</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
+const { data: mock } = useMockData()
 
-const npsScore = ref(0)
-const totalResponses = ref(0)
-const promotersPct = ref(0)
-const passivesPct = ref(0)
-const detractorsPct = ref(0)
-const reviews = ref<Array<{ id: string; rating: number; comment: string; date: string; author: string }>>([])
-const reviewLink2gis = ref('')
-const reviewLinkGoogle = ref('')
+const link2gis = ref('https://2gis.kz/almaty/firm/family-care')
+const linkGoogle = ref('https://g.page/family-care-almaty')
 
-const npsClass = computed(() => {
-  if (npsScore.value >= 50) return 'excellent'
-  if (npsScore.value >= 0) return 'good'
-  return 'poor'
-})
-
-async function saveLinks() {
-  if (!authStore.clinicId) return
-  await supabase.from('clinics').update({
-    review_link_2gis: reviewLink2gis.value || null,
-    review_link_google: reviewLinkGoogle.value || null,
-  }).eq('id', authStore.clinicId)
-}
-
-onMounted(async () => {
-  if (!authStore.clinicId) return
-
-  const { data: nps } = await supabase
-    .from('v_clinic_nps')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-    .single()
-
-  if (nps) {
-    const d = nps as Record<string, number>
-    npsScore.value = d.nps_score || 0
-    totalResponses.value = d.total_responses || 0
-    promotersPct.value = d.promoters_pct || 0
-    passivesPct.value = d.passives_pct || 0
-    detractorsPct.value = d.detractors_pct || 0
-  }
-
-  // Recent reviews
-  const { data: rev } = await supabase
-    .from('nps_responses')
-    .select('*, families!inner(clinic_id, primary_parent:users!families_primary_parent_id_fkey(first_name, last_name))')
-    .eq('families.clinic_id', authStore.clinicId)
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  reviews.value = (rev || []).map((r: Record<string, unknown>) => {
-    const family = r.families as Record<string, unknown> | null
-    const parent = family?.primary_parent as Record<string, unknown> | null
-    const name = parent ? `${parent.first_name || ''} ${parent.last_name || ''}`.trim() : 'Аноним'
-    return {
-      id: String(r.id),
-      rating: Math.round(Number(r.score) / 2),
-      comment: String(r.comment || ''),
-      date: new Date(r.created_at as string).toLocaleDateString('ru-RU'),
-      author: name,
-    }
-  })
-})
+const reviews = [
+  { id: 1, stars: 5, date: '12 мая', text: 'Отличный сервис! Координатор всегда на связи, врачи внимательные.', author: 'Айгуль М.' },
+  { id: 2, stars: 5, date: '09 мая', text: 'Приложение очень удобное, все напоминания приходят вовремя.', author: 'Динара К.' },
+  { id: 3, stars: 4, date: '05 мая', text: 'В целом хорошо, но хотелось бы больше врачей на выбор.', author: 'Марат Т.' },
+  { id: 4, stars: 5, date: '01 мая', text: 'Рекомендую всем! Особенно AI-план ухода — реально помогает.', author: 'Сауле Б.' },
+]
 </script>
 
 <style scoped>
-.reputation-page { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
-.page-header { margin-bottom: 24px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.rep-page { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-.nps-overview { display: flex; gap: 24px; margin-bottom: 28px; flex-wrap: wrap; }
-.nps-score-card { display: flex; align-items: center; gap: 16px; }
-.nps-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.nps-circle.excellent { background: rgba(124, 184, 212, 0.15); }
-.nps-circle.good { background: rgba(233, 196, 106, 0.15); }
-.nps-circle.poor { background: rgba(231, 111, 81, 0.15); }
-.nps-num { font-size: 2rem; font-weight: 700; font-family: var(--font-mono); }
-.nps-details h3 { font-size: 1rem; font-weight: 600; }
-.nps-details p { font-size: 0.8rem; color: var(--color-text-secondary); }
+.rep-hero {
+  background: linear-gradient(135deg, rgba(139,126,200,0.08), rgba(168,200,232,0.06));
+  border: 1px solid rgba(139,126,200,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
 
-.nps-breakdown { flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
-.breakdown-bar { display: flex; align-items: center; gap: 8px; }
-.bar-label { width: 150px; font-size: 0.8rem; flex-shrink: 0; }
-.bar-track { flex: 1; height: 10px; background: var(--color-border-light); border-radius: 5px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 5px; }
-.bar-fill.green { background: var(--color-success); }
-.bar-fill.yellow { background: var(--color-warning); }
-.bar-fill.red { background: var(--color-danger); }
-.bar-pct { width: 40px; text-align: right; font-size: 0.8rem; font-family: var(--font-mono); font-weight: 600; }
+.nps-row { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 24px; }
+.nps-ring-card { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+.nps-svg { width: 100%; height: 100%; }
+.nps-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.nps-num { font-size: 1.8rem; font-weight: 700; font-family: var(--font-mono); color: var(--color-primary); }
+.nps-label { font-size: 0.7rem; color: var(--color-text-muted); font-weight: 600; }
 
-.section { margin-bottom: 28px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
+.nps-bars { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 10px; }
+.nb { display: flex; align-items: center; gap: 10px; }
+.nb-label { width: 100px; font-size: 0.78rem; flex-shrink: 0; color: var(--color-text-muted); }
+.nb-track { flex: 1; height: 8px; background: rgba(139,126,200,0.08); border-radius: 4px; overflow: hidden; }
+.nb-fill { height: 100%; border-radius: 4px; }
+.nb-fill.promo { background: var(--color-success); }
+.nb-fill.passive { background: var(--color-warning); }
+.nb-fill.detract { background: var(--color-danger); }
+.nb-pct { width: 36px; text-align: right; font-size: 0.78rem; font-family: var(--font-mono); font-weight: 600; }
 
-.review-list { display: flex; flex-direction: column; gap: 10px; }
-.review-card { padding: 14px 16px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); }
-.review-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
-.review-stars { color: #F59E0B; }
-.review-date { font-size: 0.75rem; color: var(--color-text-muted); }
-.review-text { font-size: 0.85rem; margin-bottom: 4px; }
-.review-author { font-size: 0.75rem; color: var(--color-text-secondary); }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.card-title { font-size: 0.95rem; font-weight: 700; }
 
-.hint-text { font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 16px; }
-.settings-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.settings-row label { width: 140px; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; }
-.form-input { flex: 1; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.85rem; font-family: var(--font-body); outline: none; }
-.btn-save { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: var(--font-body); margin-top: 8px; }
+.review-list { display: flex; flex-direction: column; gap: 8px; }
+.review { padding: 12px 14px; background: rgba(139,126,200,0.04); border-radius: 10px; }
+.rv-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.rv-stars { color: #F59E0B; font-size: 0.85rem; }
+.rv-date { font-size: 0.72rem; color: var(--color-text-muted); }
+.rv-text { font-size: 0.82rem; margin-bottom: 4px; line-height: 1.5; }
+.rv-author { font-size: 0.72rem; color: var(--color-text-muted); font-weight: 500; }
+
+.hint { font-size: 0.78rem; color: var(--color-text-muted); }
+.fg { display: flex; flex-direction: column; gap: 4px; }
+.fl { font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); }
+.fi { padding: 9px 12px; border: 1px solid var(--color-border-light); border-radius: 10px; font-size: 0.88rem; font-family: var(--font-body); outline: none; }
+.fi:focus { border-color: var(--color-primary); }
+.btn-save { align-self: flex-start; padding: 9px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); font-size: 0.82rem; }
 </style>

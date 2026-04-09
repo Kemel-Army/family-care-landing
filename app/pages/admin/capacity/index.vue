@@ -1,204 +1,123 @@
 <template>
-  <div class="capacity-page">
-    <header class="page-header">
-      <h1 class="page-title">Планирование мощности</h1>
-    </header>
+  <div class="cap-page">
+    <div class="cap-hero">
+      <NuxtLink to="/admin" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Назад</NuxtLink>
+      <h1 class="cap-hero-title">Планирование мощности</h1>
+      <p class="cap-hero-sub">Загрузка ресурсов клиники</p>
+    </div>
 
-    <!-- Capacity overview -->
-    <div class="capacity-grid">
-      <div class="cap-card">
-        <Icon name="lucide:users" size="20" class="cap-icon" />
-        <div class="cap-value">{{ capacity.activeJourneys }}</div>
-        <div class="cap-label">Активных маршрутов</div>
+    <!-- KPI -->
+    <div class="kpi-grid">
+      <div class="kpi-card"><Icon name="lucide:users" size="18" class="kpi-icon" /><span class="kpi-value">47</span><span class="kpi-label">Активных маршрутов</span></div>
+      <div class="kpi-card"><Icon name="lucide:calendar" size="18" class="kpi-icon" /><span class="kpi-value">96</span><span class="kpi-label">Слотов/нед</span></div>
+      <div class="kpi-card"><Icon name="lucide:trending-up" size="18" class="kpi-icon" /><span class="kpi-value">78%</span><span class="kpi-label">Загрузка</span></div>
+      <div class="kpi-card"><Icon name="lucide:alert-triangle" size="18" class="kpi-icon warn" /><span class="kpi-value">2</span><span class="kpi-label">Узкие места</span></div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="card">
+      <h2 class="card-title"><Icon name="lucide:grid-3x3" size="16" /> Загрузка по дням</h2>
+      <div class="heatmap">
+        <div v-for="(day, di) in heatDays" :key="di" class="hm-row">
+          <span class="hm-day">{{ day }}</span>
+          <div class="hm-cells">
+            <div v-for="h in 9" :key="h" class="hm-cell" :class="heatClass(di * 9 + h - 1)" :title="`${day} ${8 + h}:00 — ${mock.capacityHeatmap[di * 9 + h - 1]?.value || 0} записей`" />
+          </div>
+        </div>
+        <div class="hm-hours">
+          <span v-for="h in 9" :key="h">{{ 8 + h }}</span>
+        </div>
       </div>
-      <div class="cap-card">
-        <Icon name="lucide:calendar" size="20" class="cap-icon" />
-        <div class="cap-value">{{ capacity.weeklySlots }}</div>
-        <div class="cap-label">Слотов/нед</div>
-      </div>
-      <div class="cap-card">
-        <Icon name="lucide:trending-up" size="20" class="cap-icon" />
-        <div class="cap-value">{{ capacity.utilizationPct }}%</div>
-        <div class="cap-label">Загрузка</div>
-      </div>
-      <div class="cap-card">
-        <Icon name="lucide:alert-triangle" size="20" class="cap-icon warning" />
-        <div class="cap-value">{{ capacity.bottlenecks }}</div>
-        <div class="cap-label">Узкие места</div>
+      <div class="hm-legend">
+        <span class="lg"><span class="lg-box l0" /> 0</span>
+        <span class="lg"><span class="lg-box l1" /> 1–3</span>
+        <span class="lg"><span class="lg-box l2" /> 4–7</span>
+        <span class="lg"><span class="lg-box l3" /> 8+</span>
       </div>
     </div>
 
-    <!-- Demand heatmap (simplified as a table) -->
-    <section class="section">
-      <h2 class="section-title">Загрузка по дням недели</h2>
-      <div class="heatmap">
-        <div v-for="day in weekDays" :key="day.name" class="heatmap-row">
-          <span class="heatmap-day">{{ day.name }}</span>
-          <div class="heatmap-cells">
-            <div
-              v-for="hour in day.hours"
-              :key="hour.h"
-              class="heatmap-cell"
-              :class="heatLevel(hour.count)"
-              :title="`${hour.h}:00 — ${hour.count} записей`"
-            />
-          </div>
-        </div>
-        <div class="heatmap-hours">
-          <span v-for="h in timeLabels" :key="h">{{ h }}</span>
-        </div>
-      </div>
-      <div class="heatmap-legend">
-        <span class="legend-item"><span class="cell level-0" /> 0</span>
-        <span class="legend-item"><span class="cell level-1" /> 1-2</span>
-        <span class="legend-item"><span class="cell level-2" /> 3-5</span>
-        <span class="legend-item"><span class="cell level-3" /> 6+</span>
-      </div>
-    </section>
-
     <!-- Forecast -->
-    <section class="section">
-      <h2 class="section-title">Прогноз спроса (30 дней)</h2>
-      <div class="forecast-list">
-        <div v-for="fc in demandForecast" :key="fc.week" class="forecast-row">
-          <span class="fc-week">{{ fc.week }}</span>
-          <div class="fc-bar-track">
-            <div class="fc-bar-fill" :style="{ width: `${fc.pct}%` }" />
-          </div>
-          <span class="fc-value">{{ fc.predicted }} визитов</span>
+    <div class="card">
+      <h2 class="card-title"><Icon name="lucide:calendar-range" size="16" /> Прогноз спроса (4 недели)</h2>
+      <div class="fc-list">
+        <div v-for="(f, i) in forecasts" :key="i" class="fc-row">
+          <span class="fc-week">{{ f.week }}</span>
+          <div class="fc-track"><div class="fc-fill" :style="{ width: `${f.pct}%` }" /></div>
+          <span class="fc-val">{{ f.visits }} виз.</span>
         </div>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
+const mock = useMockData()
+const heatDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
-const capacity = reactive({
-  activeJourneys: 0,
-  weeklySlots: 0,
-  utilizationPct: 0,
-  bottlenecks: 0,
-})
-
-const weekDays = ref<Array<{ name: string; hours: Array<{ h: number; count: number }> }>>([])
-const demandForecast = ref<Array<{ week: string; predicted: number; pct: number }>>([])
-const timeLabels = ['9', '10', '11', '12', '13', '14', '15', '16', '17']
-
-function heatLevel(count: number) {
-  if (count >= 6) return 'level-3'
-  if (count >= 3) return 'level-2'
-  if (count >= 1) return 'level-1'
-  return 'level-0'
+function heatClass(idx: number) {
+  const v = mock.capacityHeatmap[idx]?.value || 0
+  if (v >= 8) return 'l3'
+  if (v >= 4) return 'l2'
+  if (v >= 1) return 'l1'
+  return 'l0'
 }
 
-onMounted(async () => {
-  if (!authStore.clinicId) return
-
-  const { data: cap } = await supabase
-    .from('v_clinic_capacity')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-    .single()
-
-  if (cap) {
-    const d = cap as Record<string, number>
-    capacity.activeJourneys = d.active_journeys || 0
-    capacity.weeklySlots = d.weekly_slots || 0
-    capacity.utilizationPct = d.utilization_pct || 0
-    capacity.bottlenecks = d.bottleneck_count || 0
-  }
-
-  // Simplified heatmap data
-  const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
-  weekDays.value = days.map(name => ({
-    name,
-    hours: [9, 10, 11, 12, 13, 14, 15, 16, 17].map(h => ({ h, count: 0 })),
-  }))
-
-  const { data: heatData } = await supabase
-    .from('v_appointment_heatmap')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-
-  for (const row of (heatData || []) as Array<Record<string, number>>) {
-    const dayIdx = (row.day_of_week || 1) - 1
-    const hourIdx = (row.hour || 9) - 9
-    if (weekDays.value[dayIdx]?.hours[hourIdx]) {
-      weekDays.value[dayIdx].hours[hourIdx].count = row.appointment_count || 0
-    }
-  }
-
-  // Demand forecast: count upcoming events per week for 4 weeks
-  const now = new Date()
-  const weeks: typeof demandForecast.value = []
-  for (let w = 0; w < 4; w++) {
-    const start = new Date(now)
-    start.setDate(start.getDate() + w * 7)
-    const end = new Date(start)
-    end.setDate(end.getDate() + 7)
-    const startStr = start.toISOString().slice(0, 10)
-    const endStr = end.toISOString().slice(0, 10)
-
-    const { count } = await supabase
-      .from('journey_events')
-      .select('id', { count: 'exact', head: true })
-      .in('status', ['upcoming', 'due'])
-      .gte('due_date', startStr)
-      .lt('due_date', endStr)
-
-    weeks.push({
-      week: `${start.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} — ${end.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`,
-      predicted: count || 0,
-      pct: 0,
-    })
-  }
-  const maxVal = Math.max(...weeks.map(w => w.predicted), 1)
-  weeks.forEach(w => w.pct = Math.round((w.predicted / maxVal) * 100))
-  demandForecast.value = weeks
-})
+const forecasts = [
+  { week: '14–20 апр', visits: 42, pct: 84 },
+  { week: '21–27 апр', visits: 38, pct: 76 },
+  { week: '28 апр–4 мая', visits: 46, pct: 92 },
+  { week: '5–11 мая', visits: 50, pct: 100 },
+]
 </script>
 
 <style scoped>
-.capacity-page { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
-.page-header { margin-bottom: 24px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.cap-page { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-.capacity-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
-.cap-card { padding: 18px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); text-align: center; }
-.cap-icon { color: var(--color-primary); margin-bottom: 6px; }
-.cap-icon.warning { color: var(--color-warning); }
-.cap-value { font-size: 1.5rem; font-weight: 700; font-family: var(--font-mono); }
-.cap-label { font-size: 0.75rem; color: var(--color-text-secondary); }
+.cap-hero {
+  background: linear-gradient(135deg, rgba(168,200,232,0.08), rgba(139,126,200,0.06));
+  border: 1px solid rgba(168,200,232,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.cap-hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.cap-hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
 
-.section { margin-bottom: 28px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.kpi-card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 16px; text-align: center; }
+.kpi-icon { color: var(--color-primary); margin-bottom: 4px; }
+.kpi-icon.warn { color: var(--color-warning); }
+.kpi-value { display: block; font-size: 1.4rem; font-weight: 800; font-family: var(--font-mono); }
+.kpi-label { font-size: 0.7rem; color: var(--color-text-muted); }
 
-.heatmap { display: flex; flex-direction: column; gap: 4px; }
-.heatmap-row { display: flex; align-items: center; gap: 8px; }
-.heatmap-day { width: 24px; font-size: 0.75rem; color: var(--color-text-secondary); }
-.heatmap-cells { display: flex; gap: 3px; }
-.heatmap-cell { width: 28px; height: 20px; border-radius: 3px; }
-.heatmap-cell.level-0 { background: var(--color-border-light); }
-.heatmap-cell.level-1 { background: rgba(139, 126, 200, 0.25); }
-.heatmap-cell.level-2 { background: rgba(139, 126, 200, 0.55); }
-.heatmap-cell.level-3 { background: var(--color-primary); }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.card-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 
-.heatmap-hours { display: flex; gap: 3px; padding-left: 32px; }
-.heatmap-hours span { width: 28px; text-align: center; font-size: 0.65rem; color: var(--color-text-muted); }
+.heatmap { display: flex; flex-direction: column; gap: 3px; }
+.hm-row { display: flex; align-items: center; gap: 6px; }
+.hm-day { width: 22px; font-size: 0.68rem; color: var(--color-text-muted); }
+.hm-cells { display: flex; gap: 3px; }
+.hm-cell { width: 28px; height: 18px; border-radius: 3px; transition: background 0.2s; }
+.hm-cell.l0 { background: var(--color-border-light); }
+.hm-cell.l1 { background: rgba(139,126,200,0.2); }
+.hm-cell.l2 { background: rgba(139,126,200,0.5); }
+.hm-cell.l3 { background: var(--color-primary); }
 
-.heatmap-legend { display: flex; gap: 12px; margin-top: 8px; }
-.legend-item { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: var(--color-text-muted); }
-.cell { width: 12px; height: 12px; border-radius: 2px; }
+.hm-hours { display: flex; gap: 3px; padding-left: 28px; margin-top: 2px; }
+.hm-hours span { width: 28px; text-align: center; font-size: 0.58rem; color: var(--color-text-muted); }
 
-.forecast-list { display: flex; flex-direction: column; gap: 8px; }
-.forecast-row { display: flex; align-items: center; gap: 12px; }
-.fc-week { width: 100px; font-size: 0.85rem; flex-shrink: 0; }
-.fc-bar-track { flex: 1; height: 12px; background: var(--color-border-light); border-radius: 6px; overflow: hidden; }
-.fc-bar-fill { height: 100%; background: var(--gradient-cta); border-radius: 6px; }
-.fc-value { width: 100px; text-align: right; font-size: 0.8rem; font-family: var(--font-mono); }
+.hm-legend { display: flex; gap: 12px; margin-top: 10px; }
+.lg { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: var(--color-text-muted); }
+.lg-box { width: 10px; height: 10px; border-radius: 2px; }
+.lg-box.l0 { background: var(--color-border-light); }
+.lg-box.l1 { background: rgba(139,126,200,0.2); }
+.lg-box.l2 { background: rgba(139,126,200,0.5); }
+.lg-box.l3 { background: var(--color-primary); }
+
+.fc-list { display: flex; flex-direction: column; gap: 8px; }
+.fc-row { display: flex; align-items: center; gap: 12px; }
+.fc-week { width: 110px; font-size: 0.78rem; flex-shrink: 0; }
+.fc-track { flex: 1; height: 8px; background: var(--color-border-light); border-radius: 4px; overflow: hidden; }
+.fc-fill { height: 100%; background: var(--gradient-cta); border-radius: 4px; transition: width 0.4s; }
+.fc-val { width: 60px; text-align: right; font-size: 0.78rem; font-family: var(--font-mono); font-weight: 600; }
 </style>

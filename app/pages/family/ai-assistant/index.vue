@@ -74,6 +74,7 @@ definePageMeta({ layout: 'app' })
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const userId = useSupabaseUserId()
 const authStore = useAuthStore()
 
 interface ChatMessage {
@@ -115,7 +116,7 @@ async function sendMessage(text?: string) {
   // Create conversation if needed
   if (!conversationId.value) {
     const { data } = await supabase.from('ai_conversations').insert({
-      user_id: user.value.id,
+      user_id: userId.value,
       title: msg.slice(0, 60),
     }).select().single()
     if (data) conversationId.value = data.id
@@ -189,7 +190,7 @@ async function sendMessage(text?: string) {
 async function feedback(messageId: string, type: string) {
   await supabase.from('ai_feedback').insert({
     message_id: messageId,
-    user_id: user.value?.id,
+    user_id: userId.value,
     type,
   })
 }
@@ -200,7 +201,7 @@ onMounted(async () => {
   const { data } = await supabase
     .from('ai_conversations')
     .select('id')
-    .eq('user_id', user.value.id)
+    .eq('user_id', userId.value)
     .order('created_at', { ascending: false })
     .limit(1)
 

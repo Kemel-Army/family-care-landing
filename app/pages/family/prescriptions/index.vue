@@ -1,53 +1,75 @@
 <template>
-  <div class="prescriptions-page">
-    <header class="page-header">
-      <h1 class="page-title">Назначения</h1>
-      <div class="adherence-meter">
-        <Icon name="lucide:activity" size="16" />
-        <span>{{ prescriptionsStore.adherencePercent }}%</span>
+  <div class="rx-page">
+    <!-- Header with overall adherence ring -->
+    <div class="rx-hero">
+      <div>
+        <h1 class="rx-hero-title">Назначения</h1>
+        <p class="rx-hero-sub">{{ mock.prescriptions.length }} препаратов · {{ pendingCount }} ожидают приёма</p>
       </div>
-    </header>
-
-    <!-- Today's doses -->
-    <section v-if="prescriptionsStore.pendingDoses.length" class="section">
-      <h2 class="section-title">Сегодня</h2>
-      <div class="list">
-        <AppSharedDoseCard
-          v-for="dose in prescriptionsStore.pendingDoses"
-          :key="dose.id"
-          :dose="dose"
-          @confirm="handleConfirm"
-          @skip="handleSkip"
-        />
+      <div class="rx-hero-ring">
+        <AppSharedProgressRing :value="overallAdherence" :size="72" :strokeWidth="6" variant="primary" />
       </div>
-    </section>
+    </div>
 
-    <!-- Active prescriptions -->
-    <section v-if="prescriptionsStore.activePrescriptions.length" class="section">
-      <h2 class="section-title">Активные назначения</h2>
-      <div class="list">
-        <div v-for="rx in prescriptionsStore.activePrescriptions" :key="rx.id" class="prescription-card">
-          <div class="rx-icon">
-            <Icon name="lucide:pill" size="20" />
+    <!-- Adherence week chart -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:bar-chart-3" size="16" /> Приём за неделю</h2>
+      </div>
+      <div class="adh-chart">
+        <div v-for="day in mock.adherenceWeekly" :key="day.date" class="adh-col">
+          <div class="adh-track">
+            <div class="adh-fill" :style="{ height: `${(day.taken / day.total) * 100}%` }" />
           </div>
-          <div class="rx-content">
-            <h3>{{ rx.medication }}</h3>
-            <p>{{ rx.dosage }} · {{ rx.frequency }}</p>
-            <p v-if="rx.time_of_day?.length" class="rx-times">
-              {{ rx.time_of_day.join(', ') }}
-            </p>
-          </div>
-          <NuxtLink :to="`/family/prescriptions/${rx.id}`" class="rx-link">
-            <Icon name="lucide:chevron-right" size="16" />
-          </NuxtLink>
+          <span class="adh-label">{{ day.date }}</span>
+          <span class="adh-val">{{ day.taken }}/{{ day.total }}</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <div v-if="!prescriptionsStore.activePrescriptions.length && !prescriptionsStore.pendingDoses.length" class="empty-state">
-      <Icon name="lucide:pill" size="40" class="empty-icon" />
-      <h3>Нет назначений</h3>
-      <p>Ваш координатор или врач добавит назначения в маршрут</p>
+    <!-- Today's Doses grouped by prescription -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:clock" size="16" /> Сегодня</h2>
+      </div>
+      <div class="rx-list">
+        <div v-for="rx in mock.prescriptions" :key="rx.id" class="rx-block">
+          <div class="rx-block-header">
+            <div class="rx-block-icon"><Icon name="lucide:pill" size="16" /></div>
+            <div class="rx-block-info">
+              <span class="rx-block-name">{{ rx.medication }}</span>
+              <span class="rx-block-dose">{{ rx.dosage }} · {{ rx.frequency }}</span>
+            </div>
+            <div class="rx-block-adh">
+              <div class="rx-adh-bar"><div class="rx-adh-fill" :style="{ width: `${rx.adherencePercent}%` }" /></div>
+              <span class="rx-adh-label">{{ rx.adherencePercent }}%</span>
+            </div>
+          </div>
+          <div class="rx-doses-row">
+            <div v-for="dose in rx.todayDoses" :key="dose.id" class="rx-dose-chip" :class="`rx-dose-chip--${dose.status}`">
+              <Icon :name="dose.status === 'confirmed' ? 'lucide:check-circle' : dose.status === 'missed' ? 'lucide:x-circle' : 'lucide:circle'" size="14" />
+              <span>{{ dose.time }}</span>
+              <button v-if="dose.status === 'pending'" class="rx-dose-action" @click="handleConfirm(dose.id)">Принять</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Streak -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:flame" size="16" /> Серия приёма</h2>
+      </div>
+      <div class="streak-row">
+        <div class="streak-big">
+          <span class="streak-big-val">{{ mock.streaks.doses.current }}</span>
+          <span class="streak-big-label">дней подряд</span>
+        </div>
+        <div class="streak-record">
+          Рекорд: <strong>{{ mock.streaks.doses.longest }}</strong> дней
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -57,62 +79,90 @@ definePageMeta({ layout: 'app' })
 
 const prescriptionsStore = usePrescriptionStore()
 const authStore = useAuthStore()
+const mock = useMockData()
 
-onMounted(async () => {
-  if (authStore.familyId) {
-    await prescriptionsStore.fetchPrescriptions(authStore.familyId)
-  }
+const overallAdherence = computed(() => {
+  const arr = mock.prescriptions.map(r => r.adherencePercent)
+  return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
 })
+
+const pendingCount = computed(() =>
+  mock.prescriptions.flatMap(p => p.todayDoses).filter(d => d.status === 'pending').length
+)
 
 function handleConfirm(doseId: string) {
   prescriptionsStore.confirmDose(doseId)
 }
 
-function handleSkip(doseId: string) {
-  prescriptionsStore.skipDose(doseId)
-}
+onMounted(async () => {
+  if (authStore.familyId) await prescriptionsStore.fetchPrescriptions(authStore.familyId)
+})
 </script>
 
 <style scoped>
-.prescriptions-page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 24px 16px;
+.rx-page { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+.rx-hero {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, rgba(139,126,200,0.08), rgba(232,160,191,0.06));
+  border: 1px solid rgba(139,126,200,0.12); border-radius: 16px; padding: 24px 28px;
 }
+.rx-hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--color-text-primary); }
+.rx-hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
 
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
-
-.adherence-meter {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 14px; background: rgba(124, 184, 212, 0.1);
-  border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: var(--color-success);
+.card {
+  background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px;
 }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary); }
 
-.section { margin-bottom: 28px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
-.list { display: flex; flex-direction: column; gap: 8px; }
+/* Adherence chart */
+.adh-chart { display: flex; gap: 8px; height: 130px; padding-top: 4px; }
+.adh-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+.adh-track { flex: 1; width: 100%; background: rgba(139,126,200,0.06); border-radius: 6px; display: flex; align-items: flex-end; overflow: hidden; }
+.adh-fill { width: 100%; background: var(--gradient-cta); border-radius: 6px; min-height: 4px; transition: height 0.5s ease; }
+.adh-label { font-size: 0.6rem; color: var(--color-text-muted); }
+.adh-val { font-size: 0.58rem; color: var(--color-text-muted); }
 
-.prescription-card {
-  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
-  background: var(--color-surface); border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm); transition: all var(--transition-fast);
+/* Prescription blocks */
+.rx-list { display: flex; flex-direction: column; gap: 16px; }
+.rx-block { padding-bottom: 16px; border-bottom: 1px solid var(--color-border-light); }
+.rx-block:last-child { border-bottom: none; padding-bottom: 0; }
+
+.rx-block-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.rx-block-icon {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(139,126,200,0.08); color: var(--color-primary);
+  display: flex; align-items: center; justify-content: center;
 }
-.prescription-card:hover { box-shadow: var(--shadow-sm); }
+.rx-block-info { flex: 1; min-width: 0; }
+.rx-block-name { font-size: 0.88rem; font-weight: 600; color: var(--color-text-primary); display: block; }
+.rx-block-dose { font-size: 0.75rem; color: var(--color-text-muted); }
 
-.rx-icon {
-  width: 40px; height: 40px; border-radius: 50%; background: var(--color-primary-ultralight);
-  color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+.rx-block-adh { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; flex-shrink: 0; }
+.rx-adh-bar { width: 48px; height: 4px; background: rgba(139,126,200,0.1); border-radius: 2px; overflow: hidden; }
+.rx-adh-fill { height: 100%; background: var(--gradient-cta); border-radius: 2px; }
+.rx-adh-label { font-size: 0.62rem; color: var(--color-text-muted); }
+
+.rx-doses-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.rx-dose-chip {
+  display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+  border-radius: 10px; font-size: 0.78rem; background: rgba(139,126,200,0.04);
+  color: var(--color-text-secondary);
 }
+.rx-dose-chip--confirmed { color: var(--color-success); background: rgba(124,184,212,0.08); }
+.rx-dose-chip--missed { color: var(--color-danger); background: rgba(212,114,124,0.06); }
+.rx-dose-chip--pending { color: var(--color-warning); background: rgba(233,196,106,0.08); }
+.rx-dose-action {
+  background: var(--color-primary); color: white; border: none; padding: 2px 10px; border-radius: 6px;
+  font-size: 0.7rem; font-weight: 600; cursor: pointer; font-family: var(--font-body); margin-left: 4px;
+}
+.rx-dose-action:hover { opacity: 0.85; }
 
-.rx-content { flex: 1; }
-.rx-content h3 { font-size: 0.9rem; font-weight: 600; }
-.rx-content p { font-size: 0.8rem; color: var(--color-text-secondary); }
-.rx-times { font-style: italic; }
-.rx-link { color: var(--color-text-muted); text-decoration: none; }
-
-.empty-state { text-align: center; padding: 48px 16px; color: var(--color-text-muted); }
-.empty-state h3 { font-size: 1rem; margin: 8px 0 4px; color: var(--color-text-primary); }
-.empty-state p { font-size: 0.85rem; }
-.empty-icon { color: var(--color-primary-light); }
+/* Streak */
+.streak-row { display: flex; align-items: center; gap: 24px; }
+.streak-big { display: flex; flex-direction: column; align-items: center; }
+.streak-big-val { font-size: 2rem; font-weight: 700; color: var(--color-text-primary); line-height: 1; }
+.streak-big-label { font-size: 0.72rem; color: var(--color-text-muted); }
+.streak-record { font-size: 0.82rem; color: var(--color-text-secondary); }
 </style>

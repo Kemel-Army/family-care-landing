@@ -1,222 +1,122 @@
 <template>
   <div class="sleep-page">
-    <header class="page-header">
-      <h1 class="page-title">Сон</h1>
-    </header>
-
-    <!-- Child selector -->
-    <div v-if="authStore.children.length > 1" class="child-tabs">
-      <button
-        v-for="child in authStore.children"
-        :key="child.id"
-        class="child-tab"
-        :class="{ active: selectedChildId === child.id }"
-        @click="selectChild(child.id)"
-      >{{ child.name }}</button>
+    <!-- Hero -->
+    <div class="sleep-hero">
+      <div>
+        <h1 class="sleep-hero-title">Сон</h1>
+        <p class="sleep-hero-sub">{{ mock.children[0].first_name }} · Трекер сна</p>
+      </div>
+      <div class="sleep-hero-total">
+        <Icon name="lucide:moon" size="20" style="color: var(--color-primary)" />
+        <span class="sleep-hero-val">{{ avgTotal.toFixed(1) }}ч</span>
+        <span class="sleep-hero-lbl">среднее/день</span>
+      </div>
     </div>
 
-    <!-- Today's summary -->
-    <section class="sleep-summary">
-      <div class="summary-card">
-        <Icon name="lucide:moon" size="24" class="summary-icon" />
-        <div class="summary-value">{{ totalHours }}ч {{ totalMinutes }}мин</div>
-        <div class="summary-label">Всего сна за сегодня</div>
+    <!-- Week chart -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:bar-chart-3" size="16" /> За неделю</h2>
       </div>
-    </section>
+      <AppSharedEChart :option="sleepChartOption" style="height: 200px" />
+    </div>
 
-    <!-- Quick log -->
-    <section class="section">
-      <h2 class="section-title">Записать сон</h2>
-      <div class="log-form">
-        <div class="type-selector">
-          <button
-            v-for="t in sleepTypes"
-            :key="t.value"
-            class="type-btn"
-            :class="{ active: logForm.type === t.value }"
-            @click="logForm.type = t.value"
-          >{{ t.emoji }} {{ t.label }}</button>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Начало</label>
-            <input v-model="logForm.start" type="time" class="form-input" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Конец</label>
-            <input v-model="logForm.end" type="time" class="form-input" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Качество</label>
-          <div class="quality-selector">
-            <button
-              v-for="q in [1,2,3,4,5]"
-              :key="q"
-              class="quality-btn"
-              :class="{ active: logForm.quality === q }"
-              @click="logForm.quality = q"
-            >{{ q === 1 ? '😴' : q === 2 ? '😐' : q === 3 ? '🙂' : q === 4 ? '😊' : '⭐' }}</button>
-          </div>
-        </div>
-
-        <button class="btn-save" :disabled="saving" @click="saveLog">
-          {{ saving ? 'Сохранение...' : 'Сохранить' }}
-        </button>
+    <!-- Today logs -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:list" size="16" /> Сегодня</h2>
       </div>
-    </section>
-
-    <!-- Today's logs -->
-    <section v-if="todayLogs.length" class="section">
-      <h2 class="section-title">Сегодня</h2>
-      <div class="log-list">
-        <div v-for="log in todayLogs" :key="log.id" class="log-card">
-          <span class="log-emoji">{{ log.type === 'night' ? '🌙' : '☀️' }}</span>
-          <div class="log-content">
-            <h3>{{ log.type === 'night' ? 'Ночной' : 'Дневной' }}</h3>
-            <p>{{ log.sleep_start?.slice(0, 5) }} — {{ log.sleep_end?.slice(0, 5) }}</p>
+      <div class="sleep-logs">
+        <div class="sleep-log-row">
+          <div class="sleep-log-icon sleep-log-icon--night"><Icon name="lucide:moon" size="14" /></div>
+          <div class="sleep-log-info">
+            <span class="sleep-log-name">Ночной сон</span>
+            <span class="sleep-log-time">21:00 — 06:30</span>
           </div>
-          <span class="log-duration">{{ logDuration(log) }}</span>
+          <span class="sleep-log-dur">9ч 30мин</span>
+        </div>
+        <div class="sleep-log-row">
+          <div class="sleep-log-icon sleep-log-icon--nap"><Icon name="lucide:sun" size="14" /></div>
+          <div class="sleep-log-info">
+            <span class="sleep-log-name">Дневной сон</span>
+            <span class="sleep-log-time">12:00 — 14:00</span>
+          </div>
+          <span class="sleep-log-dur">2ч 0мин</span>
         </div>
       </div>
-    </section>
+    </div>
+
+    <!-- Streak -->
+    <div class="card sleep-streak">
+      <Icon name="lucide:flame" size="20" style="color: var(--color-warning)" />
+      <div>
+        <span class="streak-val">{{ mock.streaks.sleep.current }} дней</span>
+        <span class="streak-lbl">серия записей сна · рекорд {{ mock.streaks.sleep.longest }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import dayjs from 'dayjs'
-import type { SleepLog } from '~/types/database'
-
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
+const mock = useMockData()
 
-const selectedChildId = ref('')
-const todayLogs = ref<SleepLog[]>([])
-const saving = ref(false)
-
-const logForm = reactive({
-  type: 'night' as string,
-  start: '21:00',
-  end: '07:00',
-  quality: 3,
+const avgTotal = computed(() => {
+  const w = mock.sleepWeek
+  return w.reduce((s, d) => s + d.night + d.nap, 0) / w.length
 })
 
-const sleepTypes = [
-  { value: 'night', emoji: '🌙', label: 'Ночной' },
-  { value: 'nap', emoji: '☀️', label: 'Дневной' },
-]
-
-const totalMinutesAll = computed(() => {
-  return todayLogs.value.reduce((sum, log) => {
-    const mins = calcMinutes(log.sleep_start, log.sleep_end)
-    return sum + mins
-  }, 0)
-})
-
-const totalHours = computed(() => Math.floor(totalMinutesAll.value / 60))
-const totalMinutes = computed(() => totalMinutesAll.value % 60)
-
-function calcMinutes(start?: string, end?: string) {
-  if (!start || !end) return 0
-  const [sh, sm] = start.split(':').map(Number)
-  const [eh, em] = end.split(':').map(Number)
-  let mins = (eh * 60 + em) - (sh * 60 + sm)
-  if (mins < 0) mins += 24 * 60 // overnight
-  return mins
-}
-
-function logDuration(log: SleepLog) {
-  const mins = calcMinutes(log.sleep_start, log.sleep_end)
-  return `${Math.floor(mins / 60)}ч ${mins % 60}мин`
-}
-
-async function selectChild(childId: string) {
-  selectedChildId.value = childId
-  await fetchData(childId)
-}
-
-async function fetchData(childId: string) {
-  const today = dayjs().format('YYYY-MM-DD')
-  const { data } = await supabase
-    .from('sleep_logs')
-    .select('*')
-    .eq('child_id', childId)
-    .gte('created_at', `${today}T00:00:00`)
-    .order('created_at', { ascending: false })
-
-  todayLogs.value = (data as SleepLog[]) || []
-}
-
-async function saveLog() {
-  if (!selectedChildId.value) return
-  saving.value = true
-  try {
-    const { data } = await supabase.from('sleep_logs').insert({
-      child_id: selectedChildId.value,
-      type: logForm.type,
-      sleep_start: logForm.start,
-      sleep_end: logForm.end,
-      quality: logForm.quality,
-    }).select().single()
-
-    if (data) todayLogs.value.unshift(data as SleepLog)
-  }
-  finally { saving.value = false }
-}
-
-onMounted(() => {
-  if (authStore.children.length > 0) {
-    selectedChildId.value = authStore.children[0].id
-    fetchData(authStore.children[0].id)
-  }
-})
+const sleepChartOption = computed(() => ({
+  grid: { top: 20, right: 8, bottom: 24, left: 38 },
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: mock.sleepWeek.map(d => d.date), axisLine: { lineStyle: { color: '#e0dce8' } }, axisLabel: { color: '#9690a8', fontSize: 11 } },
+  yAxis: { type: 'value', name: 'часы', nameTextStyle: { color: '#9690a8', fontSize: 11 }, axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0eef5' } }, axisLabel: { color: '#9690a8', fontSize: 11 } },
+  series: [
+    {
+      name: 'Ночной', type: 'bar', stack: 'sleep', data: mock.sleepWeek.map(d => d.night),
+      itemStyle: { color: '#8B7EC8', borderRadius: [0, 0, 4, 4] }, barWidth: '40%',
+    },
+    {
+      name: 'Дневной', type: 'bar', stack: 'sleep', data: mock.sleepWeek.map(d => d.nap),
+      itemStyle: { color: '#E8A0BF', borderRadius: [4, 4, 0, 0] }, barWidth: '40%',
+    },
+  ],
+}))
 </script>
 
 <style scoped>
-.sleep-page { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
-.page-header { margin-bottom: 20px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.sleep-page { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
 
-.child-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.child-tab { padding: 8px 16px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-surface); font-size: 0.85rem; cursor: pointer; font-family: var(--font-body); }
-.child-tab.active { border-color: var(--color-primary); background: var(--color-primary-ultralight); color: var(--color-primary); font-weight: 600; }
+.sleep-hero {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, rgba(139,126,200,0.08), rgba(168,200,232,0.06));
+  border: 1px solid rgba(139,126,200,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.sleep-hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.sleep-hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
+.sleep-hero-total { display: flex; align-items: center; gap: 8px; }
+.sleep-hero-val { font-size: 1.3rem; font-weight: 700; font-family: var(--font-mono); }
+.sleep-hero-lbl { font-size: 0.68rem; color: var(--color-text-muted); }
 
-.sleep-summary { margin-bottom: 24px; }
-.summary-card { text-align: center; padding: 24px; background: linear-gradient(135deg, rgba(139, 126, 200, 0.1), rgba(232, 160, 191, 0.1)); border-radius: var(--radius-md); }
-.summary-icon { color: var(--color-primary); margin-bottom: 8px; }
-.summary-value { font-size: 1.5rem; font-weight: 700; font-family: var(--font-mono); }
-.summary-label { font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 4px; }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-.section { margin-bottom: 24px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
+.sleep-logs { display: flex; flex-direction: column; gap: 6px; }
+.sleep-log-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; transition: background 0.15s; }
+.sleep-log-row:hover { background: rgba(139,126,200,0.04); }
+.sleep-log-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sleep-log-icon--night { background: rgba(139,126,200,0.1); color: var(--color-primary); }
+.sleep-log-icon--nap { background: rgba(242,196,160,0.12); color: var(--color-text-secondary); }
+.sleep-log-info { flex: 1; }
+.sleep-log-name { display: block; font-size: 0.85rem; font-weight: 500; }
+.sleep-log-time { display: block; font-size: 0.72rem; color: var(--color-text-muted); }
+.sleep-log-dur { font-size: 0.85rem; font-weight: 600; font-family: var(--font-mono); color: var(--color-primary); }
 
-.log-form { background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.type-selector { display: flex; gap: 8px; }
-.type-btn { padding: 8px 14px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-surface); font-size: 0.85rem; cursor: pointer; font-family: var(--font-body); }
-.type-btn.active { border-color: var(--color-primary); background: var(--color-primary-ultralight); color: var(--color-primary); font-weight: 600; }
-
-.form-row { display: flex; gap: 12px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-.form-label { font-size: 0.85rem; font-weight: 600; }
-.form-input { padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font-body); outline: none; }
-.form-input:focus { border-color: var(--color-primary); }
-
-.quality-selector { display: flex; gap: 8px; }
-.quality-btn { width: 40px; height: 40px; border: 1px solid var(--color-border); border-radius: 50%; font-size: 1.2rem; cursor: pointer; background: var(--color-surface); }
-.quality-btn.active { border-color: var(--color-primary); background: var(--color-primary-ultralight); }
-
-.btn-save { padding: 10px; background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: var(--font-body); }
-.btn-save:disabled { opacity: 0.6; }
-
-.log-list { display: flex; flex-direction: column; gap: 6px; }
-.log-card { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); }
-.log-emoji { font-size: 1.2rem; }
-.log-content { flex: 1; }
-.log-content h3 { font-size: 0.85rem; font-weight: 600; }
-.log-content p { font-size: 0.8rem; color: var(--color-text-secondary); }
-.log-duration { font-size: 0.85rem; font-weight: 600; color: var(--color-primary); font-family: var(--font-mono); }
+.sleep-streak {
+  display: flex; align-items: center; gap: 12px;
+}
+.streak-val { font-size: 0.92rem; font-weight: 700; display: block; }
+.streak-lbl { font-size: 0.72rem; color: var(--color-text-muted); }
 </style>

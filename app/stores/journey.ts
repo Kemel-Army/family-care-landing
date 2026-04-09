@@ -83,13 +83,14 @@ export const useJourneyStore = defineStore('journey', {
     async completeEvent(eventId: string) {
       const supabase = useSupabaseClient()
       const user = useSupabaseUser()
+      const userId = (user.value as any)?.id ?? (user.value as any)?.sub
 
       const { data, error } = await supabase
         .from('journey_events')
         .update({
           status: 'completed',
           completed_at: new Date().toISOString(),
-          completed_by: user.value?.id,
+          completed_by: userId,
         })
         .eq('id', eventId)
         .select()

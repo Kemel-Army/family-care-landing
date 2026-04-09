@@ -61,6 +61,7 @@ definePageMeta({ layout: 'app' })
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const userId = useSupabaseUserId()
 
 const questions = EPDS_QUESTIONS
 const answers = reactive<number[]>(new Array(10).fill(-1))
@@ -100,7 +101,7 @@ async function submit() {
   totalScore.value = scores.reduce((sum, s) => sum + s, 0)
 
   await supabase.from('epds_screenings').insert({
-    user_id: user.value.id,
+    user_id: userId.value,
     answers: scores,
     total_score: totalScore.value,
     risk_level: riskLevel.value,

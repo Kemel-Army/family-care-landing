@@ -1,148 +1,84 @@
 <template>
-  <div class="outreach-page">
-    <header class="page-header">
-      <NuxtLink to="/coordinator" class="back-link">
-        <Icon name="lucide:chevron-left" size="16" /> Назад
-      </NuxtLink>
-      <h1 class="page-title">Outreach-сценарии</h1>
-      <button class="btn-add" @click="showCreate = true">
-        <Icon name="lucide:plus" size="16" /> Новый сценарий
-      </button>
-    </header>
-
-    <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-pill">
-        <Icon name="lucide:zap" size="14" />
-        <span>Активных: <strong>{{ activeScenarios.length }}</strong></span>
+  <div class="out-page">
+    <div class="out-hero">
+      <NuxtLink to="/coordinator" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Назад</NuxtLink>
+      <div class="hero-row">
+        <div>
+          <h1 class="hero-title">Outreach-сценарии</h1>
+          <p class="hero-sub">Автоматизация коммуникаций с семьями</p>
+        </div>
+        <button class="btn-create" @click="showCreate = true"><Icon name="lucide:plus" size="14" /> Новый сценарий</button>
       </div>
-      <div class="stat-pill">
-        <Icon name="lucide:send" size="14" />
-        <span>Отправлено: <strong>{{ totalSent }}</strong></span>
-      </div>
-      <div class="stat-pill">
-        <Icon name="lucide:target" size="14" />
-        <span>Конверсия: <strong>{{ conversionRate }}%</strong></span>
+      <div class="stat-chips">
+        <span class="chip"><Icon name="lucide:zap" size="14" /> Активных: <strong>{{ activeCount }}</strong></span>
+        <span class="chip"><Icon name="lucide:send" size="14" /> Отправлено: <strong>847</strong></span>
+        <span class="chip"><Icon name="lucide:target" size="14" /> Конверсия: <strong>24%</strong></span>
       </div>
     </div>
 
-    <!-- Scenarios list -->
-    <section v-if="loading" class="loading-state">
-      <Icon name="lucide:loader-2" size="24" class="spinner" />
-      <span>Загрузка...</span>
-    </section>
-
-    <section v-else-if="scenarios.length" class="scenarios-list">
-      <div
-        v-for="scenario in scenarios"
-        :key="scenario.id"
-        class="scenario-card"
-        :class="{ inactive: !scenario.is_active }"
-      >
-        <div class="scenario-header">
-          <div class="scenario-info">
-            <h3>{{ scenario.name }}</h3>
-            <span class="scenario-trigger">{{ describeTrigger(scenario.trigger_json) }}</span>
+    <!-- Scenarios -->
+    <div class="scn-list">
+      <div v-for="s in scenarios" :key="s.id" class="scn-card" :class="{ inactive: !s.active }">
+        <div class="scn-top">
+          <div>
+            <h3>{{ s.name }}</h3>
+            <span class="scn-trigger">{{ s.trigger }}</span>
           </div>
-          <div class="scenario-toggle">
-            <button
-              class="toggle-btn"
-              :class="{ active: scenario.is_active }"
-              @click="toggleScenario(scenario)"
-            >
-              {{ scenario.is_active ? 'Активен' : 'Выключен' }}
-            </button>
-          </div>
+          <button class="toggle-btn" :class="{ on: s.active }" @click="s.active = !s.active">{{ s.active ? 'Активен' : 'Выключен' }}</button>
         </div>
-
-        <div class="scenario-actions">
-          <div v-for="action in parseActions(scenario.actions_json)" :key="action.type" class="action-badge">
-            <Icon :name="channelIcon(action.type)" size="12" />
-            {{ channelLabel(action.type) }}
-          </div>
+        <div class="scn-channels">
+          <span v-for="ch in s.channels" :key="ch" class="ch-badge"><Icon :name="chIcon(ch)" size="12" /> {{ ch }}</span>
         </div>
-
-        <div class="scenario-stats">
-          <span>Отправлено: {{ scenarioLogStats(scenario.id).sent }}</span>
-          <span>Доставлено: {{ scenarioLogStats(scenario.id).delivered }}</span>
-          <span>Конвертировано: {{ scenarioLogStats(scenario.id).converted }}</span>
+        <div class="scn-stats">
+          <span>Отправлено: {{ s.sent }}</span>
+          <span>Доставлено: {{ s.delivered }}</span>
+          <span>Конвертировано: {{ s.converted }}</span>
         </div>
       </div>
-    </section>
-
-    <div v-else class="empty-state">
-      <Icon name="lucide:phone-call" size="40" class="empty-icon" />
-      <h3>Нет сценариев</h3>
-      <p>Создайте первый outreach-сценарий для автоматизации коммуникаций</p>
     </div>
 
     <!-- Recent logs -->
-    <section v-if="logs.length" class="section">
-      <h2 class="section-title">Последние отправки</h2>
-      <div class="logs-list">
-        <div v-for="log in recentLogs" :key="log.id" class="log-row">
-          <span class="log-status" :class="log.status" />
-          <div class="log-content">
-            <span class="log-scenario">{{ scenarioName(log.scenario_id) }}</span>
-            <span class="log-result">{{ log.result || '-' }}</span>
+    <div class="card">
+      <h2 class="card-title">Последние отправки</h2>
+      <div class="log-list">
+        <div v-for="l in logs" :key="l.id" class="log-row">
+          <span class="log-dot" :class="l.status" />
+          <div class="log-body">
+            <span class="log-name">{{ l.scenario }}</span>
+            <span class="log-result">{{ l.result }}</span>
           </div>
-          <span class="log-date">{{ formatDate(log.sent_at || log.created_at) }}</span>
+          <span class="log-date">{{ l.date }}</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Create modal -->
     <Teleport to="body">
       <div v-if="showCreate" class="modal-overlay" @click.self="showCreate = false">
-        <div class="modal">
-          <div class="modal-header">
-            <h2>Новый outreach-сценарий</h2>
-            <button class="modal-close" @click="showCreate = false">
-              <Icon name="lucide:x" size="18" />
-            </button>
+        <div class="modal-card">
+          <h2 class="modal-title">Новый сценарий</h2>
+          <div class="fg"><label class="fl">Название</label><input v-model="form.name" class="fi" placeholder="Напоминание о визите" /></div>
+          <div class="fg">
+            <label class="fl">Триггер</label>
+            <select v-model="form.trigger" class="fi">
+              <option value="appointment_upcoming">Приближающийся приём</option>
+              <option value="dose_missed">Пропущен приём лекарства</option>
+              <option value="no_login">Неактивность</option>
+              <option value="appointment_completed">Приём завершён</option>
+            </select>
           </div>
-
-          <form class="modal-form" @submit.prevent="createScenario">
-            <div class="form-group">
-              <label>Название</label>
-              <input v-model="form.name" type="text" required placeholder="Напоминание о визите" />
+          <div class="fg">
+            <label class="fl">Каналы</label>
+            <div class="ch-grid">
+              <label v-for="ch in channelOptions" :key="ch.value" class="ch-check">
+                <input v-model="form.channels" type="checkbox" :value="ch.value" />
+                <Icon :name="ch.icon" size="14" /> {{ ch.label }}
+              </label>
             </div>
-
-            <div class="form-group">
-              <label>Триггер</label>
-              <select v-model="form.triggerEvent" required>
-                <option value="" disabled>Выберите событие</option>
-                <option value="appointment_upcoming">Приближающийся приём</option>
-                <option value="dose_missed">Пропущен приём лекарства</option>
-                <option value="no_login">Неактивность</option>
-                <option value="appointment_completed">Приём завершён</option>
-                <option value="family_registered">Новая семья</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Дней / часов</label>
-              <input v-model.number="form.triggerDelay" type="number" min="0" placeholder="1" />
-            </div>
-
-            <div class="form-group">
-              <label>Каналы</label>
-              <div class="channels-grid">
-                <label v-for="ch in channelOptions" :key="ch.value" class="channel-checkbox">
-                  <input v-model="form.channels" type="checkbox" :value="ch.value" />
-                  <Icon :name="ch.icon" size="14" />
-                  {{ ch.label }}
-                </label>
-              </div>
-            </div>
-
-            <div class="modal-actions">
-              <button type="button" class="btn-cancel" @click="showCreate = false">Отмена</button>
-              <button type="submit" class="btn-submit" :disabled="creating">
-                {{ creating ? 'Создание...' : 'Создать' }}
-              </button>
-            </div>
-          </form>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" @click="showCreate = false">Отмена</button>
+            <button class="btn-submit" @click="showCreate = false">Создать</button>
+          </div>
         </div>
       </div>
     </Teleport>
@@ -152,288 +88,92 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
-
-const scenarios = ref<any[]>([])
-const logs = ref<any[]>([])
-const loading = ref(true)
 const showCreate = ref(false)
-const creating = ref(false)
-
-const form = reactive({
-  name: '',
-  triggerEvent: '',
-  triggerDelay: 1,
-  channels: [] as string[],
-})
+const form = reactive({ name: '', trigger: 'appointment_upcoming', channels: [] as string[] })
 
 const channelOptions = [
-  { value: 'sms', label: 'SMS', icon: 'lucide:message-square' },
-  { value: 'push', label: 'Push', icon: 'lucide:bell' },
-  { value: 'email', label: 'Email', icon: 'lucide:mail' },
-  { value: 'whatsapp', label: 'WhatsApp', icon: 'lucide:phone' },
+  { value: 'SMS', label: 'SMS', icon: 'lucide:message-square' },
+  { value: 'Push', label: 'Push', icon: 'lucide:bell' },
+  { value: 'Email', label: 'Email', icon: 'lucide:mail' },
+  { value: 'WhatsApp', label: 'WhatsApp', icon: 'lucide:phone' },
 ]
 
-const activeScenarios = computed(() => scenarios.value.filter(s => s.is_active))
+const chIcon = (ch: string) => ({ SMS: 'lucide:message-square', Push: 'lucide:bell', Email: 'lucide:mail', WhatsApp: 'lucide:phone' }[ch] || 'lucide:send')
 
-const totalSent = computed(() =>
-  logs.value.filter(l => l.status !== 'pending').length
-)
+const scenarios = reactive([
+  { id: 1, name: 'Напоминание о визите', trigger: 'За 24ч до приёма', active: true, channels: ['SMS', 'Push'], sent: 312, delivered: 298, converted: 87 },
+  { id: 2, name: 'Реактивация', trigger: 'Неактивность 14 дней', active: true, channels: ['WhatsApp', 'Email'], sent: 156, delivered: 142, converted: 34 },
+  { id: 3, name: 'Пропущен приём лекарства', trigger: 'Через 2ч после пропуска', active: true, channels: ['Push'], sent: 248, delivered: 245, converted: 189 },
+  { id: 4, name: 'Приветствие новой семьи', trigger: 'При регистрации', active: false, channels: ['Email', 'SMS'], sent: 131, delivered: 128, converted: 45 },
+])
 
-const conversionRate = computed(() => {
-  if (!logs.value.length) return 0
-  const converted = logs.value.filter(l => l.status === 'converted').length
-  return Math.round((converted / logs.value.length) * 100)
-})
+const activeCount = computed(() => scenarios.filter(s => s.active).length)
 
-const recentLogs = computed(() => logs.value.slice(0, 20))
-
-function scenarioLogStats(scenarioId: string) {
-  const scenarioLogs = logs.value.filter(l => l.scenario_id === scenarioId)
-  return {
-    sent: scenarioLogs.filter(l => ['sent', 'delivered', 'opened', 'converted'].includes(l.status)).length,
-    delivered: scenarioLogs.filter(l => ['delivered', 'opened', 'converted'].includes(l.status)).length,
-    converted: scenarioLogs.filter(l => l.status === 'converted').length,
-  }
-}
-
-function scenarioName(id: string) {
-  return scenarios.value.find(s => s.id === id)?.name || '—'
-}
-
-function describeTrigger(trigger: any) {
-  const t = typeof trigger === 'string' ? JSON.parse(trigger) : trigger
-  const eventLabels: Record<string, string> = {
-    appointment_upcoming: 'Приближающийся приём',
-    dose_missed: 'Пропущен приём лекарства',
-    no_login: 'Неактивность',
-    appointment_completed: 'Приём завершён',
-    family_registered: 'Регистрация семьи',
-  }
-  const eventLabel = eventLabels[t.event] || t.event
-  const delay = t.days_before ? `за ${t.days_before} дн.`
-    : t.hours_after ? `через ${t.hours_after} ч.`
-    : t.days_after ? `через ${t.days_after} дн.`
-    : ''
-  return `${eventLabel} ${delay}`.trim()
-}
-
-function parseActions(actions: any): { type: string; template: string }[] {
-  if (typeof actions === 'string') return JSON.parse(actions)
-  return actions || []
-}
-
-function channelIcon(type: string) {
-  const map: Record<string, string> = {
-    sms: 'lucide:message-square',
-    push: 'lucide:bell',
-    email: 'lucide:mail',
-    whatsapp: 'lucide:phone',
-  }
-  return map[type] || 'lucide:send'
-}
-
-function channelLabel(type: string) {
-  const map: Record<string, string> = { sms: 'SMS', push: 'Push', email: 'Email', whatsapp: 'WhatsApp' }
-  return map[type] || type
-}
-
-function formatDate(date: string | null) {
-  if (!date) return '—'
-  return new Date(date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
-}
-
-async function fetchData() {
-  if (!authStore.clinicId) return
-  loading.value = true
-
-  const [scenariosRes, logsRes] = await Promise.all([
-    supabase
-      .from('outreach_scenarios')
-      .select('*')
-      .eq('clinic_id', authStore.clinicId)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('outreach_logs')
-      .select('*, outreach_scenarios!inner(clinic_id)')
-      .eq('outreach_scenarios.clinic_id', authStore.clinicId)
-      .order('created_at', { ascending: false })
-      .limit(100),
-  ])
-
-  if (scenariosRes.data) scenarios.value = scenariosRes.data
-  if (logsRes.data) logs.value = logsRes.data
-
-  loading.value = false
-}
-
-async function toggleScenario(scenario: any) {
-  const { error } = await supabase
-    .from('outreach_scenarios')
-    .update({ is_active: !scenario.is_active })
-    .eq('id', scenario.id)
-
-  if (!error) scenario.is_active = !scenario.is_active
-}
-
-async function createScenario() {
-  if (!authStore.clinicId || !form.name || !form.triggerEvent) return
-  creating.value = true
-
-  const delayKey = ['appointment_upcoming'].includes(form.triggerEvent) ? 'days_before'
-    : ['no_login'].includes(form.triggerEvent) ? 'days_after'
-    : 'hours_after'
-
-  const { error } = await supabase.from('outreach_scenarios').insert({
-    clinic_id: authStore.clinicId,
-    name: form.name,
-    trigger_json: { event: form.triggerEvent, [delayKey]: form.triggerDelay },
-    actions_json: form.channels.map(ch => ({ type: ch, template: `${form.triggerEvent}_${ch}` })),
-    is_active: true,
-  })
-
-  if (!error) {
-    showCreate.value = false
-    form.name = ''
-    form.triggerEvent = ''
-    form.triggerDelay = 1
-    form.channels = []
-    await fetchData()
-  }
-
-  creating.value = false
-}
-
-onMounted(fetchData)
+const logs = [
+  { id: 1, scenario: 'Напоминание о визите', result: 'Доставлено — Айгуль М.', status: 'delivered', date: '12 мая' },
+  { id: 2, scenario: 'Реактивация', result: 'Открыто — Динара К.', status: 'opened', date: '12 мая' },
+  { id: 3, scenario: 'Пропущен приём', result: 'Конвертировано — Марат Т.', status: 'converted', date: '11 мая' },
+  { id: 4, scenario: 'Напоминание о визите', result: 'Ошибка доставки', status: 'failed', date: '11 мая' },
+  { id: 5, scenario: 'Приветствие', result: 'Доставлено — Сауле Б.', status: 'delivered', date: '10 мая' },
+]
 </script>
 
 <style scoped>
-.outreach-page { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+.out-page { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-.page-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
-.back-link { display: flex; align-items: center; gap: 4px; color: var(--color-text-secondary); text-decoration: none; font-size: 0.85rem; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; flex: 1; }
-.btn-add {
-  display: flex; align-items: center; gap: 6px; padding: 8px 16px;
-  background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-sm);
-  font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font-body);
+.out-hero {
+  background: linear-gradient(135deg, rgba(139,126,200,0.08), rgba(168,200,232,0.06));
+  border: 1px solid rgba(139,126,200,0.12); border-radius: 16px; padding: 24px 28px;
 }
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
+.btn-create { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--gradient-cta); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 0.82rem; cursor: pointer; font-family: var(--font-body); }
+.stat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.chip { display: flex; align-items: center; gap: 5px; padding: 4px 12px; background: rgba(139,126,200,0.06); border-radius: 20px; font-size: 0.75rem; color: var(--color-text-muted); }
+.chip strong { color: var(--color-text); }
 
-.stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-.stat-pill {
-  display: flex; align-items: center; gap: 6px; padding: 6px 14px;
-  background: var(--color-primary-ultralight); border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-full); font-size: 0.8rem; color: var(--color-text-secondary);
-}
-.stat-pill strong { color: var(--color-text-primary); }
+.scn-list { display: flex; flex-direction: column; gap: 10px; }
+.scn-card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 16px; }
+.scn-card.inactive { opacity: 0.55; }
+.scn-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.scn-top h3 { font-size: 0.92rem; font-weight: 700; }
+.scn-trigger { font-size: 0.78rem; color: var(--color-text-muted); }
+.toggle-btn { padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; border: 1px solid var(--color-border-light); background: white; cursor: pointer; color: var(--color-text-muted); font-family: var(--font-body); }
+.toggle-btn.on { border-color: var(--color-success); color: var(--color-success); background: rgba(124,184,212,0.06); }
 
-/* Scenarios */
-.scenarios-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
-.scenario-card {
-  padding: 16px; background: var(--color-surface);
-  border: 1px solid var(--color-border-light); border-radius: var(--radius-sm);
-}
-.scenario-card.inactive { opacity: 0.6; }
+.scn-channels { display: flex; gap: 5px; margin-top: 8px; }
+.ch-badge { display: flex; align-items: center; gap: 3px; padding: 2px 8px; background: rgba(139,126,200,0.06); border-radius: 12px; font-size: 0.68rem; color: var(--color-primary); font-weight: 500; }
+.scn-stats { display: flex; gap: 14px; margin-top: 8px; font-size: 0.72rem; color: var(--color-text-muted); }
 
-.scenario-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.scenario-info h3 { font-size: 0.95rem; font-weight: 600; }
-.scenario-trigger { font-size: 0.8rem; color: var(--color-text-secondary); }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; }
 
-.toggle-btn {
-  padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600;
-  border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer;
-  color: var(--color-text-muted); font-family: var(--font-body);
-}
-.toggle-btn.active { border-color: var(--color-success); color: var(--color-success); background: rgba(124, 184, 212, 0.08); }
+.log-list { display: flex; flex-direction: column; gap: 4px; }
+.log-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 0.78rem; }
+.log-row:hover { background: rgba(139,126,200,0.03); }
+.log-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.log-dot.delivered { background: var(--color-success); }
+.log-dot.opened { background: var(--color-warning); }
+.log-dot.converted { background: var(--color-primary); }
+.log-dot.failed { background: var(--color-danger); }
+.log-body { flex: 1; display: flex; flex-direction: column; }
+.log-name { font-weight: 600; }
+.log-result { font-size: 0.72rem; color: var(--color-text-muted); }
+.log-date { font-size: 0.72rem; color: var(--color-text-muted); flex-shrink: 0; }
 
-.scenario-actions { display: flex; gap: 6px; margin-top: 10px; }
-.action-badge {
-  display: flex; align-items: center; gap: 4px; padding: 3px 10px;
-  background: var(--color-primary-ultralight); border-radius: var(--radius-full);
-  font-size: 0.7rem; color: var(--color-primary); font-weight: 500;
-}
-
-.scenario-stats { display: flex; gap: 16px; margin-top: 10px; font-size: 0.75rem; color: var(--color-text-muted); }
-
-/* Logs */
-.section { margin-top: 28px; }
-.section-title { font-family: var(--font-display); font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
-
-.logs-list { display: flex; flex-direction: column; gap: 4px; }
-.log-row {
-  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
-  background: var(--color-surface); border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm); font-size: 0.8rem;
-}
-.log-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.log-status.sent { background: var(--color-accent-blue); }
-.log-status.delivered { background: var(--color-success); }
-.log-status.opened { background: var(--color-warning); }
-.log-status.converted { background: var(--color-primary); }
-.log-status.failed { background: var(--color-danger); }
-.log-status.pending { background: var(--color-text-muted); }
-
-.log-content { flex: 1; display: flex; flex-direction: column; }
-.log-scenario { font-weight: 500; }
-.log-result { font-size: 0.75rem; color: var(--color-text-muted); }
-.log-date { font-size: 0.75rem; color: var(--color-text-muted); flex-shrink: 0; }
-
-/* Empty */
-.empty-state { text-align: center; padding: 48px; color: var(--color-text-muted); }
-.empty-state h3 { font-size: 1rem; margin-top: 8px; color: var(--color-text-primary); }
-.empty-state p { font-size: 0.85rem; margin-top: 4px; }
-.empty-icon { color: var(--color-primary-light); }
-
-/* Loading */
-.loading-state { text-align: center; padding: 48px; color: var(--color-text-muted); font-size: 0.9rem; }
-.spinner { animation: spin 1s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* Modal */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex;
-  align-items: center; justify-content: center; z-index: 1000; padding: 16px;
-}
-.modal {
-  background: var(--color-surface); border-radius: var(--radius-md);
-  width: 100%; max-width: 480px; box-shadow: var(--shadow-lg);
-}
-.modal-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 20px; border-bottom: 1px solid var(--color-border-light);
-}
-.modal-header h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
-.modal-close { background: none; border: none; cursor: pointer; color: var(--color-text-muted); padding: 4px; }
-
-.modal-form { padding: 20px; }
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--color-text-secondary); }
-.form-group input, .form-group select {
-  width: 100%; padding: 10px 12px; border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font-body);
-  background: var(--color-bg); color: var(--color-text-primary);
-}
-.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--color-primary); }
-
-.channels-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.channel-checkbox {
-  display: flex; align-items: center; gap: 4px; padding: 6px 12px;
-  border: 1px solid var(--color-border-light); border-radius: var(--radius-sm);
-  font-size: 0.8rem; cursor: pointer;
-}
-.channel-checkbox input { width: 14px; height: 14px; accent-color: var(--color-primary); }
-
-.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
-.btn-cancel {
-  padding: 8px 16px; background: transparent; border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm); font-size: 0.85rem; cursor: pointer;
-  font-family: var(--font-body); color: var(--color-text-secondary);
-}
-.btn-submit {
-  padding: 8px 20px; background: var(--color-primary); color: #fff; border: none;
-  border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;
-  cursor: pointer; font-family: var(--font-body);
-}
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.modal-card { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 14px; }
+.modal-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+.fg { display: flex; flex-direction: column; gap: 4px; }
+.fl { font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); }
+.fi { padding: 9px 12px; border: 1px solid var(--color-border-light); border-radius: 10px; font-size: 0.88rem; font-family: var(--font-body); outline: none; background: white; }
+.fi:focus { border-color: var(--color-primary); }
+.ch-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.ch-check { display: flex; align-items: center; gap: 4px; padding: 5px 10px; border: 1px solid var(--color-border-light); border-radius: 8px; font-size: 0.78rem; cursor: pointer; }
+.ch-check input { accent-color: var(--color-primary); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--color-border-light); border-radius: 10px; cursor: pointer; font-family: var(--font-body); }
+.btn-submit { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
 </style>

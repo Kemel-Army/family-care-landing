@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia'
 import type { Notification } from '~/types/database'
 
+// Helper to get user ID that works in both SSR (JWT sub) and client (id)
+function _getUserId() {
+  const user = useSupabaseUser()
+  return (user.value as any)?.id ?? (user.value as any)?.sub as string | undefined
+}
+
 interface NotificationState {
   notifications: Notification[]
   unreadCount: number
@@ -22,15 +28,15 @@ export const useNotificationStore = defineStore('notifications', {
   actions: {
     async fetchNotifications() {
       const supabase = useSupabaseClient()
-      const user = useSupabaseUser()
-      if (!user.value?.id) return
+      const userId = _getUserId()
+      if (!userId) return
 
       this.loading = true
       try {
         const { data } = await supabase
           .from('notifications')
           .select('*')
-          .eq('user_id', user.value.id)
+          .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(50)
 
@@ -63,13 +69,13 @@ export const useNotificationStore = defineStore('notifications', {
 
     async markAllAsRead() {
       const supabase = useSupabaseClient()
-      const user = useSupabaseUser()
-      if (!user.value?.id) return
+      const userId = _getUserId()
+      if (!userId) return
 
       const { error } = await supabase
         .from('notifications')
         .update({ read_at: new Date().toISOString() })
-        .eq('user_id', user.value.id)
+        .eq('user_id', userId)
         .is('read_at', null)
 
       if (!error) {
@@ -82,11 +88,11 @@ export const useNotificationStore = defineStore('notifications', {
 
     // Subscribe to real-time notifications
     subscribeToNotifications() {
-      const supabase = useSupabaseClient()
-      const user = useSupabaseUser()
-      if (!user.value?.id) return
+      const userId = _getUserId()
+      if (!userId) return
 
-      const channelName = `notifications:${user.value.id}`
+      const supabase = useSupabaseClient()
+      const channelName = `notifications:${userId}`
       const channel = supabase
         .channel(channelName)
         .on(
@@ -95,7 +101,7 @@ export const useNotificationStore = defineStore('notifications', {
             event: 'INSERT',
             schema: 'public',
             table: 'notifications',
-            filter: `user_id=eq.${user.value.id}`,
+            filter: `user_id=eq.${userId}`,
           },
           (payload) => {
             this.notifications.unshift(payload.new as Notification)

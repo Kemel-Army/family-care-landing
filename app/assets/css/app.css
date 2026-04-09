@@ -1,0 +1,639 @@
+/* ================================================
+   Family Care OS — App Dashboard Design System
+   Premium glassmorphism + lavender palette
+   ================================================ */
+
+/* ================================================
+   App-specific tokens
+   ================================================ */
+:root {
+  /* Glass surfaces */
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.8);
+  --glass-blur: blur(16px);
+  --glass-border: 1px solid rgba(139, 126, 200, 0.1);
+  --glass-border-hover: 1px solid rgba(139, 126, 200, 0.2);
+
+  /* Gradient borders (for KPI / hero cards) */
+  --kpi-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --kpi-gradient-warm: linear-gradient(135deg, var(--color-accent-warm) 0%, var(--color-secondary) 100%);
+  --kpi-gradient-blue: linear-gradient(135deg, var(--color-accent-blue) 0%, var(--color-primary) 100%);
+  --kpi-gradient-success: linear-gradient(135deg, var(--color-success) 0%, var(--color-accent-blue) 100%);
+
+  /* App shadows (deeper than landing) */
+  --app-shadow-card: 0 2px 12px rgba(139, 126, 200, 0.06), 0 1px 3px rgba(139, 126, 200, 0.04);
+  --app-shadow-hover: 0 8px 24px rgba(139, 126, 200, 0.12), 0 2px 6px rgba(139, 126, 200, 0.06);
+  --app-shadow-elevated: 0 12px 40px rgba(139, 126, 200, 0.14), 0 4px 12px rgba(139, 126, 200, 0.08);
+  --app-shadow-glow-primary: 0 0 20px rgba(139, 126, 200, 0.25);
+  --app-shadow-glow-rose: 0 0 20px rgba(232, 160, 191, 0.25);
+  --app-shadow-glow-success: 0 0 20px rgba(124, 184, 212, 0.25);
+
+  /* Status colors with opacity */
+  --status-success-bg: rgba(124, 184, 212, 0.12);
+  --status-success-text: #4A9AB8;
+  --status-warning-bg: rgba(233, 196, 106, 0.15);
+  --status-warning-text: #C4930E;
+  --status-danger-bg: rgba(212, 114, 124, 0.12);
+  --status-danger-text: #B84E5A;
+  --status-info-bg: rgba(139, 126, 200, 0.1);
+  --status-info-text: var(--color-primary);
+  --status-neutral-bg: rgba(139, 126, 200, 0.06);
+  --status-neutral-text: var(--color-text-secondary);
+
+  /* App spacing */
+  --app-page-px: 32px;
+  --app-page-py: 32px;
+  --app-card-px: 24px;
+  --app-card-py: 20px;
+  --app-gap-sm: 8px;
+  --app-gap-md: 16px;
+  --app-gap-lg: 24px;
+  --app-gap-xl: 32px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --app-page-px: 16px;
+    --app-page-py: 20px;
+    --app-card-px: 16px;
+    --app-card-py: 16px;
+  }
+}
+
+/* ================================================
+   Glass card system
+   ================================================ */
+
+.app-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--app-shadow-card);
+  padding: var(--app-card-py) var(--app-card-px);
+  transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth), transform var(--transition-smooth);
+}
+
+.app-card:hover {
+  box-shadow: var(--app-shadow-hover);
+  border-color: rgba(139, 126, 200, 0.18);
+}
+
+.app-card-elevated {
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--app-shadow-elevated);
+  padding: var(--app-card-py) var(--app-card-px);
+}
+
+.app-card-interactive {
+  cursor: pointer;
+  transition: box-shadow var(--transition-smooth), border-color var(--transition-smooth), transform var(--transition-smooth);
+}
+
+.app-card-interactive:hover {
+  box-shadow: var(--app-shadow-hover);
+  border-color: rgba(139, 126, 200, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ================================================
+   KPI card with gradient border
+   ================================================ */
+
+.kpi-card {
+  position: relative;
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-md);
+  padding: var(--app-card-py) var(--app-card-px);
+  box-shadow: var(--app-shadow-card);
+  overflow: hidden;
+  transition: box-shadow var(--transition-smooth), transform var(--transition-smooth);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--kpi-gradient);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity var(--transition-smooth);
+}
+
+.kpi-card:hover {
+  box-shadow: var(--app-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.kpi-card:hover::before {
+  opacity: 1;
+}
+
+.kpi-card--warm::before { background: var(--kpi-gradient-warm); }
+.kpi-card--blue::before { background: var(--kpi-gradient-blue); }
+.kpi-card--success::before { background: var(--kpi-gradient-success); }
+
+/* ================================================
+   Status badges
+   ================================================ */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.status-badge--success { background: var(--status-success-bg); color: var(--status-success-text); }
+.status-badge--warning { background: var(--status-warning-bg); color: var(--status-warning-text); }
+.status-badge--danger { background: var(--status-danger-bg); color: var(--status-danger-text); }
+.status-badge--info { background: var(--status-info-bg); color: var(--status-info-text); }
+.status-badge--neutral { background: var(--status-neutral-bg); color: var(--status-neutral-text); }
+
+/* ================================================
+   Priority indicators (left border)
+   ================================================ */
+
+.priority-border--critical { border-left: 3px solid var(--color-danger); }
+.priority-border--high { border-left: 3px solid var(--color-warning); }
+.priority-border--medium { border-left: 3px solid var(--color-accent-blue); }
+.priority-border--low { border-left: 3px solid var(--color-border); }
+
+/* ================================================
+   Skeleton loading shimmer
+   ================================================ */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-ultralight) 25%,
+    rgba(139, 126, 200, 0.08) 50%,
+    var(--color-primary-ultralight) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.skeleton-text--short { width: 60%; }
+.skeleton-text--xs { width: 30%; }
+
+.skeleton-circle {
+  border-radius: var(--radius-full);
+}
+
+.skeleton-card {
+  height: 120px;
+}
+
+.skeleton-chart {
+  height: 200px;
+}
+
+/* ================================================
+   Page transitions for app
+   ================================================ */
+
+.app-page-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-page-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.app-page-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.app-page-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ================================================
+   List stagger animations
+   ================================================ */
+
+.stagger-list > * {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: stagger-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.stagger-list > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-list > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-list > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-list > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-list > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-list > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-list > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-list > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-list > *:nth-child(n+9) { animation-delay: 400ms; }
+
+@keyframes stagger-fade-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================================
+   Animated count-up number
+   ================================================ */
+
+.count-up-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ================================================
+   Trend indicators
+   ================================================ */
+
+.trend-up {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-success-text);
+}
+
+.trend-down {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-danger-text);
+}
+
+.trend-neutral {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* ================================================
+   Button styles for app
+   ================================================ */
+
+.app-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.app-btn--primary {
+  background: var(--gradient-cta);
+  color: white;
+  box-shadow: 0 2px 8px rgba(139, 126, 200, 0.3);
+}
+
+.app-btn--primary:hover {
+  box-shadow: 0 4px 16px rgba(139, 126, 200, 0.4);
+  transform: translateY(-1px);
+}
+
+.app-btn--secondary {
+  background: var(--color-primary-ultralight);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-light);
+}
+
+.app-btn--secondary:hover {
+  background: var(--color-primary-light);
+}
+
+.app-btn--ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.app-btn--ghost:hover {
+  background: var(--color-primary-ultralight);
+  color: var(--color-primary);
+}
+
+.app-btn--danger {
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+}
+
+.app-btn--danger:hover {
+  background: rgba(212, 114, 124, 0.2);
+}
+
+.app-btn--sm {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
+
+.app-btn--icon {
+  padding: 8px;
+  border-radius: var(--radius-sm);
+}
+
+/* ================================================
+   Tab navigation
+   ================================================ */
+
+.app-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--color-primary-ultralight);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+}
+
+.app-tab {
+  padding: 8px 16px;
+  border-radius: calc(var(--radius-sm) - 2px);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-body);
+}
+
+.app-tab:hover {
+  color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.app-tab.active {
+  background: white;
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(139, 126, 200, 0.1);
+}
+
+/* ================================================
+   Form inputs (premium)
+   ================================================ */
+
+.app-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: white;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.app-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(139, 126, 200, 0.15);
+}
+
+.app-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ================================================
+   Grid layouts
+   ================================================ */
+
+.grid-kpi {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--app-gap-md);
+}
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--app-gap-md);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--app-gap-lg);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--app-gap-md);
+}
+
+@media (max-width: 1200px) {
+  .grid-kpi { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-kpi { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-cards { grid-template-columns: 1fr; }
+}
+
+/* ================================================
+   Pulse animation (for alerts / SOS)
+   ================================================ */
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.pulse-glow {
+  position: relative;
+}
+
+.pulse-glow::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: var(--color-danger);
+  opacity: 0;
+  animation: pulse-ring 2s ease-out infinite;
+  z-index: -1;
+}
+
+/* ================================================
+   Confetti burst (achievement unlock)
+   ================================================ */
+
+.achievement-unlocked {
+  animation: achievement-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes achievement-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.achievement-locked {
+  filter: grayscale(1) opacity(0.45);
+  transition: filter var(--transition-smooth);
+}
+
+.achievement-locked:hover {
+  filter: grayscale(0.5) opacity(0.7);
+}
+
+/* ================================================
+   Streak fire animation
+   ================================================ */
+
+@keyframes fire-flicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); }
+  25% { transform: scale(1.05) rotate(1deg); }
+  50% { transform: scale(0.95) rotate(-1deg); }
+  75% { transform: scale(1.03) rotate(2deg); }
+}
+
+.streak-fire {
+  display: inline-block;
+  animation: fire-flicker 0.8s ease-in-out infinite;
+}
+
+/* ================================================
+   Empty state illustration
+   ================================================ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  background: var(--gradient-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: var(--color-primary);
+}
+
+.empty-state-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.empty-state-description {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  max-width: 360px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+/* ================================================
+   Notification dot
+   ================================================ */
+
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+  animation: notif-pulse 2s ease-in-out infinite;
+}
+
+@keyframes notif-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* ================================================
+   Reduced motion for app animations
+   ================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-list > * {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .pulse-glow::before {
+    animation: none;
+  }
+  .streak-fire {
+    animation: none;
+  }
+  .notif-dot {
+    animation: none;
+  }
+  .skeleton {
+    animation: none;
+  }
+  .achievement-unlocked {
+    animation: none;
+  }
+  .app-page-enter-active,
+  .app-page-leave-active {
+    transition: none;
+  }
+}

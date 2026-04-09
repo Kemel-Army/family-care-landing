@@ -1,85 +1,74 @@
 <template>
-  <div class="training-page">
-    <header class="page-header">
-      <h1 class="page-title">Обучение персонала</h1>
-      <button class="btn-create" @click="showCreate = true">
-        <Icon name="lucide:plus" size="16" /> Добавить модуль
-      </button>
-    </header>
+  <div class="trn-page">
+    <div class="trn-hero">
+      <NuxtLink to="/admin" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Назад</NuxtLink>
+      <div class="hero-row">
+        <div>
+          <h1 class="hero-title">Обучение персонала</h1>
+          <p class="hero-sub">Модули, прогресс и сертификация</p>
+        </div>
+        <button class="btn-create" @click="showCreate = true"><Icon name="lucide:plus" size="14" /> Добавить модуль</button>
+      </div>
+    </div>
 
     <!-- Progress overview -->
-    <div class="progress-overview">
-      <div class="progress-card">
+    <div class="card">
+      <div class="prog-row">
         <span class="prog-label">Общий прогресс</span>
-        <div class="prog-bar"><div class="prog-fill" :style="{ width: `${overallProgress}%` }" /></div>
-        <span class="prog-pct">{{ overallProgress }}%</span>
+        <div class="prog-bar"><div class="prog-fill" :style="{ width: '73%' }" /></div>
+        <span class="prog-pct">73%</span>
       </div>
       <div class="stat-row">
-        <div class="stat-item"><strong>{{ stats.totalModules }}</strong> модулей</div>
-        <div class="stat-item"><strong>{{ stats.completedByStaff }}</strong> пройдено</div>
-        <div class="stat-item"><strong>{{ stats.certifiedStaff }}</strong> сертифицировано</div>
+        <div class="stat"><span class="stat-num">6</span><span class="stat-lbl">модулей</span></div>
+        <div class="stat"><span class="stat-num">38</span><span class="stat-lbl">пройдено</span></div>
+        <div class="stat"><span class="stat-num">11</span><span class="stat-lbl">сертифицировано</span></div>
       </div>
     </div>
 
-    <!-- Modules list -->
-    <div class="modules-list">
-      <div v-for="mod in modules" :key="mod.id" class="module-card">
-        <div class="mod-icon" :class="mod.type">
-          <Icon :name="modIcon(mod.type)" size="20" />
-        </div>
-        <div class="mod-content">
-          <h3>{{ mod.title }}</h3>
-          <p>{{ mod.description }}</p>
+    <!-- Modules -->
+    <div class="mod-list">
+      <div v-for="m in modules" :key="m.id" class="mod-card">
+        <div class="mod-icon" :class="m.type"><Icon :name="modIcon(m.type)" size="20" /></div>
+        <div class="mod-body">
+          <h3>{{ m.title }}</h3>
+          <p>{{ m.desc }}</p>
           <div class="mod-meta">
-            <span v-if="mod.duration_minutes">{{ mod.duration_minutes }} мин</span>
-            <span>{{ mod.completed_count }}/{{ mod.total_staff }} прошли</span>
+            <span>{{ m.minutes }} мин</span>
+            <span>{{ m.done }}/{{ m.total }} прошли</span>
           </div>
         </div>
-        <div class="mod-progress">
-          <div class="mini-ring">
-            <svg viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="var(--color-border-light)" stroke-width="3" />
-              <circle cx="18" cy="18" r="15" fill="none" stroke="var(--color-primary)" stroke-width="3"
-                stroke-linecap="round" :stroke-dasharray="`${mod.progress * 0.94} 94`"
-                transform="rotate(-90 18 18)" />
-            </svg>
-            <span class="mini-pct">{{ mod.progress }}%</span>
-          </div>
+        <div class="mod-ring">
+          <svg viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(139,126,200,0.1)" stroke-width="3" />
+            <circle cx="18" cy="18" r="15" fill="none" stroke="var(--color-primary)" stroke-width="3"
+              stroke-linecap="round" :stroke-dasharray="`${m.pct * 0.94} 94`" transform="rotate(-90 18 18)" />
+          </svg>
+          <span class="ring-pct">{{ m.pct }}%</span>
         </div>
       </div>
     </div>
 
-    <!-- Create Modal -->
     <Teleport to="body">
       <div v-if="showCreate" class="modal-overlay" @click.self="showCreate = false">
         <div class="modal-card">
-          <h2>Новый модуль обучения</h2>
-          <div class="form-group">
-            <label class="form-label">Название</label>
-            <input v-model="form.title" type="text" class="form-input" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Описание</label>
-            <textarea v-model="form.description" rows="2" class="form-textarea" />
-          </div>
+          <h2 class="modal-title">Новый модуль</h2>
+          <div class="fg"><label class="fl">Название</label><input v-model="form.title" class="fi" /></div>
+          <div class="fg"><label class="fl">Описание</label><textarea v-model="form.desc" rows="2" class="fi" /></div>
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Тип</label>
-              <select v-model="form.type" class="form-input">
+            <div class="fg">
+              <label class="fl">Тип</label>
+              <select v-model="form.type" class="fi">
                 <option value="video">Видео</option>
                 <option value="article">Статья</option>
                 <option value="quiz">Тест</option>
                 <option value="checklist">Чеклист</option>
               </select>
             </div>
-            <div class="form-group">
-              <label class="form-label">Длительность (мин)</label>
-              <input v-model.number="form.duration_minutes" type="number" class="form-input" />
-            </div>
+            <div class="fg"><label class="fl">Длительность (мин)</label><input v-model.number="form.minutes" type="number" class="fi" /></div>
           </div>
           <div class="modal-actions">
             <button class="btn-cancel" @click="showCreate = false">Отмена</button>
-            <button class="btn-submit" @click="createModule">Создать</button>
+            <button class="btn-submit" @click="showCreate = false">Создать</button>
           </div>
         </div>
       </div>
@@ -90,123 +79,71 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
-
 const showCreate = ref(false)
-const overallProgress = ref(0)
-const stats = reactive({ totalModules: 0, completedByStaff: 0, certifiedStaff: 0 })
-const modules = ref<Array<{
-  id: string; title: string; description: string; type: string
-  duration_minutes: number; completed_count: number; total_staff: number; progress: number
-}>>([])
+const form = reactive({ title: '', desc: '', type: 'video', minutes: 30 })
 
-const form = reactive({ title: '', description: '', type: 'video', duration_minutes: 30 })
+const modIcon = (t: string) => ({ video: 'lucide:video', article: 'lucide:file-text', quiz: 'lucide:help-circle', checklist: 'lucide:check-square' }[t] || 'lucide:book-open')
 
-function modIcon(type: string) {
-  const map: Record<string, string> = { video: 'lucide:video', article: 'lucide:file-text', quiz: 'lucide:help-circle', checklist: 'lucide:check-square' }
-  return map[type] || 'lucide:book-open'
-}
-
-async function createModule() {
-  if (!authStore.clinicId || !form.title) return
-  const { data } = await supabase.from('training_modules').insert({
-    clinic_id: authStore.clinicId,
-    title: form.title,
-    description: form.description,
-    type: form.type,
-    duration_minutes: form.duration_minutes,
-  }).select().single()
-
-  if (data) {
-    modules.value.unshift({
-      ...(data as Record<string, unknown>),
-      id: String((data as Record<string, string>).id),
-      title: form.title,
-      description: form.description,
-      type: form.type,
-      duration_minutes: form.duration_minutes,
-      completed_count: 0,
-      total_staff: 0,
-      progress: 0,
-    })
-    stats.totalModules++
-  }
-  showCreate.value = false
-  form.title = ''
-  form.description = ''
-}
-
-onMounted(async () => {
-  if (!authStore.clinicId) return
-
-  const { data } = await supabase
-    .from('training_modules')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-    .order('created_at', { ascending: false })
-
-  modules.value = (data || []).map((m: Record<string, unknown>) => ({
-    id: String(m.id),
-    title: String(m.title),
-    description: String(m.description || ''),
-    type: String(m.type),
-    duration_minutes: Number(m.duration_minutes) || 0,
-    completed_count: Number(m.completed_count) || 0,
-    total_staff: Number(m.total_staff) || 0,
-    progress: Number(m.completion_rate) || 0,
-  }))
-
-  stats.totalModules = modules.value.length
-  overallProgress.value = modules.value.length
-    ? Math.round(modules.value.reduce((s, m) => s + m.progress, 0) / modules.value.length)
-    : 0
-})
+const modules = [
+  { id: 1, title: 'Протокол ведения беременности', desc: 'Стандартный маршрут наблюдения по триместрам', type: 'video', minutes: 45, done: 12, total: 14, pct: 86 },
+  { id: 2, title: 'Работа с AI-ассистентом', desc: 'Как использовать AI-рекомендации в карточке пациента', type: 'article', minutes: 20, done: 10, total: 14, pct: 71 },
+  { id: 3, title: 'Тест по GDM-скринингу', desc: 'Проверка знаний по протоколу гестационного диабета', type: 'quiz', minutes: 15, done: 8, total: 14, pct: 57 },
+  { id: 4, title: 'Координация маршрута', desc: 'Чеклист для координатора по каждому этапу', type: 'checklist', minutes: 30, done: 14, total: 14, pct: 100 },
+  { id: 5, title: 'Телемедицина: инструкция', desc: 'Как проводить видео-консультации через платформу', type: 'video', minutes: 25, done: 9, total: 14, pct: 64 },
+  { id: 6, title: 'NPS и работа с отзывами', desc: 'Как собирать обратную связь от семей', type: 'article', minutes: 15, done: 11, total: 14, pct: 79 },
+]
 </script>
 
 <style scoped>
-.training-page { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
-.btn-create { display: flex; align-items: center; gap: 6px; padding: 8px 18px; background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: var(--font-body); }
+.trn-page { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-.progress-overview { margin-bottom: 24px; padding: 20px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); }
-.progress-card { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.prog-label { font-size: 0.85rem; font-weight: 600; width: 120px; }
-.prog-bar { flex: 1; height: 10px; background: var(--color-border-light); border-radius: 5px; overflow: hidden; }
-.prog-fill { height: 100%; background: var(--gradient-cta); border-radius: 5px; }
-.prog-pct { font-size: 0.85rem; font-weight: 700; font-family: var(--font-mono); width: 40px; text-align: right; }
+.trn-hero {
+  background: linear-gradient(135deg, rgba(242,196,160,0.08), rgba(232,160,191,0.06));
+  border: 1px solid rgba(242,196,160,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.hero-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
+.btn-create { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--gradient-cta); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 0.82rem; cursor: pointer; font-family: var(--font-body); }
 
-.stat-row { display: flex; gap: 20px; }
-.stat-item { font-size: 0.85rem; }
-.stat-item strong { font-family: var(--font-mono); display: block; font-size: 1rem; }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.prog-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.prog-label { font-size: 0.82rem; font-weight: 600; width: 120px; flex-shrink: 0; }
+.prog-bar { flex: 1; height: 8px; background: rgba(139,126,200,0.08); border-radius: 4px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--gradient-cta); border-radius: 4px; }
+.prog-pct { font-size: 0.82rem; font-weight: 700; font-family: var(--font-mono); width: 36px; text-align: right; }
 
-.modules-list { display: flex; flex-direction: column; gap: 10px; }
-.module-card { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); }
-.mod-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--color-primary-ultralight); color: var(--color-primary); }
-.mod-icon.quiz { background: rgba(233, 196, 106, 0.15); color: var(--color-warning); }
+.stat-row { display: flex; gap: 24px; }
+.stat { display: flex; flex-direction: column; }
+.stat-num { font-size: 1.1rem; font-weight: 700; font-family: var(--font-mono); }
+.stat-lbl { font-size: 0.72rem; color: var(--color-text-muted); }
 
-.mod-content { flex: 1; }
-.mod-content h3 { font-size: 0.95rem; font-weight: 600; }
-.mod-content p { font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 2px; }
-.mod-meta { display: flex; gap: 12px; margin-top: 4px; font-size: 0.75rem; color: var(--color-text-muted); }
+.mod-list { display: flex; flex-direction: column; gap: 10px; }
+.mod-card { display: flex; align-items: center; gap: 14px; padding: 16px; background: white; border: 1px solid var(--color-border-light); border-radius: 14px; }
+.mod-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: rgba(139,126,200,0.08); color: var(--color-primary); }
+.mod-icon.quiz { background: rgba(233,196,106,0.12); color: var(--color-warning); }
+.mod-icon.checklist { background: rgba(124,184,212,0.12); color: var(--color-success); }
 
-.mod-progress { flex-shrink: 0; }
-.mini-ring { position: relative; width: 48px; height: 48px; }
-.mini-ring svg { width: 100%; height: 100%; }
-.mini-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; font-family: var(--font-mono); }
+.mod-body { flex: 1; }
+.mod-body h3 { font-size: 0.92rem; font-weight: 700; }
+.mod-body p { font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px; }
+.mod-meta { display: flex; gap: 12px; margin-top: 4px; font-size: 0.72rem; color: var(--color-text-muted); }
 
-/* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-.modal-card { background: var(--color-surface); border-radius: var(--radius-md); padding: 24px; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 14px; }
-.modal-card h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
+.mod-ring { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
+.mod-ring svg { width: 100%; height: 100%; }
+.ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; font-family: var(--font-mono); }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.modal-card { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 14px; }
+.modal-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+.fg { display: flex; flex-direction: column; gap: 4px; }
 .form-row { display: flex; gap: 12px; }
-.form-row .form-group { flex: 1; }
-.form-label { font-size: 0.85rem; font-weight: 600; }
-.form-input { padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font-body); outline: none; }
-.form-textarea { padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font-body); outline: none; resize: vertical; }
+.form-row .fg { flex: 1; }
+.fl { font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); }
+.fi { padding: 9px 12px; border: 1px solid var(--color-border-light); border-radius: 10px; font-size: 0.88rem; font-family: var(--font-body); outline: none; resize: vertical; background: white; }
+.fi:focus { border-color: var(--color-primary); }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; font-family: var(--font-body); }
-.btn-submit { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: var(--font-body); }
+.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--color-border-light); border-radius: 10px; cursor: pointer; font-family: var(--font-body); }
+.btn-submit { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
 </style>

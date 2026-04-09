@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { User, Family, MotherProfile, ChildProfile, Consent, UserRole } from '~/types/database'
-import { ROLE_HOME_MAP } from '~/utils/constants'
+import { ROLE_HOME_MAP, DOCTOR_ROLES } from '~/utils/constants'
 
 interface AuthState {
   profile: User | null
@@ -8,6 +8,7 @@ interface AuthState {
   motherProfile: MotherProfile | null
   children: ChildProfile[]
   consents: Consent[]
+  doctorId: string | null
   loading: boolean
   initialized: boolean
 }
@@ -19,6 +20,7 @@ export const useAuthStore = defineStore('auth', {
     motherProfile: null,
     children: [],
     consents: [],
+    doctorId: null,
     loading: false,
     initialized: false,
   }),
@@ -46,13 +48,16 @@ export const useAuthStore = defineStore('auth', {
       try {
         const supabase = useSupabaseClient()
         const user = useSupabaseUser()
-        if (!user.value?.id) return
+        // On SSR, useSupabaseUser() returns decoded JWT payload (sub, not id)
+        // On client, it returns the full User object (id)
+        const userId = (user.value as any)?.id ?? (user.value as any)?.sub
+        if (!userId) return
 
         // Fetch user profile from public.users
         const { data: profile, error: profileError } = await supabase
           .from('users')
           .select('*')
-          .eq('id', user.value.id)
+          .eq('id', userId)
           .single()
 
         if (profileError) {
@@ -63,12 +68,22 @@ export const useAuthStore = defineStore('auth', {
           this.profile = profile as User
         }
 
+        // Fetch doctor record if doctor/nurse role
+        if (this.profile && DOCTOR_ROLES.includes(this.profile.role)) {
+          const { data: doctorRow } = await supabase
+            .from('doctors')
+            .select('id')
+            .eq('user_id', userId)
+            .single()
+          if (doctorRow) this.doctorId = doctorRow.id
+        }
+
         // Fetch family if family role
         if (this.profile && ['mother', 'father'].includes(this.profile.role)) {
           const { data: family, error: familyError } = await supabase
             .from('families')
             .select('*')
-            .or(`primary_parent_id.eq.${user.value.id},secondary_parent_id.eq.${user.value.id}`)
+            .or(`primary_parent_id.eq.${userId},secondary_parent_id.eq.${userId}`)
             .eq('status', 'active')
             .single()
 
@@ -101,7 +116,7 @@ export const useAuthStore = defineStore('auth', {
         const { data: consents } = await supabase
           .from('consents')
           .select('*')
-          .eq('user_id', user.value.id)
+          .eq('user_id', userId)
         if (consents) this.consents = consents as Consent[]
 
         this.initialized = true
@@ -132,11 +147,12 @@ export const useAuthStore = defineStore('auth', {
       const supabase = useSupabaseClient()
       const user = useSupabaseUser()
       if (!user.value) return
+      const userId = (user.value as any).id ?? (user.value as any).sub
 
       const { data, error } = await supabase
         .from('consents')
         .upsert({
-          user_id: user.value.id,
+          user_id: userId,
           type,
           granted,
           granted_at: granted ? new Date().toISOString() : null,

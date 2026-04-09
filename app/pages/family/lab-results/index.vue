@@ -74,6 +74,7 @@ definePageMeta({ layout: 'app' })
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const userId = useSupabaseUserId()
 
 interface LabValue { name: string; value: string; unit: string; reference: string; flag: string }
 interface LabResult {
@@ -107,7 +108,7 @@ onMounted(async () => {
   const { data } = await supabase
     .from('lab_results')
     .select('*')
-    .eq('user_id', user.value.id)
+    .eq('user_id', userId.value)
     .order('created_at', { ascending: false })
 
   results.value = (data || []).map((r: Record<string, unknown>) => {

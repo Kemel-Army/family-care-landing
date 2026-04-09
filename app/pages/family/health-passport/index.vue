@@ -1,240 +1,164 @@
 <template>
-  <div class="health-passport">
-    <header class="page-header">
-      <h1 class="page-title">Паспорт здоровья</h1>
-      <button v-if="selectedChildId" class="btn-export" @click="exportPassport">
-        <Icon name="lucide:download" size="14" /> Экспорт
+  <div class="hp-page">
+    <!-- Hero -->
+    <div class="hp-hero">
+      <div>
+        <h1 class="hp-hero-title">Паспорт здоровья</h1>
+        <p class="hp-hero-sub">{{ mock.children[0].first_name }} · {{ entries.length }} записей</p>
+      </div>
+      <button class="hp-hero-btn" @click="showAdd = !showAdd">
+        <Icon :name="showAdd ? 'lucide:x' : 'lucide:plus'" size="15" />
       </button>
-    </header>
-
-    <!-- Child selector -->
-    <div v-if="authStore.children.length > 1" class="child-tabs">
-      <button
-        v-for="child in authStore.children"
-        :key="child.id"
-        class="child-tab"
-        :class="{ active: selectedChildId === child.id }"
-        @click="selectChild(child.id)"
-      >{{ child.name }}</button>
     </div>
 
-    <!-- Summary cards -->
-    <div class="summary-grid">
-      <div class="summary-card">
-        <h3>Группа крови</h3>
-        <span class="summary-value">{{ passport.blood_type || '—' }}</span>
-      </div>
-      <div class="summary-card">
-        <h3>Аллергии</h3>
-        <span class="summary-value">{{ passport.allergies?.length || 0 }}</span>
-      </div>
-      <div class="summary-card">
-        <h3>Хронические</h3>
-        <span class="summary-value">{{ passport.chronic?.length || 0 }}</span>
-      </div>
+    <!-- Summary -->
+    <div class="hp-strip">
+      <div class="hp-chip"><Icon name="lucide:droplet" size="14" /> {{ passport.blood_type }}</div>
+      <div class="hp-chip"><Icon name="lucide:alert-triangle" size="14" /> {{ passport.allergies }} аллергий</div>
+      <div class="hp-chip"><Icon name="lucide:activity" size="14" /> {{ passport.chronic }} хрон.</div>
     </div>
 
-    <!-- Timeline entries -->
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title">Записи</h2>
-        <button class="btn-add" @click="showAdd = true">
-          <Icon name="lucide:plus" size="14" /> Добавить
-        </button>
-      </div>
-
-      <div v-if="entries.length" class="entries-list">
-        <div v-for="entry in entries" :key="entry.id" class="entry-card">
-          <div class="entry-type-icon" :class="entry.entry_type">
-            <Icon :name="entryIcon(entry.entry_type)" size="16" />
-          </div>
-          <div class="entry-content">
-            <h3>{{ entry.title }}</h3>
-            <p v-if="entry.description">{{ entry.description }}</p>
-            <span class="entry-date">{{ formatDate(entry.date) }}</span>
-          </div>
+    <!-- Add form -->
+    <Transition name="slide">
+      <div v-if="showAdd" class="card hp-form">
+        <h3 class="hp-form-title">Новая запись</h3>
+        <div class="hp-form-grid">
+          <select v-model="newEntry.type" class="hp-input">
+            <option value="diagnosis">Диагноз</option>
+            <option value="allergy">Аллергия</option>
+            <option value="surgery">Операция</option>
+            <option value="note">Заметка</option>
+          </select>
+          <input v-model="newEntry.title" placeholder="Название" class="hp-input" />
+          <input v-model="newEntry.date" type="date" class="hp-input" />
+        </div>
+        <textarea v-model="newEntry.description" placeholder="Описание..." rows="2" class="hp-input hp-textarea" />
+        <div class="hp-form-actions">
+          <button class="hp-btn-cancel" @click="showAdd = false">Отмена</button>
+          <button class="hp-btn-save" @click="addEntry">Сохранить</button>
         </div>
       </div>
-      <p v-else class="empty-hint">Паспорт здоровья пуст</p>
-    </section>
+    </Transition>
 
-    <!-- Add Entry Modal -->
-    <Teleport to="body">
-      <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-        <div class="modal-card">
-          <h2 class="modal-title">Новая запись</h2>
-          <div class="form-group">
-            <label class="form-label">Тип</label>
-            <select v-model="newEntry.entry_type" class="form-input">
-              <option value="diagnosis">Диагноз</option>
-              <option value="allergy">Аллергия</option>
-              <option value="surgery">Операция</option>
-              <option value="hospitalization">Госпитализация</option>
-              <option value="note">Заметка</option>
-            </select>
+    <!-- Entries -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:file-text" size="16" /> Медицинские записи</h2>
+      </div>
+      <div v-if="entries.length" class="hp-list">
+        <div v-for="e in entries" :key="e.id" class="hp-row">
+          <div class="hp-icon" :class="`hp-icon--${e.type}`">
+            <Icon :name="entryIcon(e.type)" size="14" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Название</label>
-            <input v-model="newEntry.title" type="text" class="form-input" />
+          <div class="hp-info">
+            <span class="hp-name">{{ e.title }}</span>
+            <span v-if="e.description" class="hp-desc">{{ e.description }}</span>
+            <span class="hp-meta">{{ e.date }}</span>
           </div>
-          <div class="form-group">
-            <label class="form-label">Описание</label>
-            <textarea v-model="newEntry.description" rows="2" class="form-textarea" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Дата</label>
-            <input v-model="newEntry.date" type="date" class="form-input" />
-          </div>
-          <div class="modal-actions">
-            <button class="btn-cancel" @click="showAdd = false">Отмена</button>
-            <button class="btn-submit" @click="addEntry">Сохранить</button>
-          </div>
+          <span class="hp-type-badge">{{ typeLabel(e.type) }}</span>
         </div>
       </div>
-    </Teleport>
+      <div v-else class="hp-empty">
+        <Icon name="lucide:file-text" size="32" style="color: var(--color-text-muted); opacity: 0.4" />
+        <p>Паспорт здоровья пока пуст</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import dayjs from 'dayjs'
-import { formatDate } from '~/utils/formatters'
-import type { HealthPassportEntry } from '~/types/database'
-
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
-
-const selectedChildId = ref('')
-const entries = ref<HealthPassportEntry[]>([])
+const mock = useMockData()
 const showAdd = ref(false)
-const passport = reactive({ blood_type: '', allergies: [] as string[], chronic: [] as string[] })
 
-const newEntry = reactive({
-  entry_type: 'diagnosis' as string,
-  title: '',
-  description: '',
-  date: dayjs().format('YYYY-MM-DD'),
-})
+const passport = reactive({ blood_type: mock.children[0].blood_type, allergies: 1, chronic: 0 })
+
+const entries = ref([
+  { id: '1', type: 'allergy', title: 'Пищевая аллергия — яичный белок', description: 'Сыпь, отёк. Рекомендована элиминационная диета.', date: '2026-03-10' },
+  { id: '2', type: 'diagnosis', title: 'Физиологическая желтуха', description: 'Разрешилась к 14 дню.', date: '2026-01-20' },
+  { id: '3', type: 'note', title: 'Осмотр невролога', description: 'Норма. Физическое развитие по возрасту.', date: '2026-02-15' },
+])
+
+const newEntry = reactive({ type: 'diagnosis', title: '', description: '', date: new Date().toISOString().slice(0, 10) })
+
+function addEntry() {
+  if (!newEntry.title) return
+  entries.value.unshift({ id: String(Date.now()), type: newEntry.type, title: newEntry.title, description: newEntry.description, date: newEntry.date })
+  newEntry.title = ''; newEntry.description = ''
+  showAdd.value = false
+}
 
 function entryIcon(type: string) {
-  const map: Record<string, string> = {
-    diagnosis: 'lucide:stethoscope',
-    allergy: 'lucide:alert-triangle',
-    surgery: 'lucide:scissors',
-    hospitalization: 'lucide:building',
-    note: 'lucide:file-text',
-  }
-  return map[type] || 'lucide:file-text'
+  const m: Record<string, string> = { diagnosis: 'lucide:stethoscope', allergy: 'lucide:alert-triangle', surgery: 'lucide:scissors', note: 'lucide:file-text' }
+  return m[type] || 'lucide:file-text'
 }
 
-async function selectChild(childId: string) {
-  selectedChildId.value = childId
-  await fetchData(childId)
+function typeLabel(type: string) {
+  const m: Record<string, string> = { diagnosis: 'Диагноз', allergy: 'Аллергия', surgery: 'Операция', note: 'Заметка' }
+  return m[type] || type
 }
-
-async function fetchData(childId: string) {
-  const { data } = await supabase
-    .from('health_passport_entries')
-    .select('*')
-    .eq('child_id', childId)
-    .order('date', { ascending: false })
-
-  entries.value = (data as HealthPassportEntry[]) || []
-
-  // Load blood_type from child_profiles
-  const { data: childData } = await supabase
-    .from('child_profiles')
-    .select('blood_type')
-    .eq('id', childId)
-    .single()
-
-  passport.blood_type = childData?.blood_type || ''
-
-  // Derive summary
-  passport.allergies = entries.value
-    .filter(e => e.entry_type === 'allergy')
-    .map(e => e.title)
-  passport.chronic = entries.value
-    .filter(e => e.entry_type === 'diagnosis')
-    .map(e => e.title)
-}
-
-async function addEntry() {
-  if (!selectedChildId.value || !newEntry.title) return
-
-  const { data } = await supabase.from('health_passport_entries').insert({
-    child_id: selectedChildId.value,
-    entry_type: newEntry.entry_type,
-    title: newEntry.title,
-    description: newEntry.description || null,
-    date: newEntry.date,
-  }).select().single()
-
-  if (data) {
-    entries.value.unshift(data as HealthPassportEntry)
-    showAdd.value = false
-    newEntry.title = ''
-    newEntry.description = ''
-  }
-}
-
-function exportPassport() {
-  if (!selectedChildId.value) return
-  window.open(`/api/pdf/health-passport?child_id=${selectedChildId.value}`, '_blank')
-}
-
-onMounted(() => {
-  if (authStore.children.length > 0) {
-    selectedChildId.value = authStore.children[0].id
-    fetchData(authStore.children[0].id)
-  }
-})
 </script>
 
 <style scoped>
-.health-passport { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
-.page-header { margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
-.btn-export { display: flex; align-items: center; gap: 4px; padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-primary); border-radius: var(--radius-sm); color: var(--color-primary); font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
-.btn-export:hover { background: var(--color-primary-ultralight); }
+.hp-page { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
 
-.child-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.child-tab { padding: 8px 16px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-surface); font-size: 0.85rem; cursor: pointer; font-family: var(--font-body); }
-.child-tab.active { border-color: var(--color-primary); background: var(--color-primary-ultralight); color: var(--color-primary); font-weight: 600; }
+.hp-hero {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, rgba(232,160,191,0.08), rgba(139,126,200,0.06));
+  border: 1px solid rgba(232,160,191,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.hp-hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.hp-hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
+.hp-hero-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--color-border-light);
+  background: white; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
 
-.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-.summary-card { padding: 16px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); text-align: center; }
-.summary-card h3 { font-size: 0.75rem; color: var(--color-text-secondary); margin-bottom: 4px; }
-.summary-value { font-size: 1.2rem; font-weight: 700; }
+.hp-strip { display: flex; gap: 10px; flex-wrap: wrap; }
+.hp-chip {
+  display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+  background: white; border: 1px solid var(--color-border-light); border-radius: 10px;
+  font-size: 0.78rem; color: var(--color-text-secondary); font-weight: 500;
+}
 
-.section { margin-bottom: 24px; }
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.section-title { font-size: 1rem; font-weight: 600; }
-.btn-add { display: flex; align-items: center; gap: 4px; padding: 6px 14px; background: var(--color-primary-ultralight); color: var(--color-primary); border: 1px solid var(--color-primary); border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.card-header { margin-bottom: 16px; }
+.card-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-.entries-list { display: flex; flex-direction: column; gap: 8px; }
-.entry-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); }
-.entry-type-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--color-primary-ultralight); color: var(--color-primary); }
-.entry-type-icon.allergy { background: rgba(233, 196, 106, 0.15); color: var(--color-warning); }
-.entry-type-icon.surgery { background: rgba(231, 111, 81, 0.15); color: var(--color-danger); }
-.entry-content { flex: 1; }
-.entry-content h3 { font-size: 0.9rem; font-weight: 600; }
-.entry-content p { font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 2px; }
-.entry-date { font-size: 0.75rem; color: var(--color-text-muted); }
+.hp-form { display: flex; flex-direction: column; gap: 10px; }
+.hp-form-title { font-size: 0.9rem; font-weight: 600; }
+.hp-form-grid { display: flex; gap: 8px; }
+.hp-input {
+  flex: 1; padding: 10px 12px; border: 1px solid var(--color-border-light); border-radius: 10px;
+  font-size: 0.82rem; font-family: var(--font-body); outline: none;
+}
+.hp-input:focus { border-color: var(--color-primary); }
+.hp-textarea { resize: none; }
+.hp-form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.hp-btn-cancel { padding: 8px 16px; border: 1px solid var(--color-border-light); background: white; border-radius: 10px; cursor: pointer; font-family: var(--font-body); font-size: 0.82rem; }
+.hp-btn-save { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: var(--font-body); font-size: 0.82rem; }
 
-.empty-hint { font-size: 0.85rem; color: var(--color-text-muted); text-align: center; padding: 24px; }
+.hp-list { display: flex; flex-direction: column; gap: 4px; }
+.hp-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 10px; transition: background 0.15s; }
+.hp-row:hover { background: rgba(139,126,200,0.04); }
 
-/* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-.modal-card { background: var(--color-surface); border-radius: var(--radius-md); padding: 24px; width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; }
-.modal-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 0.85rem; font-weight: 600; }
-.form-input { padding: 10px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font-body); outline: none; }
-.form-input:focus { border-color: var(--color-primary); }
-.form-textarea { padding: 10px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font-body); outline: none; resize: vertical; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; font-family: var(--font-body); }
-.btn-submit { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: var(--font-body); }
+.hp-icon {
+  width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: rgba(139,126,200,0.08); color: var(--color-primary);
+}
+.hp-icon--allergy { background: rgba(233,196,106,0.12); color: var(--color-warning); }
+.hp-icon--surgery { background: rgba(212,114,124,0.1); color: var(--color-danger); }
+
+.hp-info { flex: 1; min-width: 0; }
+.hp-name { display: block; font-size: 0.85rem; font-weight: 500; }
+.hp-desc { display: block; font-size: 0.75rem; color: var(--color-text-muted); margin-top: 2px; }
+.hp-meta { display: block; font-size: 0.68rem; color: var(--color-text-muted); margin-top: 2px; }
+.hp-type-badge { font-size: 0.62rem; font-weight: 600; padding: 3px 8px; border-radius: var(--radius-full); background: rgba(139,126,200,0.06); color: var(--color-text-muted); flex-shrink: 0; margin-top: 2px; }
+
+.hp-empty { text-align: center; padding: 32px 16px; color: var(--color-text-muted); font-size: 0.85rem; }
+.hp-empty p { margin-top: 8px; }
+
+.slide-enter-active, .slide-leave-active { transition: all 0.25s ease; }
+.slide-enter-from, .slide-leave-to { opacity: 0; transform: translateY(-8px); }
 </style>

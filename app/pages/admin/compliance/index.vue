@@ -1,165 +1,124 @@
 <template>
-  <div class="compliance-page">
-    <header class="page-header">
-      <h1 class="page-title">Соблюдение протоколов</h1>
-    </header>
+  <div class="comp-page">
+    <div class="comp-hero">
+      <NuxtLink to="/admin" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Назад</NuxtLink>
+      <h1 class="hero-title">Соблюдение протоколов</h1>
+      <p class="hero-sub">Мониторинг качества медицинского обслуживания</p>
+    </div>
 
-    <!-- Overall compliance -->
-    <div class="compliance-overview">
-      <div class="compliance-ring">
+    <!-- Overview -->
+    <div class="overview-row">
+      <div class="ring-card">
         <svg viewBox="0 0 120 120" class="ring-svg">
           <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-border-light)" stroke-width="8" />
-          <circle cx="60" cy="60" r="52" fill="none" :stroke="complianceColor" stroke-width="8"
-            stroke-linecap="round" :stroke-dasharray="`${compliancePct * 3.27} 327`"
+          <circle cx="60" cy="60" r="52" fill="none" :stroke="ringColor" stroke-width="8"
+            stroke-linecap="round" :stroke-dasharray="`${mock.complianceOverall * 3.27} 327`"
             transform="rotate(-90 60 60)" />
         </svg>
         <div class="ring-label">
-          <span class="ring-value">{{ compliancePct }}%</span>
+          <span class="ring-value">{{ mock.complianceOverall }}%</span>
           <span class="ring-text">выполнение</span>
         </div>
       </div>
-      <div class="compliance-summary">
-        <div class="summary-item"><strong>{{ stats.completed }}</strong> выполнено</div>
-        <div class="summary-item"><strong>{{ stats.overdue }}</strong> просрочено</div>
-        <div class="summary-item"><strong>{{ stats.upcoming }}</strong> предстоит</div>
+      <div class="summary-cards">
+        <div class="sc"><span class="sc-val">68</span><span class="sc-lbl">Выполнено</span></div>
+        <div class="sc warn"><span class="sc-val">7</span><span class="sc-lbl">Просрочено</span></div>
+        <div class="sc"><span class="sc-val">14</span><span class="sc-lbl">Предстоит</span></div>
       </div>
     </div>
 
     <!-- Gaps -->
-    <section class="section">
-      <h2 class="section-title">Выявленные пробелы</h2>
-      <div v-if="gaps.length" class="gaps-list">
-        <div v-for="gap in gaps" :key="gap.id" class="gap-card" :class="gap.severity">
-          <div class="gap-indicator" />
-          <div class="gap-content">
-            <h3>{{ gap.title }}</h3>
-            <p>{{ gap.description }}</p>
-            <span class="gap-count">{{ gap.affected_families }} семей</span>
+    <div class="card">
+      <h2 class="card-title"><Icon name="lucide:alert-circle" size="16" /> Выявленные пробелы</h2>
+      <div class="gaps-list">
+        <div v-for="(g, i) in gaps" :key="i" class="gap-row">
+          <div class="gap-dot" :class="g.severity" />
+          <div class="gap-info">
+            <span class="gap-name">{{ g.title }}</span>
+            <span class="gap-desc">{{ g.desc }}</span>
           </div>
+          <span class="gap-count">{{ g.families }} семей</span>
         </div>
       </div>
-      <p v-else class="empty-text">Пробелов не обнаружено ✓</p>
-    </section>
+    </div>
 
-    <!-- Protocol checklist -->
-    <section class="section">
-      <h2 class="section-title">Обязательные мероприятия</h2>
-      <div class="protocol-list">
-        <div v-for="item in protocolItems" :key="item.event_type" class="protocol-row">
-          <span class="protocol-name">{{ item.event_type }}</span>
-          <div class="protocol-bar-track">
-            <div class="protocol-bar-fill" :style="{ width: `${item.completion_rate}%` }" :class="complianceBarClass(item.completion_rate)" />
-          </div>
-          <span class="protocol-pct">{{ item.completion_rate }}%</span>
+    <!-- Protocols -->
+    <div class="card">
+      <h2 class="card-title"><Icon name="lucide:shield-check" size="16" /> Мероприятия</h2>
+      <div class="proto-list">
+        <div v-for="p in mock.complianceProtocols" :key="p.name" class="proto-row">
+          <span class="proto-name">{{ p.name }}</span>
+          <div class="proto-track"><div class="proto-fill" :class="barClass(p.completion)" :style="{ width: `${p.completion}%` }" /></div>
+          <span class="proto-pct">{{ p.completion }}%</span>
         </div>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
+const mock = useMockData()
 
-const compliancePct = ref(0)
-const stats = reactive({ completed: 0, overdue: 0, upcoming: 0 })
-const gaps = ref<Array<{ id: string; title: string; description: string; severity: string; affected_families: number }>>([])
-const protocolItems = ref<Array<{ event_type: string; completion_rate: number }>>([])
-
-const complianceColor = computed(() => {
-  if (compliancePct.value >= 80) return 'var(--color-success)'
-  if (compliancePct.value >= 60) return 'var(--color-warning)'
+const ringColor = computed(() => {
+  if (mock.complianceOverall >= 80) return 'var(--color-success)'
+  if (mock.complianceOverall >= 60) return 'var(--color-warning)'
   return 'var(--color-danger)'
 })
 
-function complianceBarClass(pct: number) {
-  if (pct >= 80) return 'high'
-  if (pct >= 60) return 'medium'
-  return 'low'
-}
+function barClass(pct: number) { return pct >= 80 ? 'high' : pct >= 60 ? 'med' : 'low' }
 
-onMounted(async () => {
-  if (!authStore.clinicId) return
-
-  const { data: overview } = await supabase
-    .from('v_compliance_overview')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-    .single()
-
-  if (overview) {
-    const d = overview as Record<string, number>
-    compliancePct.value = d.compliance_pct || 0
-    stats.completed = d.completed_count || 0
-    stats.overdue = d.overdue_count || 0
-    stats.upcoming = d.upcoming_count || 0
-  }
-
-  const { data: gapsData } = await supabase
-    .from('v_compliance_gaps')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-    .order('affected_families', { ascending: false })
-
-  gaps.value = (gapsData || []).map((g: Record<string, unknown>) => ({
-    id: String(g.id || g.event_type),
-    title: String(g.title || g.event_type),
-    description: String(g.description || ''),
-    severity: Number(g.affected_families) > 10 ? 'critical' : 'warning',
-    affected_families: Number(g.affected_families),
-  }))
-
-  const { data: protocols } = await supabase
-    .from('v_protocol_completion')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-    .order('completion_rate')
-
-  protocolItems.value = (protocols || []).map((p: Record<string, unknown>) => ({
-    event_type: String(p.event_type),
-    completion_rate: Number(p.completion_rate) || 0,
-  }))
-})
+const gaps = [
+  { title: 'Пропущенный скрининг GDM', desc: 'Глюкозотолерантный тест на 24–28 нед.', families: 5, severity: 'critical' },
+  { title: 'Задержка УЗИ II триместра', desc: 'Анатомическое УЗИ 18–22 нед.', families: 3, severity: 'warning' },
+]
 </script>
 
 <style scoped>
-.compliance-page { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
-.page-header { margin-bottom: 24px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.comp-page { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-.compliance-overview { display: flex; align-items: center; gap: 32px; margin-bottom: 28px; flex-wrap: wrap; }
-.compliance-ring { position: relative; width: 120px; height: 120px; }
+.comp-hero {
+  background: linear-gradient(135deg, rgba(124,184,212,0.08), rgba(139,126,200,0.06));
+  border: 1px solid rgba(124,184,212,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
+
+.overview-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.ring-card { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
 .ring-svg { width: 100%; height: 100%; }
 .ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ring-value { font-size: 1.5rem; font-weight: 700; font-family: var(--font-mono); }
-.ring-text { font-size: 0.7rem; color: var(--color-text-secondary); }
+.ring-value { font-size: 1.5rem; font-weight: 800; font-family: var(--font-mono); }
+.ring-text { font-size: 0.65rem; color: var(--color-text-muted); }
 
-.compliance-summary { display: flex; gap: 20px; }
-.summary-item { font-size: 0.9rem; }
-.summary-item strong { font-family: var(--font-mono); font-size: 1.1rem; display: block; }
+.summary-cards { display: flex; gap: 10px; }
+.sc { background: white; border: 1px solid var(--color-border-light); border-radius: 12px; padding: 14px 18px; text-align: center; }
+.sc.warn { border-color: rgba(212,114,124,0.3); }
+.sc-val { display: block; font-size: 1.3rem; font-weight: 800; font-family: var(--font-mono); }
+.sc-lbl { font-size: 0.68rem; color: var(--color-text-muted); }
 
-.section { margin-bottom: 28px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.card-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 
 .gaps-list { display: flex; flex-direction: column; gap: 8px; }
-.gap-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); }
-.gap-indicator { width: 4px; height: 32px; border-radius: 2px; flex-shrink: 0; margin-top: 2px; }
-.gap-card.critical .gap-indicator { background: var(--color-danger); }
-.gap-card.warning .gap-indicator { background: var(--color-warning); }
-.gap-content h3 { font-size: 0.9rem; font-weight: 600; }
-.gap-content p { font-size: 0.8rem; color: var(--color-text-secondary); }
-.gap-count { font-size: 0.75rem; color: var(--color-text-muted); }
-.empty-text { color: var(--color-success); font-size: 0.9rem; }
+.gap-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(0,0,0,0.01); border-radius: 10px; }
+.gap-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.gap-dot.critical { background: var(--color-danger); }
+.gap-dot.warning { background: var(--color-warning); }
+.gap-name { font-size: 0.88rem; font-weight: 600; display: block; }
+.gap-desc { font-size: 0.72rem; color: var(--color-text-muted); }
+.gap-info { flex: 1; }
+.gap-count { font-size: 0.72rem; color: var(--color-text-muted); font-family: var(--font-mono); white-space: nowrap; }
 
-.protocol-list { display: flex; flex-direction: column; gap: 8px; }
-.protocol-row { display: flex; align-items: center; gap: 12px; }
-.protocol-name { width: 200px; font-size: 0.85rem; flex-shrink: 0; }
-.protocol-bar-track { flex: 1; height: 8px; background: var(--color-border-light); border-radius: 4px; overflow: hidden; }
-.protocol-bar-fill { height: 100%; border-radius: 4px; }
-.protocol-bar-fill.high { background: var(--color-success); }
-.protocol-bar-fill.medium { background: var(--color-warning); }
-.protocol-bar-fill.low { background: var(--color-danger); }
-.protocol-pct { width: 40px; text-align: right; font-size: 0.8rem; font-family: var(--font-mono); font-weight: 600; }
+.proto-list { display: flex; flex-direction: column; gap: 8px; }
+.proto-row { display: flex; align-items: center; gap: 12px; }
+.proto-name { width: 180px; font-size: 0.82rem; flex-shrink: 0; }
+.proto-track { flex: 1; height: 8px; background: var(--color-border-light); border-radius: 4px; overflow: hidden; }
+.proto-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+.proto-fill.high { background: var(--color-success); }
+.proto-fill.med { background: var(--color-warning); }
+.proto-fill.low { background: var(--color-danger); }
+.proto-pct { width: 40px; text-align: right; font-size: 0.78rem; font-family: var(--font-mono); font-weight: 600; }
 </style>

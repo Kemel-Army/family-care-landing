@@ -93,6 +93,7 @@ definePageMeta({ layout: 'app' })
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const userId = useSupabaseUserId()
 const authStore = useAuthStore()
 
 const sosActive = ref(false)
@@ -125,7 +126,7 @@ async function sendSOS() {
 
   try {
     await supabase.from('sos_events').insert({
-      user_id: user.value.id,
+      user_id: userId.value,
       family_id: authStore.familyId,
       reason: triageOptions.find(o => o.value === selectedTriage.value)?.label || selectedTriage.value,
       triage_result: triageResult.value,
@@ -149,7 +150,7 @@ onMounted(async () => {
   const { data } = await supabase
     .from('sos_events')
     .select('*')
-    .eq('user_id', user.value.id)
+    .eq('user_id', userId.value)
     .order('created_at', { ascending: false })
     .limit(10)
 

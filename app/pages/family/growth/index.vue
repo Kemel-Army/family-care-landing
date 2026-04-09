@@ -1,217 +1,130 @@
 <template>
-  <div class="growth-page">
-    <header class="page-header">
-      <h1 class="page-title">Рост и развитие</h1>
-    </header>
-
-    <!-- Child selector -->
-    <div v-if="authStore.children.length > 1" class="child-tabs">
-      <button
-        v-for="child in authStore.children"
-        :key="child.id"
-        class="child-tab"
-        :class="{ active: selectedChildId === child.id }"
-        @click="selectChild(child.id)"
-      >
-        {{ child.name }}
-      </button>
+  <div class="grow-page">
+    <!-- Hero -->
+    <div class="grow-hero">
+      <div>
+        <h1 class="grow-hero-title">Рост и развитие</h1>
+        <p class="grow-hero-sub">{{ mock.children[0].first_name }} · {{ achievedCount }}/{{ mock.milestones.length }} вех</p>
+      </div>
+      <div class="grow-hero-metrics">
+        <div class="grow-metric">
+          <span class="grow-metric-val">{{ latestWeight }} <small>кг</small></span>
+          <span class="grow-metric-lbl">Вес</span>
+        </div>
+        <div class="grow-metric">
+          <span class="grow-metric-val">{{ latestHeight }} <small>см</small></span>
+          <span class="grow-metric-lbl">Рост</span>
+        </div>
+        <div class="grow-metric">
+          <span class="grow-metric-val">{{ latestHead }} <small>см</small></span>
+          <span class="grow-metric-lbl">Голова</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Latest metrics -->
-    <section v-if="latestMetric" class="metrics-overview">
-      <div class="metric-card">
-        <Icon name="lucide:ruler" size="20" class="metric-icon" />
-        <div class="metric-value">{{ latestMetric.height_cm }} <small>см</small></div>
-        <div class="metric-label">Рост</div>
+    <!-- Weight chart -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:trending-up" size="16" /> Кривая роста (вес)</h2>
       </div>
-      <div class="metric-card">
-        <Icon name="lucide:scale" size="20" class="metric-icon" />
-        <div class="metric-value">{{ latestMetric.weight_kg }} <small>кг</small></div>
-        <div class="metric-label">Вес</div>
+      <div class="chart-wrap">
+        <AppSharedEChart :option="weightChartOption" style="height: 240px" />
       </div>
-      <div class="metric-card">
-        <Icon name="lucide:circle" size="20" class="metric-icon" />
-        <div class="metric-value">{{ latestMetric.head_cm || '—' }} <small>см</small></div>
-        <div class="metric-label">Окр. головы</div>
-      </div>
-    </section>
-
-    <!-- Add measurement -->
-    <section class="section">
-      <button v-if="!showAddForm" class="btn-add" @click="showAddForm = true">
-        <Icon name="lucide:plus" size="16" /> Добавить измерение
-      </button>
-      <div v-else class="add-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Рост (см)</label>
-            <input v-model.number="newMetric.height_cm" type="number" step="0.1" class="form-input" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Вес (кг)</label>
-            <input v-model.number="newMetric.weight_kg" type="number" step="0.01" class="form-input" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Голова (см)</label>
-            <input v-model.number="newMetric.head_cm" type="number" step="0.1" class="form-input" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Дата измерения</label>
-          <input v-model="newMetric.measured_at" type="date" class="form-input" />
-        </div>
-        <div class="form-actions">
-          <button class="btn-cancel" @click="showAddForm = false">Отмена</button>
-          <button class="btn-save" @click="addMetric">Сохранить</button>
-        </div>
-      </div>
-    </section>
+    </div>
 
     <!-- Milestones -->
-    <section class="section">
-      <h2 class="section-title">Вехи развития</h2>
-      <div v-if="milestones.length" class="milestone-list">
-        <div v-for="ms in milestones" :key="ms.id" class="milestone-card" :class="{ achieved: ms.achieved_at }">
-          <div class="milestone-check">
-            <Icon :name="ms.achieved_at ? 'lucide:check-circle' : 'lucide:circle'" size="20" />
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:star" size="16" /> Вехи развития</h2>
+        <span class="card-badge">{{ achievedCount }}/{{ mock.milestones.length }}</span>
+      </div>
+      <div class="ms-list">
+        <div v-for="ms in mock.milestones" :key="ms.id" class="ms-row" :class="{ 'ms-row--done': ms.achieved }">
+          <div class="ms-dot" :class="{ 'ms-dot--done': ms.achieved }">
+            <Icon :name="ms.achieved ? 'lucide:check' : ms.icon" size="14" />
           </div>
-          <div class="milestone-content">
-            <h3>{{ ms.title }}</h3>
-            <p>{{ ms.category }} · {{ ms.expected_age_months }} мес</p>
+          <div class="ms-info">
+            <span class="ms-name">{{ ms.name }}</span>
+            <span class="ms-meta">{{ ms.expected }}{{ ms.achieved ? ' · ' + formatDate(ms.date) : '' }}</span>
           </div>
-          <button v-if="!ms.achieved_at" class="btn-achieve" @click="achieveMilestone(ms.id)">Достигнуто ✓</button>
-          <span v-else class="achieved-date">{{ formatDate(ms.achieved_at) }}</span>
+          <span v-if="ms.achieved" class="ms-badge ms-badge--done">Достигнуто</span>
+          <span v-else class="ms-badge ms-badge--pending">Ожидается</span>
         </div>
       </div>
-    </section>
-
-    <!-- History -->
-    <section v-if="metrics.length > 1" class="section">
-      <h2 class="section-title">История измерений</h2>
-      <div class="history-list">
-        <div v-for="m in metrics" :key="m.id" class="history-row">
-          <span class="history-date">{{ formatDate(m.measured_at) }}</span>
-          <span>{{ m.height_cm }} см</span>
-          <span>{{ m.weight_kg }} кг</span>
-          <span>{{ m.head_cm || '—' }} см</span>
-        </div>
-      </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import dayjs from 'dayjs'
-import { formatDate } from '~/utils/formatters'
-import type { GrowthMetric, Milestone } from '~/types/database'
-
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
+const mock = useMockData()
 
-const selectedChildId = ref('')
-const metrics = ref<GrowthMetric[]>([])
-const milestones = ref<Milestone[]>([])
-const showAddForm = ref(false)
+const g = mock.growthData
+const latestWeight = g.weight[g.weight.length - 1]
+const latestHeight = g.height[g.height.length - 1]
+const latestHead = g.head[g.head.length - 1]
+const achievedCount = computed(() => mock.milestones.filter(m => m.achieved).length)
 
-const newMetric = reactive({
-  height_cm: 0,
-  weight_kg: 0,
-  head_cm: 0,
-  measured_at: dayjs().format('YYYY-MM-DD'),
-})
+const weightChartOption = computed(() => ({
+  grid: { top: 30, right: 16, bottom: 30, left: 42 },
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: g.months.map(m => `${m} мес`), axisLine: { lineStyle: { color: '#e0dce8' } }, axisLabel: { color: '#9690a8', fontSize: 11 } },
+  yAxis: { type: 'value', name: 'кг', nameTextStyle: { color: '#9690a8', fontSize: 11 }, axisLine: { show: false }, splitLine: { lineStyle: { color: '#f0eef5' } }, axisLabel: { color: '#9690a8', fontSize: 11 } },
+  series: [
+    { name: '3-й перцентиль', type: 'line', data: g.whoWeight3rd, lineStyle: { type: 'dashed', color: '#d4d0e0', width: 1 }, symbol: 'none', itemStyle: { color: '#d4d0e0' } },
+    { name: '50-й перцентиль', type: 'line', data: g.whoWeight50th, lineStyle: { type: 'dashed', color: '#b8b0d0', width: 1 }, symbol: 'none', itemStyle: { color: '#b8b0d0' } },
+    { name: '97-й перцентиль', type: 'line', data: g.whoWeight97th, lineStyle: { type: 'dashed', color: '#d4d0e0', width: 1 }, symbol: 'none', itemStyle: { color: '#d4d0e0' } },
+    { name: 'Вес ребёнка', type: 'line', data: g.weight, lineStyle: { color: '#8B7EC8', width: 3 }, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#8B7EC8', borderColor: '#fff', borderWidth: 2 }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(139,126,200,0.18)' }, { offset: 1, color: 'rgba(139,126,200,0)' }] } } },
+  ],
+}))
 
-const latestMetric = computed(() => metrics.value[0] || null)
-
-async function selectChild(childId: string) {
-  selectedChildId.value = childId
-  await fetchData(childId)
+function formatDate(iso: string) {
+  const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+  const d = new Date(iso)
+  return `${d.getDate()} ${months[d.getMonth()]}`
 }
-
-async function fetchData(childId: string) {
-  const [metricsRes, milestonesRes] = await Promise.all([
-    supabase.from('growth_metrics').select('*').eq('child_id', childId).order('measured_at', { ascending: false }),
-    supabase.from('milestones').select('*').eq('child_id', childId).order('expected_age_months'),
-  ])
-  metrics.value = (metricsRes.data as GrowthMetric[]) || []
-  milestones.value = (milestonesRes.data as Milestone[]) || []
-}
-
-async function addMetric() {
-  if (!selectedChildId.value) return
-  const { data } = await supabase.from('growth_metrics').insert({
-    child_id: selectedChildId.value,
-    height_cm: newMetric.height_cm,
-    weight_kg: newMetric.weight_kg,
-    head_cm: newMetric.head_cm || null,
-    measured_at: newMetric.measured_at,
-  }).select().single()
-
-  if (data) {
-    metrics.value.unshift(data as GrowthMetric)
-    showAddForm.value = false
-  }
-}
-
-async function achieveMilestone(id: string) {
-  await supabase.from('milestones').update({ achieved_at: new Date().toISOString() }).eq('id', id)
-  const ms = milestones.value.find(m => m.id === id)
-  if (ms) ms.achieved_at = new Date().toISOString()
-}
-
-onMounted(() => {
-  if (authStore.children.length > 0) {
-    selectedChildId.value = authStore.children[0].id
-    fetchData(authStore.children[0].id)
-  }
-})
 </script>
 
 <style scoped>
-.growth-page { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
-.page-header { margin-bottom: 20px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.grow-page { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
 
-.child-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.child-tab { padding: 8px 16px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-surface); font-size: 0.85rem; cursor: pointer; font-family: var(--font-body); }
-.child-tab.active { border-color: var(--color-primary); background: var(--color-primary-ultralight); color: var(--color-primary); font-weight: 600; }
+.grow-hero {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  background: linear-gradient(135deg, rgba(139,126,200,0.08), rgba(242,196,160,0.06));
+  border: 1px solid rgba(139,126,200,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.grow-hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.grow-hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
 
-.metrics-overview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-.metric-card { padding: 16px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); text-align: center; }
-.metric-icon { color: var(--color-primary); margin-bottom: 6px; }
-.metric-value { font-size: 1.3rem; font-weight: 700; font-family: var(--font-mono); }
-.metric-value small { font-size: 0.75rem; font-weight: 400; color: var(--color-text-secondary); }
-.metric-label { font-size: 0.75rem; color: var(--color-text-secondary); }
+.grow-hero-metrics { display: flex; gap: 20px; }
+.grow-metric { text-align: center; }
+.grow-metric-val { font-size: 1.2rem; font-weight: 700; font-family: var(--font-mono); display: block; }
+.grow-metric-val small { font-size: 0.7rem; font-weight: 400; color: var(--color-text-muted); }
+.grow-metric-lbl { font-size: 0.68rem; color: var(--color-text-muted); }
 
-.section { margin-bottom: 24px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.card-badge { font-size: 0.72rem; font-weight: 600; color: var(--color-primary); background: rgba(139,126,200,0.08); padding: 3px 10px; border-radius: var(--radius-full); }
+.chart-wrap { margin: 0 -8px; }
 
-.btn-add { display: flex; align-items: center; gap: 6px; padding: 10px 18px; background: var(--color-primary-ultralight); color: var(--color-primary); border: 1px solid var(--color-primary); border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: var(--font-body); }
+.ms-list { display: flex; flex-direction: column; gap: 4px; }
+.ms-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; transition: background 0.15s; }
+.ms-row:hover { background: rgba(139,126,200,0.04); }
+.ms-row--done { opacity: 0.65; }
 
-.add-form { background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.form-row { display: flex; gap: 12px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-.form-label { font-size: 0.85rem; font-weight: 600; }
-.form-input { padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font-body); outline: none; }
-.form-input:focus { border-color: var(--color-primary); }
-.form-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; font-family: var(--font-body); }
-.btn-save { padding: 8px 20px; background: var(--gradient-cta); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: var(--font-body); }
+.ms-dot {
+  width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: rgba(233,196,106,0.12); color: var(--color-warning);
+}
+.ms-dot--done { background: rgba(124,184,212,0.12); color: var(--color-success); }
 
-.milestone-list { display: flex; flex-direction: column; gap: 8px; }
-.milestone-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); }
-.milestone-card.achieved { opacity: 0.65; }
-.milestone-check { flex-shrink: 0; color: var(--color-text-muted); }
-.milestone-card.achieved .milestone-check { color: var(--color-success); }
-.milestone-content { flex: 1; }
-.milestone-content h3 { font-size: 0.9rem; font-weight: 600; }
-.milestone-content p { font-size: 0.75rem; color: var(--color-text-secondary); }
-.btn-achieve { padding: 5px 10px; background: rgba(124, 184, 212, 0.1); color: var(--color-success); border: 1px solid rgba(124, 184, 212, 0.3); border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
-.achieved-date { font-size: 0.75rem; color: var(--color-text-muted); }
+.ms-info { flex: 1; min-width: 0; }
+.ms-name { display: block; font-size: 0.85rem; font-weight: 500; }
+.ms-meta { display: block; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 1px; }
 
-.history-list { display: flex; flex-direction: column; }
-.history-row { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--color-border-light); font-size: 0.85rem; }
-.history-row:last-child { border: none; }
-.history-date { color: var(--color-text-secondary); min-width: 100px; }
+.ms-badge { font-size: 0.62rem; font-weight: 600; padding: 3px 8px; border-radius: var(--radius-full); flex-shrink: 0; }
+.ms-badge--done { background: rgba(124,184,212,0.1); color: var(--color-success); }
+.ms-badge--pending { background: rgba(233,196,106,0.08); color: var(--color-warning); }
 </style>

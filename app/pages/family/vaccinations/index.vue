@@ -1,160 +1,123 @@
 <template>
-  <div class="vaccinations-page">
-    <header class="page-header">
-      <h1 class="page-title">Прививки</h1>
-    </header>
-
-    <!-- Child selector (if multiple children) -->
-    <div v-if="authStore.children.length > 1" class="child-tabs">
-      <button
-        v-for="child in authStore.children"
-        :key="child.id"
-        class="child-tab"
-        :class="{ active: selectedChildId === child.id }"
-        @click="selectChild(child.id)"
-      >
-        {{ child.name }}
-      </button>
+  <div class="vax-page">
+    <!-- Hero -->
+    <div class="vax-hero">
+      <div>
+        <h1 class="vax-hero-title">Прививки</h1>
+        <p class="vax-hero-sub">{{ mock.children[0].first_name }} · Национальный календарь</p>
+      </div>
+      <AppSharedProgressRing :value="completionPercent" :size="72" :strokeWidth="6" variant="success" />
     </div>
 
-    <!-- Upcoming vaccinations -->
-    <section v-if="upcoming.length" class="section">
-      <h2 class="section-title">Предстоящие</h2>
-      <div class="list">
-        <div v-for="v in upcoming" :key="v.id" class="vax-card">
-          <div class="vax-icon">
-            <Icon name="lucide:syringe" size="18" />
+    <!-- Summary strip -->
+    <div class="vax-strip">
+      <div class="vax-chip vax-chip--done">
+        <Icon name="lucide:check-circle" size="14" />
+        <span>{{ completedVax.length }} выполнено</span>
+      </div>
+      <div class="vax-chip vax-chip--upcoming">
+        <Icon name="lucide:clock" size="14" />
+        <span>{{ upcomingVax.length }} впереди</span>
+      </div>
+    </div>
+
+    <!-- Upcoming -->
+    <div class="card" v-if="upcomingVax.length">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:calendar-check" size="16" /> Предстоящие</h2>
+      </div>
+      <div class="vax-list">
+        <div v-for="v in upcomingVax" :key="v.id" class="vax-row">
+          <div class="vax-icon vax-icon--upcoming"><Icon name="lucide:syringe" size="16" /></div>
+          <div class="vax-info">
+            <span class="vax-name">{{ v.name }}</span>
+            <span class="vax-meta">Доза {{ v.dose }} · {{ formatDate(v.date) }}</span>
           </div>
-          <div class="vax-content">
-            <h3>{{ v.vaccine_name }}</h3>
-            <p>Доза {{ v.dose_number }} · {{ formatDate(v.scheduled_date) }}</p>
-          </div>
-          <span class="vax-status scheduled">Запланирована</span>
+          <span class="vax-badge vax-badge--upcoming">Запланирована</span>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- Completed -->
-    <section v-if="completed.length" class="section">
-      <h2 class="section-title muted">Выполненные</h2>
-      <div class="list">
-        <div v-for="v in completed" :key="v.id" class="vax-card done">
-          <div class="vax-icon done">
-            <Icon name="lucide:check" size="18" />
+    <div class="card" v-if="completedVax.length">
+      <div class="card-header">
+        <h2 class="card-title"><Icon name="lucide:shield-check" size="16" /> Выполненные</h2>
+      </div>
+      <div class="vax-list">
+        <div v-for="v in completedVax" :key="v.id" class="vax-row vax-row--done">
+          <div class="vax-icon vax-icon--done"><Icon name="lucide:check" size="16" /></div>
+          <div class="vax-info">
+            <span class="vax-name">{{ v.name }}</span>
+            <span class="vax-meta">Доза {{ v.dose }} · {{ formatDate(v.date) }}</span>
+            <span v-if="v.batch" class="vax-batch">Партия: {{ v.batch }}</span>
           </div>
-          <div class="vax-content">
-            <h3>{{ v.vaccine_name }}</h3>
-            <p>Доза {{ v.dose_number }} · {{ formatDate(v.administered_date || v.scheduled_date) }}</p>
-            <p v-if="v.batch_number" class="vax-batch">Партия: {{ v.batch_number }}</p>
-          </div>
-          <span class="vax-status completed">Выполнена</span>
+          <span class="vax-badge vax-badge--done">Выполнена</span>
         </div>
       </div>
-    </section>
-
-    <div v-if="!upcoming.length && !completed.length" class="empty-state">
-      <Icon name="lucide:syringe" size="40" class="empty-icon" />
-      <h3>Нет прививок</h3>
-      <p>Календарь прививок будет сформирован по дате рождения ребёнка</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { formatDate } from '~/utils/formatters'
-import type { Vaccination } from '~/types/database'
-
 definePageMeta({ layout: 'app' })
 
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
+const mock = useMockData()
 
-const vaccinations = ref<Vaccination[]>([])
-const selectedChildId = ref('')
+const completedVax = computed(() => mock.vaccinations.filter(v => v.status === 'completed'))
+const upcomingVax = computed(() => mock.vaccinations.filter(v => v.status === 'upcoming'))
+const completionPercent = computed(() => Math.round((completedVax.value.length / mock.vaccinations.length) * 100))
 
-const upcoming = computed(() => vaccinations.value
-  .filter(v => v.status === 'scheduled')
-  .sort((a, b) => (a.scheduled_date || '').localeCompare(b.scheduled_date || '')),
-)
-
-const completed = computed(() => vaccinations.value
-  .filter(v => v.status === 'completed')
-  .sort((a, b) => (b.administered_date || b.scheduled_date || '').localeCompare(a.administered_date || a.scheduled_date || '')),
-)
-
-async function selectChild(childId: string) {
-  selectedChildId.value = childId
-  await fetchVaccinations(childId)
+function formatDate(iso: string) {
+  const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+  const d = new Date(iso)
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
 }
-
-async function fetchVaccinations(childId: string) {
-  const { data } = await supabase
-    .from('vaccinations')
-    .select('*')
-    .eq('child_id', childId)
-    .order('scheduled_date')
-
-  vaccinations.value = (data as Vaccination[]) || []
-}
-
-onMounted(async () => {
-  if (authStore.children.length > 0) {
-    const firstChild = authStore.children[0]
-    selectedChildId.value = firstChild.id
-    await fetchVaccinations(firstChild.id)
-  }
-})
 </script>
 
 <style scoped>
-.vaccinations-page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 24px 16px;
+.vax-page { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+.vax-hero {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, rgba(124,184,212,0.08), rgba(139,126,200,0.06));
+  border: 1px solid rgba(124,184,212,0.12); border-radius: 16px; padding: 24px 28px;
 }
+.vax-hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.vax-hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
 
-.page-header { margin-bottom: 24px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
-
-.child-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.child-tab {
-  padding: 8px 16px; border: 1px solid var(--color-border); border-radius: 20px;
-  background: var(--color-surface); font-size: 0.85rem; cursor: pointer; font-family: var(--font-body);
+.vax-strip { display: flex; gap: 10px; }
+.vax-chip {
+  display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+  background: white; border: 1px solid var(--color-border-light); border-radius: 10px;
+  font-size: 0.78rem; color: var(--color-text-secondary);
 }
-.child-tab.active { border-color: var(--color-primary); background: var(--color-primary-ultralight); color: var(--color-primary); font-weight: 600; }
+.vax-chip--done { color: var(--color-success); }
+.vax-chip--upcoming { color: var(--color-warning); }
 
-.section { margin-bottom: 28px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
-.section-title.muted { color: var(--color-text-secondary); }
-.list { display: flex; flex-direction: column; gap: 8px; }
+.card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 20px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-.vax-card {
-  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
-  background: var(--color-surface); border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm);
+.vax-list { display: flex; flex-direction: column; gap: 4px; }
+.vax-row {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px;
+  transition: background 0.15s;
 }
-.vax-card.done { opacity: 0.7; }
+.vax-row:hover { background: rgba(139,126,200,0.04); }
+.vax-row--done { opacity: 0.7; }
 
 .vax-icon {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(233, 196, 106, 0.15); color: var(--color-warning);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.vax-icon.done { background: rgba(124, 184, 212, 0.15); color: var(--color-success); }
+.vax-icon--upcoming { background: rgba(233,196,106,0.12); color: var(--color-warning); }
+.vax-icon--done { background: rgba(124,184,212,0.12); color: var(--color-success); }
 
-.vax-content { flex: 1; }
-.vax-content h3 { font-size: 0.9rem; font-weight: 600; }
-.vax-content p { font-size: 0.8rem; color: var(--color-text-secondary); }
-.vax-batch { font-size: 0.75rem; color: var(--color-text-muted); }
+.vax-info { flex: 1; min-width: 0; }
+.vax-name { display: block; font-size: 0.85rem; font-weight: 500; color: var(--color-text-primary); }
+.vax-meta { display: block; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px; }
+.vax-batch { display: block; font-size: 0.68rem; color: var(--color-text-muted); font-family: var(--font-mono); }
 
-.vax-status {
-  font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 4px; flex-shrink: 0;
-}
-.vax-status.scheduled { background: rgba(233, 196, 106, 0.15); color: var(--color-warning); }
-.vax-status.completed { background: rgba(124, 184, 212, 0.15); color: var(--color-success); }
-
-.empty-state { text-align: center; padding: 48px 16px; color: var(--color-text-muted); }
-.empty-state h3 { font-size: 1rem; margin: 8px 0 4px; color: var(--color-text-primary); }
-.empty-state p { font-size: 0.85rem; }
-.empty-icon { color: var(--color-primary-light); }
+.vax-badge { font-size: 0.65rem; font-weight: 600; padding: 3px 8px; border-radius: var(--radius-full); flex-shrink: 0; }
+.vax-badge--done { background: rgba(124,184,212,0.1); color: var(--color-success); }
+.vax-badge--upcoming { background: rgba(233,196,106,0.1); color: var(--color-warning); }
 </style>

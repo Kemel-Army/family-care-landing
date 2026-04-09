@@ -1,124 +1,75 @@
 <template>
-  <div class="doctors-page">
-    <header class="page-header">
-      <h1 class="page-title">Производительность врачей</h1>
-    </header>
-
-    <!-- Overview cards -->
-    <div class="overview-grid">
-      <div v-for="doc in doctors" :key="doc.id" class="doctor-card">
-        <div class="doc-header">
-          <div class="doc-avatar">{{ doc.name.charAt(0) }}</div>
-          <div>
-            <h3>{{ doc.name }}</h3>
-            <span class="doc-specialty">{{ doc.specialty }}</span>
-          </div>
-        </div>
-
-        <div class="doc-metrics">
-          <div class="metric">
-            <span class="metric-label">Приёмы/нед</span>
-            <span class="metric-value">{{ doc.weeklyVisits }}</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">No-show</span>
-            <span class="metric-value" :class="{ danger: doc.noShowRate > 15 }">{{ doc.noShowRate }}%</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Ср. визит</span>
-            <span class="metric-value">{{ doc.avgDuration }} мин</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Рейтинг</span>
-            <span class="metric-value">{{ doc.rating }}/5</span>
-          </div>
-        </div>
-
-        <!-- Workload heatmap (simplified) -->
-        <div class="workload-bar">
-          <span class="workload-label">Загрузка</span>
-          <div class="workload-track">
-            <div class="workload-fill" :style="{ width: `${doc.utilization}%` }" :class="utilizationClass(doc.utilization)" />
-          </div>
-          <span class="workload-pct">{{ doc.utilization }}%</span>
-        </div>
-      </div>
+  <div class="doc-page">
+    <div class="doc-hero">
+      <NuxtLink to="/admin/analytics" class="back-link"><Icon name="lucide:chevron-left" size="16" /> Аналитика</NuxtLink>
+      <h1 class="doc-hero-title">Производительность врачей</h1>
+      <p class="doc-hero-sub">{{ mock.doctorPerformance.length }} специалистов</p>
     </div>
 
-    <div v-if="!doctors.length" class="empty">
-      <p>Данные загружаются...</p>
+    <div class="doc-grid">
+      <div v-for="d in mock.doctorPerformance" :key="d.name" class="doc-card">
+        <div class="dc-top">
+          <div class="dc-avatar">{{ d.name.slice(4, 5) }}</div>
+          <div class="dc-info">
+            <h3>{{ d.name }}</h3>
+            <span class="dc-spec">{{ d.specialty }}</span>
+          </div>
+          <span class="dc-rating">★ {{ d.rating }}</span>
+        </div>
+        <div class="dc-metrics">
+          <div class="dcm"><span class="dcm-val">{{ d.visits }}</span><span class="dcm-lbl">визит./нед</span></div>
+          <div class="dcm"><span class="dcm-val" :class="{ danger: d.noShowRate > 10 }">{{ d.noShowRate }}%</span><span class="dcm-lbl">no-show</span></div>
+          <div class="dcm"><span class="dcm-val">{{ d.avgDuration }}</span><span class="dcm-lbl">мин/визит</span></div>
+        </div>
+        <div class="dc-load">
+          <span class="dc-load-lbl">Загрузка</span>
+          <div class="dc-load-track">
+            <div class="dc-load-fill" :style="{ width: `${d.load}%` }" :class="d.load > 90 ? 'over' : d.load > 70 ? 'ok' : 'low'" />
+          </div>
+          <span class="dc-load-pct">{{ d.load }}%</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'app' })
-
-const supabase = useSupabaseClient()
-const authStore = useAuthStore()
-
-interface DoctorPerf {
-  id: string; name: string; specialty: string
-  weeklyVisits: number; noShowRate: number; avgDuration: number
-  rating: number; utilization: number
-}
-
-const doctors = ref<DoctorPerf[]>([])
-
-function utilizationClass(pct: number) {
-  if (pct > 90) return 'overloaded'
-  if (pct > 70) return 'optimal'
-  return 'low'
-}
-
-onMounted(async () => {
-  if (!authStore.clinicId) return
-
-  const { data } = await supabase
-    .from('v_doctor_performance')
-    .select('*')
-    .eq('clinic_id', authStore.clinicId)
-
-  doctors.value = (data || []).map((d: Record<string, unknown>) => ({
-    id: String(d.doctor_id),
-    name: String(d.full_name || 'Врач'),
-    specialty: String(d.specialty || ''),
-    weeklyVisits: Number(d.weekly_visits) || 0,
-    noShowRate: Number(d.no_show_rate) || 0,
-    avgDuration: Number(d.avg_duration_minutes) || 0,
-    rating: Number(d.avg_rating) || 0,
-    utilization: Number(d.utilization_pct) || 0,
-  }))
-})
+const mock = useMockData()
 </script>
 
 <style scoped>
-.doctors-page { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-.page-header { margin-bottom: 24px; }
-.page-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.doc-page { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-.overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; }
+.doc-hero {
+  background: linear-gradient(135deg, rgba(232,160,191,0.08), rgba(139,126,200,0.06));
+  border: 1px solid rgba(232,160,191,0.12); border-radius: 16px; padding: 24px 28px;
+}
+.back-link { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--color-text-muted); text-decoration: none; margin-bottom: 8px; }
+.doc-hero-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.doc-hero-sub { font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px; }
 
-.doctor-card { padding: 20px; background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); }
-.doc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.doc-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--color-primary-ultralight); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; }
-.doc-header h3 { font-size: 0.95rem; font-weight: 600; }
-.doc-specialty { font-size: 0.8rem; color: var(--color-text-secondary); }
+.doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.doc-card { background: white; border: 1px solid var(--color-border-light); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 
-.doc-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
-.metric { text-align: center; }
-.metric-label { display: block; font-size: 0.7rem; color: var(--color-text-muted); }
-.metric-value { font-size: 0.95rem; font-weight: 700; font-family: var(--font-mono); }
-.metric-value.danger { color: var(--color-danger); }
+.dc-top { display: flex; align-items: center; gap: 10px; }
+.dc-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(139,126,200,0.1); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+.dc-info { flex: 1; }
+.dc-info h3 { font-size: 0.88rem; font-weight: 600; }
+.dc-spec { font-size: 0.72rem; color: var(--color-text-muted); }
+.dc-rating { font-size: 0.8rem; font-weight: 700; color: var(--color-warning); }
 
-.workload-bar { display: flex; align-items: center; gap: 8px; }
-.workload-label { font-size: 0.75rem; color: var(--color-text-secondary); width: 60px; }
-.workload-track { flex: 1; height: 8px; background: var(--color-border-light); border-radius: 4px; overflow: hidden; }
-.workload-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
-.workload-fill.low { background: rgba(124, 184, 212, 0.6); }
-.workload-fill.optimal { background: var(--color-primary); }
-.workload-fill.overloaded { background: var(--color-danger); }
-.workload-pct { font-size: 0.8rem; font-weight: 600; font-family: var(--font-mono); width: 40px; text-align: right; }
+.dc-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.dcm-val { display: block; font-size: 1rem; font-weight: 700; font-family: var(--font-mono); }
+.dcm-val.danger { color: var(--color-danger); }
+.dcm-lbl { font-size: 0.62rem; color: var(--color-text-muted); }
 
-.empty { text-align: center; padding: 48px; color: var(--color-text-muted); }
+.dc-load { display: flex; align-items: center; gap: 8px; }
+.dc-load-lbl { font-size: 0.72rem; color: var(--color-text-muted); width: 55px; }
+.dc-load-track { flex: 1; height: 6px; background: var(--color-border-light); border-radius: 3px; overflow: hidden; }
+.dc-load-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+.dc-load-fill.low { background: rgba(168,200,232,0.5); }
+.dc-load-fill.ok { background: var(--color-primary); }
+.dc-load-fill.over { background: var(--color-danger); }
+.dc-load-pct { font-size: 0.75rem; font-weight: 700; font-family: var(--font-mono); width: 36px; text-align: right; }
 </style>
