@@ -215,12 +215,7 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: {
-      include: ['echarts'],
-    },
-    resolve: {
-      alias: {
-        cookie: 'cookie-es',
-      },
+      include: ['echarts', '@supabase/ssr > cookie'],
     },
     ssr: {
       noExternal: [],

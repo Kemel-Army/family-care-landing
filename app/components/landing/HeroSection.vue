@@ -561,7 +561,7 @@ onBeforeUnmount(() => {
 .hero {
   position: relative;
   overflow: hidden;
-  padding: 140px 0 96px;
+  padding: 80px 0 96px;
   min-height: 100vh;
   display: flex;
   align-items: center;
