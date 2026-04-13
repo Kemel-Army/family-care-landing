@@ -38,6 +38,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: npx nuxi prepare
       - run: npx vitest run
 
   test-e2e:
