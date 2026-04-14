@@ -59,6 +59,15 @@
   "pnpm": {
     "overrides": {
       "cookie": "1.0.2"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "core-js",
+      "esbuild",
+      "protobufjs",
+      "sharp",
+      "supabase",
+      "vue-demi"
+    ]
   }
 }
