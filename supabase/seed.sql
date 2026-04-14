@@ -4,6 +4,23 @@
 BEGIN;
 
 -- ============================================
+-- 0. DEMO ACCOUNTS (4 records — used by /api/auth/demo-login)
+-- ============================================
+INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
+VALUES
+('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'p1@demo.kz',      crypt('DemoPass123!', gen_salt('bf')), now(), now(), now(), '', '', '', ''),
+('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'dinara@demo.kz',  crypt('DemoPass123!', gen_salt('bf')), now(), now(), now(), '', '', '', ''),
+('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'admin@demo.kz',   crypt('DemoPass123!', gen_salt('bf')), now(), now(), now(), '', '', '', ''),
+('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated', 'doctor@demo.kz',  crypt('DemoPass123!', gen_salt('bf')), now(), now(), now(), '', '', '', '');
+
+INSERT INTO users (id, email, phone, role, clinic_id, first_name, last_name, avatar_url, is_active, last_seen_at, created_at, updated_at)
+VALUES
+('D0000000-0000-0000-0000-000000000001', 'p1@demo.kz',      '+77000000001', 'mother',      '10000000-0000-0000-0000-000000000001', 'Айгерим',  'Демо',     NULL, true, now(), now(), now()),
+('D0000000-0000-0000-0000-000000000002', 'dinara@demo.kz',  '+77000000002', 'coordinator', '10000000-0000-0000-0000-000000000001', 'Динара',   'Демо',     NULL, true, now(), now(), now()),
+('D0000000-0000-0000-0000-000000000003', 'admin@demo.kz',   '+77000000003', 'admin',       '10000000-0000-0000-0000-000000000001', 'Аскар',    'Демо',     NULL, true, now(), now(), now()),
+('D0000000-0000-0000-0000-000000000004', 'doctor@demo.kz',  '+77000000004', 'doctor',      '10000000-0000-0000-0000-000000000001', 'Сауле',    'Демо',     NULL, true, now(), now(), now());
+
+-- ============================================
 -- 1. AUTH.USERS (48 records)
 -- ============================================
 

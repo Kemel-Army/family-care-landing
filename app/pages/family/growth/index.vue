@@ -95,10 +95,6 @@
         </div>
       </div>
     </Teleport>
-
-    <Transition name="toast">
-      <div v-if="toast" class="toast"><Icon name="lucide:check-circle" size="16" /> {{ toast }}</div>
-    </Transition>
   </div>
 </template>
 
@@ -138,7 +134,7 @@ function formatDate(iso: string) {
 // Measurement modal
 const showModal = ref(false)
 const saving = ref(false)
-const toast = ref('')
+const { success: toastSuccess } = useToast()
 const measureForm = reactive({
   date: new Date().toISOString().slice(0, 10),
   weight_kg: null as number | null,
@@ -162,8 +158,7 @@ async function saveMeasure() {
     })
     await appData.fetchAll()
     showModal.value = false
-    toast.value = 'Измерение сохранено!'
-    setTimeout(() => { toast.value = '' }, 2500)
+    toastSuccess('Измерение сохранено!')
     Object.assign(measureForm, { date: new Date().toISOString().slice(0, 10), weight_kg: null, height_cm: null, head_cm: null })
   }
   catch (e) { console.error(e) }

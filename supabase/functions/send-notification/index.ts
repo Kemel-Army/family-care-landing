@@ -84,7 +84,8 @@ serve(async (req: Request) => {
       } else if (channel === 'sms') {
         results[channel] = 'not_implemented'
       } else if (channel === 'email') {
-        results[channel] = 'not_implemented'
+        const sent = await sendEmail(user_id, title, notifBody || '', supabase)
+        results[channel] = sent ? 'sent' : 'failed'
       } else {
         results[channel] = 'delivered'
       }
@@ -105,7 +106,7 @@ serve(async (req: Request) => {
  * Send Firebase Cloud Messaging push notification.
  */
 async function sendPushNotification(
-  _userId: string,
+  userId: string,
   title: string,
   body: string,
   data?: Record<string, unknown>,
@@ -113,10 +114,53 @@ async function sendPushNotification(
   const fcmKey = Deno.env.get('FCM_SERVER_KEY')
   if (!fcmKey) return false
 
-  // TODO: Lookup user's FCM token from a `push_tokens` table
-  // For now, log and return true for the record
-  console.log(`[FCM] Would send to user: title="${title}", body="${body}", data=${JSON.stringify(data)}`)
-  return false // Will return true once FCM token lookup is implemented
+  const supabase = createSupabaseAdmin()
+
+  // Lookup user's active FCM tokens
+  const { data: tokens } = await supabase
+    .from('push_tokens')
+    .select('token')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+
+  if (!tokens || tokens.length === 0) return false
+
+  let anySuccess = false
+
+  for (const { token } of tokens) {
+    try {
+      const response = await fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `key=${fcmKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: token,
+          notification: { title, body },
+          data: data || {},
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success === 1) {
+          anySuccess = true
+        } else {
+          // Token is invalid — deactivate it
+          await supabase
+            .from('push_tokens')
+            .update({ is_active: false, updated_at: new Date().toISOString() })
+            .eq('user_id', userId)
+            .eq('token', token)
+        }
+      }
+    } catch {
+      // Network error — skip this token
+    }
+  }
+
+  return anySuccess
 }
 
 /**
@@ -162,6 +206,54 @@ async function sendWhatsApp(
         }),
       },
     )
+
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Send email notification via Resend.
+ */
+async function sendEmail(
+  userId: string,
+  title: string,
+  body: string,
+  supabase: ReturnType<typeof createSupabaseAdmin>,
+): Promise<boolean> {
+  const resendKey = Deno.env.get('RESEND_API_KEY')
+  if (!resendKey) return false
+
+  const { data: user } = await supabase
+    .from('users')
+    .select('email, first_name')
+    .eq('id', userId)
+    .single()
+
+  if (!user?.email) return false
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Family Care <noreply@familycare.kz>',
+        to: [user.email],
+        subject: title,
+        html: `
+          <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;padding:24px">
+            <h2 style="color:#1e293b;margin-bottom:16px">${title}</h2>
+            <p style="color:#475569;font-size:16px;line-height:1.6">${body}</p>
+            <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0">
+            <p style="color:#94a3b8;font-size:12px">Family Care OS — ${user.first_name || 'Пользователь'}</p>
+          </div>
+        `,
+      }),
+    })
 
     return response.ok
   } catch {

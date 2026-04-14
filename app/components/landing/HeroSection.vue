@@ -9,50 +9,28 @@
 
     <div class="hero-inner landing-container">
       <div class="hero-content" ref="heroContentRef">
+        <div ref="heroBadgeRef" class="hero-badge font-heading">
+          <span class="hero-badge-dot" />
+          Для частных клиник педиатрии и акушерства
+        </div>
+
         <h1 ref="heroTitleRef" class="hero-title font-display">
           Family Care OS
         </h1>
 
         <p ref="heroSubRef" class="hero-subtitle font-body">
-          Цифровая платформа сопровождения семьи от&nbsp;зачатия до&nbsp;2&nbsp;лет&nbsp;—
+          Цифровая платформа сопровождения семьи от&nbsp;зачатия до&nbsp;2&nbsp;лет
           <span class="hero-typewriter" :class="{ 'typewriter-active': isTyping, 'typewriter-done': isDone }">{{ displayText }}</span>
         </p>
 
-        <div class="hero-features">
-          <div class="hero-feature">
+        <div ref="heroFeaturesRef" class="hero-features">
+          <div v-for="(f, i) in heroFeatures" :key="i" class="hero-feature">
             <div class="hero-feature-icon">
-              <Icon name="lucide:zap" size="18" />
+              <Icon :name="f.icon" size="18" />
             </div>
             <div class="hero-feature-text">
-              <span class="hero-feature-title font-heading">Маршрут за 2 секунды</span>
-              <span class="hero-feature-desc">50+ событий генерируются автоматически</span>
-            </div>
-          </div>
-          <div class="hero-feature">
-            <div class="hero-feature-icon">
-              <Icon name="lucide:users" size="18" />
-            </div>
-            <div class="hero-feature-text">
-              <span class="hero-feature-title font-heading">3 роли</span>
-              <span class="hero-feature-desc">Мама, координатор, руководитель — каждый видит своё</span>
-            </div>
-          </div>
-          <div class="hero-feature">
-            <div class="hero-feature-icon">
-              <Icon name="lucide:palette" size="18" />
-            </div>
-            <div class="hero-feature-text">
-              <span class="hero-feature-title font-heading">White-label</span>
-              <span class="hero-feature-desc">Приложение под брендом вашей клиники</span>
-            </div>
-          </div>
-          <div class="hero-feature">
-            <div class="hero-feature-icon">
-              <Icon name="lucide:rocket" size="18" />
-            </div>
-            <div class="hero-feature-text">
-              <span class="hero-feature-title font-heading">0 дней IT</span>
-              <span class="hero-feature-desc">Настройка без вашего IT-отдела</span>
+              <span class="hero-feature-title font-heading">{{ f.title }}</span>
+              <span class="hero-feature-desc">{{ f.desc }}</span>
             </div>
           </div>
         </div>
@@ -250,7 +228,17 @@ const heroVisualRef = ref<HTMLElement | null>(null)
 const heroTitleRef = ref<HTMLElement | null>(null)
 const heroSubRef = ref<HTMLElement | null>(null)
 const heroActionsRef = ref<HTMLElement | null>(null)
+const heroFeaturesRef = ref<HTMLElement | null>(null)
 const scrollIndicatorRef = ref<HTMLElement | null>(null)
+
+const heroFeatures = [
+  { icon: 'lucide:zap', title: 'Маршрут за 2 секунды', desc: '50+ событий генерируются автоматически' },
+  { icon: 'lucide:users', title: '3 роли', desc: 'Мама, координатор, руководитель — каждый видит своё' },
+  { icon: 'lucide:palette', title: 'White-label', desc: 'Приложение под брендом вашей клиники' },
+  { icon: 'lucide:rocket', title: '0 дней IT', desc: 'Настройка без вашего IT-отдела' },
+]
+
+const heroBadgeRef = ref<HTMLElement | null>(null)
 
 // Week badge ref
 const weekBadgeRef = ref<HTMLElement | null>(null)
@@ -436,6 +424,31 @@ onMounted(() => {
       duration: 0.8,
       delay: 0.8,
       ease: 'power3.out',
+    })
+  }
+
+  // Features stagger entrance
+  if (heroFeaturesRef.value) {
+    const features = heroFeaturesRef.value.querySelectorAll('.hero-feature')
+    gsap.set(features, { opacity: 0, y: 20 })
+    gsap.to(features, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      stagger: 0.08,
+      delay: 0.5,
+      ease: 'power3.out',
+    })
+  }
+
+  // Badge entrance
+  if (heroBadgeRef.value) {
+    gsap.from(heroBadgeRef.value, {
+      opacity: 0,
+      y: -10,
+      duration: 0.5,
+      delay: 0.1,
+      ease: 'power2.out',
     })
   }
 
@@ -696,6 +709,80 @@ onBeforeUnmount(() => {
   padding-left: 0;
 }
 
+/* Hero badge */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(139, 126, 200, 0.08);
+  border: 1px solid rgba(139, 126, 200, 0.12);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  letter-spacing: 0.01em;
+}
+
+.hero-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Hero features list */
+.hero-features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.hero-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.hero-feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(139, 126, 200, 0.08);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.hero-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-feature-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.hero-feature-desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
 /* Hero stats row */
 .hero-stats {
   display: flex;
@@ -748,14 +835,15 @@ onBeforeUnmount(() => {
   font-size: 16px;
   font-weight: 600;
   text-decoration: none;
-  transition: opacity 0.2s, box-shadow 0.2s;
+  transition: opacity 0.3s, box-shadow 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 20px rgba(139, 126, 200, 0.3);
   will-change: transform;
 }
 
 .hero-cta-primary:hover {
-  opacity: 0.92;
-  box-shadow: 0 6px 28px rgba(139, 126, 200, 0.4);
+  opacity: 0.95;
+  box-shadow: 0 8px 36px rgba(139, 126, 200, 0.45);
+  transform: translateY(-2px);
 }
 
 .hero-cta-secondary {
@@ -770,13 +858,14 @@ onBeforeUnmount(() => {
   font-size: 16px;
   font-weight: 600;
   text-decoration: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 }
 
 .hero-cta-secondary:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 12px rgba(139, 126, 200, 0.15);
+  box-shadow: 0 6px 24px rgba(139, 126, 200, 0.18);
+  transform: translateY(-2px);
 }
 
 /* Typewriter in subtitle */
@@ -1150,9 +1239,9 @@ onBeforeUnmount(() => {
   border-radius: 14px;
   font-size: 12px;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(139, 126, 200, 0.12);
   box-shadow: 0 4px 20px rgba(139, 126, 200, 0.1);
 }
@@ -1235,7 +1324,9 @@ onBeforeUnmount(() => {
 
 @keyframes phone-idle-float {
   0%, 100% { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
-  50% { transform: translateY(-8px) rotateY(0deg) rotateX(0deg); }
+  25% { transform: translateY(-6px) rotateY(1deg) rotateX(-0.5deg); }
+  50% { transform: translateY(-10px) rotateY(0deg) rotateX(0.5deg); }
+  75% { transform: translateY(-4px) rotateY(-1deg) rotateX(0deg); }
 }
 
 /* ---- Responsive ---- */
@@ -1249,6 +1340,8 @@ onBeforeUnmount(() => {
   .hero-subtitle { margin-left: auto; margin-right: auto; }
   .hero-stats { justify-content: center; }
   .hero-actions { justify-content: center; }
+  .hero-features { max-width: 480px; margin-left: auto; margin-right: auto; }
+  .hero-badge { margin-left: auto; margin-right: auto; }
   .hero-segment-banner { justify-content: center; }
   .hero-visual { order: -1; min-height: 440px; }
   .hero-float--doc { left: -4%; }
@@ -1282,6 +1375,8 @@ onBeforeUnmount(() => {
   }
   .hero-visual { min-height: 360px; }
   .phone-frame { width: 240px; }
+  .hero-features { flex-wrap: wrap; }
+
   .hero-stats {
     flex-wrap: wrap;
     gap: 12px;

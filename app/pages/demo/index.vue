@@ -68,9 +68,6 @@
 </template>
 
 <script setup lang="ts">
-import { ROLE_HOME_MAP } from '~/utils/constants'
-import type { UserRole } from '~/types/database'
-
 definePageMeta({ layout: 'landing' })
 
 useSeoMeta({
@@ -81,6 +78,13 @@ useSeoMeta({
 const supabase = useSupabaseClient()
 const loadingRole = ref<string | null>(null)
 const error = ref('')
+
+const DEMO_HOME: Record<string, string> = {
+  mom: '/demo/family',
+  coordinator: '/demo/coordinator',
+  doctor: '/demo/doctor',
+  admin: '/demo/coordinator', // admin shares coordinator view in demo
+}
 
 const roles = [
   {
@@ -100,6 +104,15 @@ const roles = [
     gradient: 'var(--gradient-cta)',
     features: ['Очередь задач с приоритетами', 'Список семей и статусы', 'Расписание дня', 'KPI метрики'],
     actionLabel: 'координатор',
+  },
+  {
+    key: 'doctor',
+    icon: 'lucide:stethoscope',
+    title: 'Врач',
+    description: 'Расписание приёма, карточки пациентов, KPI.',
+    gradient: 'linear-gradient(135deg, #10b981, #059669)',
+    features: ['Расписание на сегодня', 'Карточки пациентов', 'KPI приёма', 'Свободные слоты'],
+    actionLabel: 'врач',
   },
   {
     key: 'admin',
@@ -149,11 +162,7 @@ async function enterDemo(roleKey: string) {
     }
 
     // Initialize auth store and navigate
-    const authStore = useAuthStore()
-    authStore.$patch({ initialized: false })
-    await authStore.initialize()
-    const role = authStore.role as UserRole
-    navigateTo(ROLE_HOME_MAP[role] || '/family', { replace: true })
+    navigateTo(DEMO_HOME[roleKey] || '/demo/family', { replace: true })
   }
   catch (err: any) {
     error.value = err?.data?.message || err?.message || 'Ошибка входа. Попробуйте ещё раз.'

@@ -41,19 +41,8 @@
       </div>
 
       <!-- Empty state -->
-      <div v-else class="empty-card">
-        <Icon name="lucide:check-circle" size="36" style="color:var(--color-success); opacity:0.4;" />
-        <p class="empty-text">Все задачи выполнены</p>
-      </div>
+      <AppSharedEmptyState v-else icon="lucide:check-circle" title="Все задачи выполнены" />
     </template>
-
-    <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="toast" class="toast" :class="`toast--${toast.type}`">
-        <Icon :name="toast.type === 'success' ? 'lucide:check-circle' : 'lucide:alert-circle'" size="16" />
-        {{ toast.message }}
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -66,12 +55,7 @@ const appData = useAppData()
 const filter = ref('all')
 const loading = ref(true)
 const processingId = ref<string | null>(null)
-const toast = ref<{ type: 'success' | 'error'; message: string } | null>(null)
-
-function showToast(type: 'success' | 'error', message: string) {
-  toast.value = { type, message }
-  setTimeout(() => { toast.value = null }, 3000)
-}
+const { success: toastSuccess, error: toastError } = useToast()
 
 onMounted(async () => {
   const cid = authStore.clinicId
@@ -118,9 +102,9 @@ async function completeTask(id: string) {
   try {
     const { error } = await coordStore.completeTask(id)
     if (error) throw error
-    showToast('success', 'Задача выполнена')
+    toastSuccess('Задача выполнена')
   }
-  catch { showToast('error', 'Не удалось завершить задачу') }
+  catch { toastError('Не удалось завершить задачу') }
   finally { processingId.value = null }
 }
 
@@ -129,9 +113,9 @@ async function dismissTask(id: string) {
   try {
     const { error } = await coordStore.dismissTask(id)
     if (error) throw error
-    showToast('success', 'Задача отклонена')
+    toastSuccess('Задача отклонена')
   }
-  catch { showToast('error', 'Не удалось отклонить задачу') }
+  catch { toastError('Не удалось отклонить задачу') }
   finally { processingId.value = null }
 }
 </script>

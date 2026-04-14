@@ -106,10 +106,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 780px;
+  max-width: 1000px;
   margin: 0 auto;
   height: 56px;
-  padding: 0 8px 0 20px;
+  padding: 0 6px;
   border-radius: var(--radius-full);
   background: rgba(254, 252, 255, 0.72);
   backdrop-filter: blur(20px) saturate(180%);

@@ -37,11 +37,7 @@
       </div>
     </div>
 
-    <div v-else class="empty-state">
-      <Icon name="lucide:folder" size="40" class="empty-icon" />
-      <h3>Нет документов</h3>
-      <p>Загрузите анализы, УЗИ, выписки</p>
-    </div>
+    <AppSharedEmptyState v-else icon="lucide:folder-open" title="Нет документов" description="Загрузите анализы, УЗИ, выписки" />
 
     <!-- Upload Modal -->
     <Teleport to="body">

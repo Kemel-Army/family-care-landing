@@ -49,7 +49,7 @@
           <span class="dose-status" :class="d.status">{{ doseLabel(d.status) }}</span>
         </div>
       </div>
-      <p v-else class="empty-mini">Нет данных</p>
+      <AppSharedEmptyState v-else size="sm" icon="lucide:pill" title="Нет данных" />
 
       <div class="adherence-summary">
         <span>Adherence за 7 дней:</span>

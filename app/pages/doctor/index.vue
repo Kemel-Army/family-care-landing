@@ -60,9 +60,7 @@
           <span v-else class="slot-free-label">Свободно</span>
         </div>
       </div>
-      <div v-else class="card-empty">
-        <span>Нет записей на сегодня</span>
-      </div>
+      <AppSharedEmptyState v-else icon="lucide:calendar-off" title="Нет записей на сегодня" />
     </div>
 
     <!-- Weekly load chart -->

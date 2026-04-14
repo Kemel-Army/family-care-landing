@@ -206,6 +206,9 @@
 
     <!-- Onboarding wizard for new users -->
     <AppOnboardingWizard v-if="showOnboarding" @complete="showOnboarding = false" />
+
+    <!-- Global toast notifications -->
+    <AppToastContainer />
   </div>
 </template>
 

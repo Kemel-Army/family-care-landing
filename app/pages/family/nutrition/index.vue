@@ -201,13 +201,6 @@
         </div>
       </div>
     </Teleport>
-
-    <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="toast" class="toast">
-        <Icon name="lucide:check-circle" size="16" /> {{ toast }}
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -255,7 +248,7 @@ const introStatuses = [
 // Feed modal
 const showFeedModal = ref(false)
 const saving = ref(false)
-const toast = ref('')
+const { success: toastSuccess } = useToast()
 
 const feedForm = reactive({
   type: 'breast' as string,
@@ -286,8 +279,7 @@ async function saveFeed() {
     })
     await appData.fetchAll()
     showFeedModal.value = false
-    toast.value = 'Кормление записано!'
-    setTimeout(() => { toast.value = '' }, 2500)
+    toastSuccess('Кормление записано!')
     Object.assign(feedForm, { type: 'breast', side: 'L', duration: null, food: '', amount: '', notes: '' })
   }
   catch (e) { console.error(e) }
@@ -322,8 +314,7 @@ async function saveIntro() {
     })
     await appData.fetchFoodIntros(childId)
     showIntroModal.value = false
-    toast.value = `${introForm.food} добавлен!`
-    setTimeout(() => { toast.value = '' }, 2500)
+    toastSuccess(`${introForm.food} добавлен!`)
     Object.assign(introForm, { food: '', introduced_at: new Date().toISOString().slice(0, 10), status: 'accepted', reaction: '', notes: '' })
   }
   catch (e) { console.error(e) }

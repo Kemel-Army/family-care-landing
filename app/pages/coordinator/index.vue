@@ -63,10 +63,7 @@
           <button class="btn-sm btn-sm--done" :disabled="completing === t.id" @click="handleComplete(t.id)">✓</button>
         </div>
       </div>
-      <div v-else class="card-empty">
-        <Icon name="lucide:check-circle" size="28" style="color: var(--color-success); opacity: 0.5" />
-        <span>Все задачи выполнены</span>
-      </div>
+      <AppSharedEmptyState v-else icon="lucide:check-circle" title="Все задачи выполнены" />
     </div>
 
     <!-- Two column layout -->
@@ -110,14 +107,6 @@
       </div>
     </div>
     </template>
-
-    <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="toast" class="toast" :class="`toast--${toast.type}`">
-        <Icon :name="toast.type === 'success' ? 'lucide:check-circle' : 'lucide:alert-circle'" size="16" />
-        {{ toast.message }}
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -130,10 +119,15 @@ const authStore = useAuthStore()
 const appData = useAppData()
 
 const completing = ref<string | null>(null)
-const toast = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+const { success: toastSuccess, error: toastError } = useToast()
 
-// ── Fetch real data on mount ──
 const clinicId = computed(() => authStore.clinicId)
+const loading = computed(() => coordStore.loading && coordStore.tasks.length === 0)
+
+// ── Day schedule from today's appointments (real DB) ──
+const daySchedule = ref<Array<{ time: string; event: string; detail?: string | null; active?: boolean; past?: boolean }>>([])
+
+const activityItems = ref<Array<{ id: string | number; text: string; time: string }>>([])
 
 onMounted(async () => {
   if (clinicId.value) {
@@ -142,11 +136,68 @@ onMounted(async () => {
       coordStore.fetchStats(clinicId.value),
     ])
   }
+
+  // Fetch day schedule from appointments
+  const supabase = useSupabaseClient()
+  const today = new Date().toISOString().slice(0, 10)
+  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes()
+
+  const { data: todayAppts } = await supabase
+    .from('appointments')
+    .select('id, start_time, end_time, status, notes, visit_type, child_profiles(name)')
+    .eq('appointment_date', today)
+    .order('start_time', { ascending: true })
+    .limit(20)
+
+  if (todayAppts?.length) {
+    daySchedule.value = todayAppts.map((a: any) => {
+      const time = a.start_time?.slice(0, 5) || ''
+      const child = a.child_profiles as Record<string, unknown> | null
+      const name = child?.name || 'Пациент'
+      const [h, m] = (a.start_time || '').split(':').map(Number)
+      const slotMinutes = (h || 0) * 60 + (m || 0)
+      return {
+        time,
+        event: `${a.visit_type || 'Приём'} — ${name}`,
+        detail: a.notes || null,
+        active: Math.abs(slotMinutes - nowMinutes) < 30,
+        past: slotMinutes < nowMinutes - 30,
+      }
+    })
+  } else {
+    // Fallback mock if no appointments
+    daySchedule.value = [
+      { time: '09:00', event: 'Звонок — Каримова А.', detail: 'УЗИ просрочено', active: true },
+      { time: '10:00', event: 'Подключение — Жумабаева К.', detail: 'Новая семья', active: false },
+      { time: '11:30', event: 'Напоминание — Нурланова С.', detail: 'Автоматическое', active: false },
+      { time: '14:00', event: 'Проверка adherence — 5 семей', detail: null, active: false },
+      { time: '16:00', event: 'Отчёт для руководителя', detail: null, active: false },
+    ]
+  }
+
+  // Fetch recent activity from notifications
+  const { data: recentNotifs } = await supabase
+    .from('notifications')
+    .select('id, title, created_at')
+    .order('created_at', { ascending: false })
+    .limit(5)
+
+  if (recentNotifs?.length) {
+    activityItems.value = recentNotifs.map((n: any) => ({
+      id: n.id,
+      text: n.title,
+      time: timeAgo(n.created_at),
+    }))
+  } else {
+    activityItems.value = [
+      { id: 1, text: 'Каримова А. подтвердила запись на УЗИ', time: '2 мин назад' },
+      { id: 2, text: 'Push-уведомление отправлено Алиевой Д.', time: '15 мин назад' },
+      { id: 3, text: 'Новая семья: Жумабаева К. зарегистрирована', time: '1 час назад' },
+      { id: 4, text: 'Нурланова С. отметила приём витамина D3', time: '2 часа назад' },
+      { id: 5, text: 'Сулейменова М. загрузила результат ОАК', time: '3 часа назад' },
+    ]
+  }
 })
-
-const loading = computed(() => coordStore.loading && coordStore.tasks.length === 0)
-
-// ── Greeting ──
 const greetingLine = computed(() => {
   const name = authStore.profile?.first_name || 'Координатор'
   const h = new Date().getHours()
@@ -184,18 +235,13 @@ async function handleComplete(taskId: string) {
   completing.value = taskId
   try {
     const { error } = await coordStore.completeTask(taskId)
-    if (error) showToast('error', 'Не удалось завершить задачу')
-    else showToast('success', 'Задача завершена!')
+    if (error) toastError('Не удалось завершить задачу')
+    else toastSuccess('Задача завершена!')
   } catch {
-    showToast('error', 'Ошибка сети')
+    toastError('Ошибка сети')
   } finally {
     completing.value = null
   }
-}
-
-function showToast(type: 'success' | 'error', message: string) {
-  toast.value = { type, message }
-  setTimeout(() => { toast.value = null }, 3000)
 }
 
 function taskTypeLabel(type: string) {
@@ -234,23 +280,6 @@ const taskPieOption = computed<EChartsOption>(() => {
     }],
   }
 })
-
-// ── Day schedule (placeholder until schedule API) ──
-const daySchedule = [
-  { time: '09:00', event: 'Звонок — Каримова А.', detail: 'УЗИ просрочено', active: true },
-  { time: '10:00', event: 'Подключение — Жумабаева К.', detail: 'Новая семья', active: false },
-  { time: '11:30', event: 'Напоминание — Нурланова С.', detail: 'Автоматическое', active: false },
-  { time: '14:00', event: 'Проверка adherence — 5 семей', detail: null, active: false },
-  { time: '16:00', event: 'Отчёт для руководителя', detail: null, active: false },
-]
-
-const activityItems = [
-  { id: 1, text: 'Каримова А. подтвердила запись на УЗИ', time: '2 мин назад' },
-  { id: 2, text: 'Push-уведомление отправлено Алиевой Д.', time: '15 мин назад' },
-  { id: 3, text: 'Новая семья: Жумабаева К. зарегистрирована', time: '1 час назад' },
-  { id: 4, text: 'Нурланова С. отметила приём витамина D3', time: '2 часа назад' },
-  { id: 5, text: 'Сулейменова М. загрузила результат ОАК', time: '3 часа назад' },
-]
 </script>
 
 <style scoped>

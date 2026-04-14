@@ -5,10 +5,11 @@ const DEMO_ACCOUNTS: Record<string, string> = {
   mom: 'p1@demo.kz',
   coordinator: 'dinara@demo.kz',
   admin: 'admin@demo.kz',
+  doctor: 'doctor@demo.kz',
 }
 
 const schema = z.object({
-  role: z.enum(['mom', 'coordinator', 'admin']),
+  role: z.enum(['mom', 'coordinator', 'admin', 'doctor']),
 })
 
 // Simple per-IP rate limit for demo login: 10 requests per minute

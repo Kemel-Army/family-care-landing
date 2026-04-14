@@ -81,7 +81,7 @@
             <!-- Children -->
             <div class="card">
               <h2 class="card-title"><Icon name="lucide:baby" size="16" /> Дети</h2>
-              <div v-if="!data.children.length" class="empty-mini">Детей пока нет</div>
+              <AppSharedEmptyState v-if="!data.children.length" size="sm" icon="lucide:baby" title="Детей пока нет" />
               <div v-for="c in data.children" :key="c.id" class="child-row">
                 <div class="child-avatar">{{ (c.name || '?')[0] }}</div>
                 <div class="child-info">
@@ -159,7 +159,7 @@
             <h2 class="card-title"><Icon name="lucide:clock" size="16" /> Хронология</h2>
             <button class="btn-sm" @click="showActivity = true"><Icon name="lucide:plus" size="12" /> Записать</button>
           </div>
-          <div v-if="!activities.length && !activitiesLoading" class="empty-mini">История взаимодействий пуста</div>
+          <AppSharedEmptyState v-if="!activities.length && !activitiesLoading" size="sm" icon="lucide:clock" title="История взаимодействий пуста" />
           <div v-for="act in activities" :key="act.id" class="activity-item">
             <div class="act-dot" :class="act.type" />
             <div class="act-body">
@@ -176,7 +176,7 @@
 
       <!-- ═══════ TAB: Journey ═══════ -->
       <template v-if="activeTab === 'journey'">
-        <div v-if="!data.journey" class="card"><div class="empty-mini">Активный маршрут не найден</div></div>
+        <div v-if="!data.journey" class="card"><AppSharedEmptyState size="sm" icon="lucide:route" title="Активный маршрут не найден" /></div>
         <template v-else>
           <div class="card">
             <h2 class="card-title"><Icon name="lucide:route" size="16" /> {{ journeyTypeLabel(data.journey.type) }} — События</h2>
@@ -202,7 +202,7 @@
       <template v-if="activeTab === 'prescriptions'">
         <div class="card">
           <h2 class="card-title"><Icon name="lucide:pill" size="16" /> Назначения</h2>
-          <div v-if="!data.prescriptions.length" class="empty-mini">Назначений нет</div>
+          <AppSharedEmptyState v-if="!data.prescriptions.length" size="sm" icon="lucide:pill" title="Назначений нет" />
           <div v-for="rx in data.prescriptions" :key="rx.id" class="rx-detail-row">
             <div class="rx-detail-main">
               <span class="rx-name">{{ rx.medication }}</span>
@@ -233,7 +233,7 @@
             <h2 class="card-title"><Icon name="lucide:sticky-note" size="16" /> Заметки</h2>
             <button class="btn-sm" @click="showNote = true"><Icon name="lucide:plus" size="12" /> Добавить</button>
           </div>
-          <div v-if="!data.notes.length" class="empty-mini">Заметок пока нет</div>
+          <AppSharedEmptyState v-if="!data.notes.length" size="sm" icon="lucide:sticky-note" title="Заметок пока нет" />
           <div v-for="n in data.notes" :key="n.id" class="note-item" :class="{ pinned: n.is_pinned }">
             <div class="note-header">
               <Icon v-if="n.is_pinned" name="lucide:pin" size="12" class="note-pin" />

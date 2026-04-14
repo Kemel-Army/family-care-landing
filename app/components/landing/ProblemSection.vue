@@ -63,7 +63,26 @@ useSplitText(titleRef, {
 })
 
 onMounted(() => {
-  // section animations handled by data-reveal attributes
+  if (!gsap || !ScrollTrigger || !cardsRef.value) return
+
+  const cards = cardsRef.value.querySelectorAll('.problem-card')
+  gsap.set(cards, { opacity: 0, y: 40, scale: 0.95 })
+
+  ScrollTrigger.create({
+    trigger: cardsRef.value,
+    start: 'top 80%',
+    once: true,
+    onEnter: () => {
+      gsap.to(cards, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.7,
+        stagger: 0.15,
+        ease: 'back.out(1.4)',
+      })
+    },
+  })
 })
 </script>
 
@@ -164,6 +183,24 @@ onMounted(() => {
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.problem-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(212, 114, 124, 0.03) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.problem-card:hover::before {
+  opacity: 1;
 }
 
 .problem-card--problem {
@@ -175,18 +212,23 @@ onMounted(() => {
 }
 
 .problem-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(212, 114, 124, 0.12);
 }
 
 .problem-card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.problem-card:hover .problem-card-icon {
+  transform: scale(1.1) rotate(-3deg);
 }
 
 .problem-card-icon--danger {

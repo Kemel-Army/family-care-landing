@@ -58,10 +58,7 @@
           <span class="hp-type-badge">{{ typeLabel(e.type) }}</span>
         </div>
       </div>
-      <div v-else class="hp-empty">
-        <Icon name="lucide:file-text" size="32" style="color: var(--color-text-muted); opacity: 0.4" />
-        <p>Паспорт здоровья пока пуст</p>
-      </div>
+      <AppSharedEmptyState v-else icon="lucide:file-text" title="Паспорт здоровья пока пуст" />
     </div>
   </div>
 </template>

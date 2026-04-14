@@ -4,15 +4,15 @@
     <div class="grid-kpi">
       <div class="kpi-card">
         <span class="kpi-overline">Пациентов</span>
-        <span class="kpi-val font-display">34</span>
+        <span class="kpi-val font-display">{{ doctorKpi.totalPatients }}</span>
       </div>
       <div class="kpi-card kpi-card--warm">
         <span class="kpi-overline">Визитов сегодня</span>
-        <span class="kpi-val font-display">8</span>
+        <span class="kpi-val font-display">{{ doctorKpi.todayAppointments }}</span>
       </div>
       <div class="kpi-card kpi-card--blue">
-        <span class="kpi-overline">Средний Adherence</span>
-        <span class="kpi-val font-display">91%</span>
+        <span class="kpi-overline">Свободных слотов</span>
+        <span class="kpi-val font-display">{{ doctorKpi.freeSlots }}</span>
       </div>
     </div>
 
@@ -21,24 +21,16 @@
       <h2 class="panel-title">Расписание на сегодня</h2>
       <div class="doctor-schedule">
         <div
-          v-for="visit in visits"
-          :key="visit.id"
+          v-for="slot in todaySchedule"
+          :key="slot.id"
           class="visit-card"
-          :class="{ 'visit-warning': visit.warning }"
+          :class="{ 'visit-free': !slot.is_booked }"
         >
-          <div class="visit-time font-mono">{{ visit.time }}</div>
-          <div class="visit-body">
+          <div class="visit-time font-mono">{{ slot.start_time }}</div>
+          <div v-if="slot.is_booked" class="visit-body">
             <div class="visit-header">
-              <span class="visit-name">{{ visit.patient }}</span>
-              <span class="visit-type-badge">{{ visit.type }}</span>
-            </div>
-            <p class="visit-info">{{ visit.info }}</p>
-            <div class="visit-meta">
-              <span class="visit-adherence" :class="visit.adherenceClass">
-                Adherence {{ visit.adherence }}%
-                <Icon :name="visit.adherence >= 80 ? 'lucide:check' : 'lucide:alert-triangle'" size="12" />
-              </span>
-              <span v-if="visit.note" class="visit-note">{{ visit.note }}</span>
+              <span class="visit-name">{{ slot.patient_name }}</span>
+              <span class="visit-type-badge">{{ slot.reason }}</span>
             </div>
             <div class="visit-actions">
               <button class="visit-btn">
@@ -55,6 +47,26 @@
               </button>
             </div>
           </div>
+          <div v-else class="visit-body">
+            <span class="visit-free-label">Свободный слот</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Patients -->
+    <section class="demo-panel">
+      <h2 class="panel-title">Мои пациенты</h2>
+      <div class="doctor-patients">
+        <div v-for="p in doctorPatients" :key="p.id" class="patient-card">
+          <div class="patient-info">
+            <span class="patient-name">{{ p.mother_name }}</span>
+            <span class="patient-journey">{{ p.journey_type }}</span>
+          </div>
+          <div class="patient-meta">
+            <span class="patient-visit">Посл. визит: {{ formatDate(p.last_visit) }}</span>
+            <span class="patient-next">След.: {{ formatDate(p.next_visit) }}</span>
+          </div>
         </div>
       </div>
     </section>
@@ -64,63 +76,13 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'demo' })
 
-const visits = [
-  {
-    id: 1,
-    time: '09:00',
-    patient: 'Каримова А.',
-    type: 'УЗИ',
-    info: 'Беременность 24 нед · II триместр скрининг',
-    adherence: 45,
-    adherenceClass: 'adherence--danger',
-    warning: true,
-    note: 'Пропустила 2 визита',
-  },
-  {
-    id: 2,
-    time: '10:30',
-    patient: 'Алиева Д.',
-    type: 'Плановый осмотр',
-    info: 'Беременность 16 нед',
-    adherence: 92,
-    adherenceClass: 'adherence--success',
-    warning: false,
-    note: 'Всё по графику',
-  },
-  {
-    id: 3,
-    time: '12:00',
-    patient: 'Нурланова С.',
-    type: 'АКДС #3',
-    info: 'Малыш 6 мес · Вакцинация',
-    adherence: 98,
-    adherenceClass: 'adherence--success',
-    warning: false,
-    note: 'Вес/рост в норме',
-  },
-  {
-    id: 4,
-    time: '14:00',
-    patient: 'Байтурсынова Г.',
-    type: 'Первичный',
-    info: 'Малыш 1 мес · Первый осмотр',
-    adherence: 100,
-    adherenceClass: 'adherence--success',
-    warning: false,
-    note: null,
-  },
-  {
-    id: 5,
-    time: '15:30',
-    patient: 'Оразова Л.',
-    type: 'Консультация',
-    info: 'Беременность 32 нед · Результаты анализов',
-    adherence: 78,
-    adherenceClass: 'adherence--warning',
-    warning: false,
-    note: 'Пропустила приём железа',
-  },
-]
+const { doctorKpi, todaySchedule, doctorPatients } = useMockData()
+
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+  return `${d.getDate()} ${months[d.getMonth()]}`
+}
 </script>
 
 <style scoped>
@@ -214,9 +176,16 @@ const visits = [
   box-shadow: var(--shadow-md);
 }
 
-.visit-warning {
-  border-left: 3px solid var(--color-danger);
-  background: rgba(212, 114, 124, 0.03);
+.visit-free {
+  border: 1px dashed var(--color-border);
+  background: var(--color-bg-alt);
+  opacity: 0.7;
+}
+
+.visit-free-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .visit-time {
@@ -256,26 +225,52 @@ const visits = [
   margin: 0 0 6px;
 }
 
-.visit-meta {
+/* Patients */
+.doctor-patients {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.patient-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+  transition: box-shadow var(--transition-fast);
 }
 
-.visit-adherence {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--text-xs);
+.patient-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.patient-name {
   font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
 }
 
-.adherence--success { color: var(--color-success); }
-.adherence--warning { color: #C4930E; }
-.adherence--danger { color: var(--color-danger); }
+.patient-journey {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
 
-.visit-note {
+.patient-meta {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.patient-visit,
+.patient-next {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }

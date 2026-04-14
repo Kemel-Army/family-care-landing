@@ -3,7 +3,7 @@
     <!-- Greeting -->
     <div class="demo-greeting">
       <h1 class="demo-greeting-title font-display">Привет, Айгерим!</h1>
-      <p class="demo-greeting-sub">Алиса · 4 мес. 12 дней</p>
+      <p class="demo-greeting-sub">{{ children[0]?.first_name }} · {{ childAge }}</p>
     </div>
 
     <!-- KPI row -->
@@ -12,23 +12,23 @@
         <span class="kpi-label">Adherence сегодня</span>
         <div class="kpi-progress">
           <div class="kpi-progress-track">
-            <div class="kpi-progress-fill" style="width: 66%" />
+            <div class="kpi-progress-fill" :style="{ width: todayAdherencePercent + '%' }" />
           </div>
-          <span class="kpi-progress-text font-mono">2/3</span>
+          <span class="kpi-progress-text font-mono">{{ todayTaken }}/{{ todayTotal }}</span>
         </div>
       </div>
       <div class="kpi-card kpi-card--warm">
         <span class="kpi-label">Streak</span>
         <div class="kpi-val">
-          <span class="kpi-number font-display">12</span>
+          <span class="kpi-number font-display">{{ streaks.doses.current }}</span>
           <span class="kpi-unit">дней подряд</span>
         </div>
       </div>
       <div class="kpi-card kpi-card--blue">
         <span class="kpi-label">Маршрут</span>
         <div class="kpi-val">
-          <span class="kpi-number font-display">68%</span>
-          <span class="kpi-unit">34 из 50</span>
+          <span class="kpi-number font-display">{{ familyKpi.journeyProgress.value }}%</span>
+          <span class="kpi-unit">{{ familyKpi.completedEvents }} из {{ familyKpi.totalEvents }}</span>
         </div>
       </div>
     </div>
@@ -38,29 +38,43 @@
       <h2 class="demo-section-title">Назначения на сегодня</h2>
       <div class="demo-doses">
         <div
-          v-for="dose in doses"
-          :key="dose.id"
-          class="dose-card"
-          :class="{ 'dose-taken': dose.taken }"
+          v-for="rx in prescriptions"
+          :key="rx.id"
+          class="rx-card"
         >
-          <div class="dose-icon" :style="{ background: dose.color }">
-            <Icon name="lucide:pill" size="16" />
+          <div class="rx-header">
+            <div class="rx-icon" :style="{ background: rxColors[rx.id] || 'var(--color-primary)' }">
+              <Icon name="lucide:pill" size="16" />
+            </div>
+            <div class="rx-info">
+              <span class="rx-name">{{ rx.medication }}</span>
+              <span class="rx-dosage">{{ rx.dosage }} · {{ rx.frequency }}</span>
+            </div>
+            <span class="rx-adherence" :class="adherenceClass(rx.adherencePercent)">
+              {{ rx.adherencePercent }}%
+            </span>
           </div>
-          <div class="dose-body">
-            <span class="dose-name">{{ dose.name }}</span>
-            <span class="dose-time">{{ dose.time }}</span>
+          <div class="rx-doses">
+            <div
+              v-for="dose in rx.todayDoses"
+              :key="dose.id"
+              class="dose-row"
+              :class="{ 'dose-taken': doseStatuses[dose.id] === 'confirmed' }"
+            >
+              <span class="dose-time font-mono">{{ dose.time }}</span>
+              <button
+                v-if="doseStatuses[dose.id] !== 'confirmed'"
+                class="dose-btn"
+                @click="takeDose(dose.id)"
+              >
+                Принять
+              </button>
+              <span v-else class="dose-done">
+                <Icon name="lucide:check" size="16" />
+                Принято
+              </span>
+            </div>
           </div>
-          <button
-            v-if="!dose.taken"
-            class="dose-btn"
-            @click="takeDose(dose.id)"
-          >
-            Принять
-          </button>
-          <span v-else class="dose-done">
-            <Icon name="lucide:check" size="16" />
-            Принято
-          </span>
         </div>
       </div>
     </section>
@@ -69,15 +83,42 @@
     <section class="demo-section">
       <h2 class="demo-section-title">Ближайшие события</h2>
       <div class="demo-events">
-        <div v-for="event in events" :key="event.id" class="event-card">
-          <div class="event-icon" :style="{ background: event.color }">
-            <Icon :name="event.icon" size="16" />
+        <div
+          v-for="event in upcomingEvents"
+          :key="event.id"
+          class="event-card"
+          :class="{ 'event-overdue': event.status === 'overdue' }"
+        >
+          <div class="event-icon" :style="{ background: eventColor(event.status) }">
+            <Icon :name="eventIcon(event.type)" size="16" />
           </div>
           <div class="event-body">
-            <span class="event-name">{{ event.name }}</span>
-            <span class="event-date">{{ event.date }}</span>
+            <span class="event-name">{{ event.title }}</span>
+            <span class="event-date">{{ event.description }}</span>
           </div>
-          <span class="event-badge" :class="event.badgeClass">{{ event.badge }}</span>
+          <span class="event-badge" :class="`badge--${event.status}`">{{ statusLabel(event.status) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vaccinations -->
+    <section class="demo-section">
+      <h2 class="demo-section-title">Прививки</h2>
+      <div class="demo-vaccinations">
+        <div
+          v-for="v in vaccinations"
+          :key="v.id"
+          class="vacc-card"
+          :class="{ 'vacc-done': v.status === 'completed' }"
+        >
+          <Icon :name="v.status === 'completed' ? 'lucide:shield-check' : 'lucide:shield'" size="18" class="vacc-icon" />
+          <div class="vacc-body">
+            <span class="vacc-name">{{ v.name }}</span>
+            <span class="vacc-dose">{{ v.dose }}</span>
+          </div>
+          <span class="vacc-status" :class="`vacc-status--${v.status}`">
+            {{ v.status === 'completed' ? formatDate(v.date) : 'Предстоит' }}
+          </span>
         </div>
       </div>
     </section>
@@ -87,21 +128,80 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'demo' })
 
-const doses = ref([
-  { id: 1, name: 'Витамин D3', time: '08:00', color: 'var(--color-primary)', taken: true },
-  { id: 2, name: 'Железо', time: '14:00', color: 'var(--color-secondary)', taken: false },
-  { id: 3, name: 'Магний B6', time: '20:00', color: 'var(--color-accent-blue)', taken: false },
-])
+const {
+  familyKpi, prescriptions, journeyEvents, vaccinations,
+  children, streaks,
+} = useMockData()
 
-const events = [
-  { id: 1, name: 'Педиатр — осмотр', date: 'Сегодня, 14:00', icon: 'lucide:stethoscope', color: 'var(--color-secondary)', badge: 'Сегодня', badgeClass: 'badge--warning' },
-  { id: 2, name: 'АКДС #2', date: 'Через 5 дней', icon: 'lucide:shield-check', color: 'var(--color-accent-blue)', badge: 'Скоро', badgeClass: 'badge--info' },
-  { id: 3, name: 'Общий анализ крови', date: 'Через 8 дней', icon: 'lucide:flask-conical', color: 'var(--color-success)', badge: 'Плановый', badgeClass: 'badge--neutral' },
-]
+// Track dose statuses reactively — initialized from mock data
+const doseStatuses = ref<Record<string, string>>({})
+for (const rx of prescriptions) {
+  for (const dose of rx.todayDoses) {
+    doseStatuses.value[dose.id] = dose.status
+  }
+}
 
-function takeDose(id: number) {
-  const dose = doses.value.find(d => d.id === id)
-  if (dose) dose.taken = true
+const todayTotal = computed(() => prescriptions.reduce((sum, rx) => sum + rx.todayDoses.length, 0))
+const todayTaken = computed(() => Object.values(doseStatuses.value).filter(s => s === 'confirmed').length)
+const todayAdherencePercent = computed(() => todayTotal.value ? Math.round((todayTaken.value / todayTotal.value) * 100) : 0)
+
+const upcomingEvents = computed(() => journeyEvents.filter(e => e.status !== 'completed').slice(0, 5))
+
+const childAge = computed(() => {
+  if (!children[0]) return ''
+  const birth = new Date(children[0].birth_date)
+  const now = new Date()
+  const months = (now.getFullYear() - birth.getFullYear()) * 12 + now.getMonth() - birth.getMonth()
+  const days = now.getDate() - birth.getDate()
+  return `${months} мес. ${days >= 0 ? days : 30 + days} дней`
+})
+
+function takeDose(id: string) {
+  doseStatuses.value[id] = 'confirmed'
+}
+
+const rxColors: Record<string, string> = {
+  rx1: 'var(--color-primary)',
+  rx2: 'var(--color-secondary)',
+  rx3: 'var(--color-accent-blue)',
+  rx4: 'var(--color-success)',
+}
+
+function adherenceClass(val: number) {
+  if (val >= 90) return 'adherence--success'
+  if (val >= 70) return 'adherence--warning'
+  return 'adherence--danger'
+}
+
+function eventColor(status: string) {
+  const colors: Record<string, string> = {
+    overdue: 'var(--color-danger)',
+    due: 'var(--color-warning)',
+    upcoming: 'var(--color-accent-blue)',
+  }
+  return colors[status] || 'var(--color-primary)'
+}
+
+function eventIcon(type: string) {
+  const icons: Record<string, string> = {
+    ultrasound: 'lucide:scan',
+    analysis: 'lucide:flask-conical',
+    screening: 'lucide:scan-search',
+    checkup: 'lucide:stethoscope',
+    vaccination: 'lucide:shield-check',
+  }
+  return icons[type] || 'lucide:calendar'
+}
+
+function statusLabel(status: string) {
+  const labels: Record<string, string> = { overdue: 'Просрочено', due: 'Сегодня', upcoming: 'Скоро' }
+  return labels[status] || status
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+  return `${d.getDate()} ${months[d.getMonth()]}`
 }
 </script>
 
@@ -232,29 +332,28 @@ function takeDose(id: number) {
   margin: 0 0 16px;
 }
 
-/* Doses */
+/* Doses → Rx cards */
 .demo-doses {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-.dose-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+.rx-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
-  transition: all var(--transition-smooth);
+  padding: 14px 16px;
 }
 
-.dose-taken {
-  opacity: 0.6;
+.rx-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
-.dose-icon {
+.rx-icon {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-sm);
@@ -265,28 +364,61 @@ function takeDose(id: number) {
   flex-shrink: 0;
 }
 
-.dose-body {
+.rx-info {
   flex: 1;
 }
 
-.dose-name {
+.rx-name {
   display: block;
   font-weight: 600;
   font-size: var(--text-body);
   color: var(--color-text-primary);
 }
 
-.dose-time {
+.rx-dosage {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
+.rx-adherence {
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.adherence--success { color: var(--color-success); }
+.adherence--warning { color: #C4930E; }
+.adherence--danger { color: var(--color-danger); }
+
+.rx-doses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 48px;
+}
+
+.dose-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.dose-taken {
+  opacity: 0.6;
+}
+
+.dose-time {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  width: 44px;
+}
+
 .dose-btn {
-  padding: 8px 20px;
+  padding: 6px 16px;
   border-radius: var(--radius-full);
   background: var(--gradient-cta);
   color: white;
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 600;
   border: none;
   cursor: pointer;
@@ -301,7 +433,7 @@ function takeDose(id: number) {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--color-success);
 }
@@ -321,6 +453,11 @@ function takeDose(id: number) {
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
+}
+
+.event-overdue {
+  border-left: 3px solid var(--color-danger);
+  background: rgba(212, 114, 124, 0.03);
 }
 
 .event-icon {
@@ -370,6 +507,75 @@ function takeDose(id: number) {
   background: var(--color-bg-alt);
   color: var(--color-text-secondary);
 }
+
+.badge--overdue {
+  background: rgba(212, 114, 124, 0.12);
+  color: #B84E5A;
+}
+
+.badge--due {
+  background: rgba(233, 196, 106, 0.15);
+  color: #C4930E;
+}
+
+.badge--upcoming {
+  background: rgba(139, 126, 200, 0.1);
+  color: var(--color-primary);
+}
+
+/* Vaccinations */
+.demo-vaccinations {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vacc-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-surface);
+}
+
+.vacc-done {
+  opacity: 0.7;
+}
+
+.vacc-icon {
+  color: var(--color-accent-blue);
+  flex-shrink: 0;
+}
+
+.vacc-done .vacc-icon {
+  color: var(--color-success);
+}
+
+.vacc-body {
+  flex: 1;
+}
+
+.vacc-name {
+  display: block;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.vacc-dose {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.vacc-status {
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.vacc-status--completed { color: var(--color-success); }
+.vacc-status--upcoming { color: var(--color-accent-blue); }
 
 @media (max-width: 480px) {
   .demo-kpi-row {

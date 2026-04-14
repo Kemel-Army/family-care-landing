@@ -86,10 +86,7 @@
           <span class="lr-date">{{ formatDate(lead.created_at) }}</span>
         </NuxtLink>
       </div>
-      <div v-if="!filteredLeads.length" class="empty-card">
-        <Icon name="lucide:user-plus" size="32" style="opacity:0.3; color:var(--color-primary)" />
-        <p class="empty-text">Лиды не найдены</p>
-      </div>
+      <AppSharedEmptyState v-if="!filteredLeads.length" icon="lucide:user-plus" title="Лиды не найдены" />
     </div>
 
     <!-- Create Modal -->

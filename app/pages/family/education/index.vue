@@ -43,10 +43,7 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else class="empty-card">
-      <Icon name="lucide:search-x" size="36" style="color: var(--color-primary); opacity: 0.3;" />
-      <p class="empty-text">Нет материалов в этой категории</p>
-    </div>
+    <AppSharedEmptyState v-else icon="lucide:search-x" title="Нет материалов в этой категории" />
   </div>
 </template>
 

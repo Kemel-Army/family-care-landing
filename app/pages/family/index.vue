@@ -170,10 +170,7 @@
               </button>
             </div>
           </div>
-          <div v-else class="card-empty">
-            <Icon name="lucide:check-circle" size="28" style="color: var(--color-success); opacity: 0.5" />
-            <span>На сегодня всё выполнено</span>
-          </div>
+          <AppSharedEmptyState v-else icon="lucide:check-circle" title="На сегодня всё выполнено" />
         </div>
 
         <!-- Upcoming Events -->
@@ -195,9 +192,7 @@
               <span class="event-date">{{ formatDate(ev.due_date!) }}</span>
             </div>
           </div>
-          <div v-else class="card-empty">
-            <span>Нет предстоящих событий</span>
-          </div>
+          <AppSharedEmptyState v-else icon="lucide:calendar-off" title="Нет предстоящих событий" />
         </div>
 
         <!-- Appointments -->
@@ -224,10 +219,7 @@
               </span>
             </div>
           </div>
-          <div v-else class="card-empty">
-            <span>Нет записей к врачу</span>
-            <NuxtLink to="/family/appointments/book" class="empty-link">Записаться →</NuxtLink>
-          </div>
+          <AppSharedEmptyState v-else icon="lucide:stethoscope" title="Нет записей к врачу" action-label="Записаться" action-icon="lucide:calendar-plus" @action="navigateTo('/family/appointments/book')" />
         </div>
       </div>
 
@@ -259,9 +251,7 @@
               <span class="rx-adherence-label">Adherence: {{ rx.adherencePercent }}%</span>
             </div>
           </div>
-          <div v-else class="card-empty">
-            <span>Нет активных назначений</span>
-          </div>
+          <AppSharedEmptyState v-else icon="lucide:pill" title="Нет активных назначений" />
         </div>
 
         <!-- Adherence Chart -->
@@ -345,13 +335,6 @@
       </div>
     </section>
 
-    <!-- Toast notification -->
-    <Transition name="toast">
-      <div v-if="toast" class="toast" :class="`toast--${toast.type}`">
-        <Icon :name="toast.type === 'success' ? 'lucide:check-circle' : 'lucide:alert-circle'" size="16" />
-        {{ toast.message }}
-      </div>
-    </Transition>
     </template>
   </div>
 </template>
@@ -367,7 +350,7 @@ const notifStore = useNotificationStore()
 const appData = useAppData()
 
 const completing = ref<string | null>(null)
-const toast = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+const { success: toastSuccess, error: toastError } = useToast()
 
 // ── Loading state ──
 const loading = computed(() =>
@@ -531,12 +514,12 @@ async function handleComplete(eventId: string) {
   try {
     const { error } = await journeyStore.completeEvent(eventId)
     if (error) {
-      showToast('error', 'Не удалось отметить событие')
+      toastError('Не удалось отметить событие')
     } else {
-      showToast('success', 'Событие выполнено!')
+      toastSuccess('Событие выполнено!')
     }
   } catch {
-    showToast('error', 'Ошибка сети')
+    toastError('Ошибка сети')
   } finally {
     completing.value = null
   }
@@ -545,16 +528,11 @@ async function handleComplete(eventId: string) {
 async function handleConfirmDose(doseId: string) {
   try {
     const { error } = await prescriptionsStore.confirmDose(doseId)
-    if (!error) showToast('success', 'Приём подтверждён!')
-    else showToast('error', 'Не удалось подтвердить')
+    if (!error) toastSuccess('Приём подтверждён!')
+    else toastError('Не удалось подтвердить')
   } catch {
-    showToast('error', 'Ошибка сети')
+    toastError('Ошибка сети')
   }
-}
-
-function showToast(type: 'success' | 'error', message: string) {
-  toast.value = { type, message }
-  setTimeout(() => { toast.value = null }, 3000)
 }
 
 function formatDate(iso: string): string {

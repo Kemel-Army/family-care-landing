@@ -56,11 +56,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="no-logs">
-        <Icon name="lucide:moon" size="28" style="color:var(--color-primary); opacity:0.3; margin-bottom:8px" />
-        <p>Нет записей сна на сегодня</p>
-        <button class="btn-log-inline" @click="showModal = true">Записать первый</button>
-      </div>
+      <AppSharedEmptyState v-else icon="lucide:moon" title="Нет записей сна на сегодня" action-label="Записать первый" @action="showModal = true" />
     </div>
 
     <!-- Sleep quality tips -->
@@ -151,11 +147,6 @@
     </Teleport>
 
     <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="toast" class="toast toast--success">
-        <Icon name="lucide:check-circle" size="16" /> {{ toast }}
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -211,7 +202,7 @@ const sleepTips = [
 // Modal
 const showModal = ref(false)
 const saving = ref(false)
-const toast = ref('')
+const { success: toastSuccess } = useToast()
 
 const sleepForm = reactive({
   type: 'night' as 'night' | 'nap',
@@ -258,8 +249,7 @@ async function saveLog() {
     // Refresh today's logs
     await appData.fetchSleepLogsToday(childId)
     showModal.value = false
-    toast.value = 'Сон записан!'
-    setTimeout(() => { toast.value = '' }, 2500)
+    toastSuccess('Сон записан!')
     // Reset form
     Object.assign(sleepForm, { type: 'night', sleep_start: '', sleep_end: '', wake_ups: 0, quality: 0, notes: '' })
   }

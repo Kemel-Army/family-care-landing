@@ -63,10 +63,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="card-empty">
-        <Icon name="lucide:pill" size="28" style="opacity: 0.3" />
-        <span>Нет активных назначений</span>
-      </div>
+      <AppSharedEmptyState v-else icon="lucide:pill" title="Нет активных назначений" />
     </div>
 
     <!-- Streak -->
@@ -85,14 +82,6 @@
       </div>
     </div>
     </template>
-
-    <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="toast" class="toast" :class="`toast--${toast.type}`">
-        <Icon :name="toast.type === 'success' ? 'lucide:check-circle' : 'lucide:alert-circle'" size="16" />
-        {{ toast.message }}
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -104,7 +93,7 @@ const authStore = useAuthStore()
 const appData = useAppData()
 
 const confirming = ref<string | null>(null)
-const toast = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+const { success: toastSuccess, error: toastError } = useToast()
 const loading = ref(true)
 
 onMounted(async () => {
@@ -134,18 +123,13 @@ async function handleConfirm(doseId: string) {
   confirming.value = doseId
   try {
     const { error } = await prescriptionsStore.confirmDose(doseId)
-    if (!error) showToast('success', 'Приём подтверждён!')
-    else showToast('error', 'Не удалось подтвердить')
+    if (!error) toastSuccess('Приём подтверждён!')
+    else toastError('Не удалось подтвердить')
   } catch {
-    showToast('error', 'Ошибка сети')
+    toastError('Ошибка сети')
   } finally {
     confirming.value = null
   }
-}
-
-function showToast(type: 'success' | 'error', message: string) {
-  toast.value = { type, message }
-  setTimeout(() => { toast.value = null }, 3000)
 }
 </script>
 

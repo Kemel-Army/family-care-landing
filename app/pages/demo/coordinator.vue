@@ -4,27 +4,27 @@
     <div class="grid-kpi">
       <div class="kpi-card">
         <span class="kpi-overline">Семей в маршруте</span>
-        <span class="kpi-val font-display">247</span>
-        <span class="trend-up">+8 за неделю</span>
+        <span class="kpi-val font-display">{{ coordinatorKpi.activeFamilies.value }}</span>
+        <span class="trend-up">+{{ coordinatorKpi.activeFamilies.trend }} за неделю</span>
       </div>
       <div class="kpi-card kpi-card--warm">
         <span class="kpi-overline">Срочных задач</span>
-        <span class="kpi-val font-display">12</span>
-        <span class="trend-down">3 просрочены</span>
+        <span class="kpi-val font-display">{{ coordinatorKpi.criticalTasks.value }}</span>
+        <span class="trend-down">{{ pendingCritical }} в ожидании</span>
       </div>
       <div class="kpi-card kpi-card--blue">
-        <span class="kpi-overline">Adherence средний</span>
-        <span class="kpi-val font-display">87%</span>
-        <span class="trend-up">+4% vs пр. мес</span>
+        <span class="kpi-overline">Задач в очереди</span>
+        <span class="kpi-val font-display">{{ coordinatorKpi.pendingTasks.value }}</span>
+        <span class="trend-up">+{{ coordinatorKpi.pendingTasks.trend }}% vs пр. мес</span>
       </div>
       <div class="kpi-card kpi-card--success">
         <span class="kpi-overline">Визитов сегодня</span>
-        <span class="kpi-val font-display">18</span>
-        <span class="trend-neutral">2 no-show risk</span>
+        <span class="kpi-val font-display">{{ coordinatorKpi.todayAppointments.value }}</span>
+        <span class="trend-neutral">{{ families.filter(f => f.overdue_count > 0).length }} с просрочкой</span>
       </div>
     </div>
 
-    <!-- Two columns: Tasks + Schedule -->
+    <!-- Two columns: Tasks + Families -->
     <div class="demo-grid-2">
       <!-- Task queue -->
       <section class="demo-panel">
@@ -47,23 +47,23 @@
             v-for="task in filteredTasks"
             :key="task.id"
             class="task-card"
-            :class="[`priority-border--${task.priority}`, { 'task-done': task.done }]"
+            :class="[`priority-border--${task.priority}`, { 'task-done': task.status === 'done' }]"
           >
             <div class="task-body">
               <div class="task-header">
-                <span class="task-name">{{ task.family }}</span>
-                <span class="status-badge" :class="`status-badge--${task.priority}`">{{ task.priorityLabel }}</span>
+                <span class="task-name">{{ task.family_name }}</span>
+                <span class="status-badge" :class="`status-badge--${task.priority}`">{{ priorityLabel(task.priority) }}</span>
               </div>
-              <p class="task-desc">{{ task.description }}</p>
+              <p class="task-desc">{{ task.title }}</p>
               <div class="task-meta">
-                <span>{{ task.stage }}</span>
+                <span>{{ taskTypeLabel(task.type) }}</span>
                 <span class="task-dot" />
-                <span>Adherence {{ task.adherence }}%</span>
+                <span>{{ formatDate(task.created_at) }}</span>
               </div>
             </div>
             <div class="task-actions">
-              <button class="task-action-btn" @click="task.done = true" :disabled="task.done">
-                <Icon :name="task.done ? 'lucide:check-circle' : 'lucide:circle'" size="18" />
+              <button class="task-action-btn" @click="completeTask(task.id)" :disabled="task.status === 'done'">
+                <Icon :name="task.status === 'done' ? 'lucide:check-circle' : 'lucide:circle'" size="18" />
               </button>
               <button class="task-action-btn">
                 <Icon name="lucide:phone" size="16" />
@@ -76,18 +76,25 @@
         </div>
       </section>
 
-      <!-- Day schedule -->
+      <!-- Family list -->
       <section class="demo-panel">
         <div class="panel-header">
-          <h2 class="panel-title">Расписание на день</h2>
+          <h2 class="panel-title">Семьи</h2>
         </div>
-        <div class="schedule-timeline">
-          <div v-for="slot in schedule" :key="slot.time" class="schedule-slot">
-            <span class="schedule-time font-mono">{{ slot.time }}</span>
-            <div class="schedule-dot" :class="{ 'dot--active': slot.active }" />
-            <div class="schedule-event">
-              <span class="schedule-event-name">{{ slot.event }}</span>
-              <span v-if="slot.detail" class="schedule-event-detail">{{ slot.detail }}</span>
+        <div class="family-list">
+          <div v-for="fam in families" :key="fam.id" class="family-card">
+            <div class="family-info">
+              <span class="family-name">{{ fam.mother_name }}</span>
+              <span class="family-stage">{{ fam.week_or_age }}</span>
+            </div>
+            <div class="family-meta">
+              <span class="family-adherence" :class="adherenceClass(fam.adherence)">
+                {{ fam.adherence }}%
+              </span>
+              <span v-if="fam.overdue_count > 0" class="family-overdue">
+                {{ fam.overdue_count }} просроч.
+              </span>
+              <span class="family-activity">{{ fam.last_activity }}</span>
             </div>
           </div>
         </div>
@@ -99,35 +106,59 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'demo' })
 
-const activeTab = ref('urgent')
+const { coordinatorKpi, coordinatorTasks, families } = useMockData()
 
-const taskTabs = [
-  { key: 'urgent', label: 'Срочные', count: 12 },
-  { key: 'today', label: 'Сегодня', count: 8 },
-  { key: 'week', label: 'Неделя', count: 23 },
-]
+const tasks = ref(coordinatorTasks.map(t => ({ ...t })))
 
-const tasks = ref([
-  { id: 1, family: 'Каримова А.', description: 'УЗИ II триместр просрочено 3 дня', stage: 'Беременность · 24 нед', adherence: 45, priority: 'critical', priorityLabel: 'Критично', type: 'urgent', done: false },
-  { id: 2, family: 'Алиева Д.', description: 'Неявка на приём гинеколога', stage: 'Беременность · 16 нед', adherence: 72, priority: 'high', priorityLabel: 'Высокий', type: 'urgent', done: false },
-  { id: 3, family: 'Жумабаева К.', description: 'Новая семья — подключение, 8 недель', stage: 'Новая · Маршрут не начат', adherence: 0, priority: 'medium', priorityLabel: 'Средний', type: 'urgent', done: false },
-  { id: 4, family: 'Нурланова С.', description: 'Напомнить о приёме витаминов', stage: 'Малыш · 6 мес', adherence: 98, priority: 'low', priorityLabel: 'Низкий', type: 'today', done: false },
-  { id: 5, family: 'Сулейменова М.', description: 'Проверить результаты ОАК', stage: 'Беременность · 20 нед', adherence: 85, priority: 'medium', priorityLabel: 'Средний', type: 'today', done: false },
+const activeTab = ref('all')
+
+const pendingCritical = computed(() => tasks.value.filter(t => t.priority === 'critical' && t.status === 'pending').length)
+
+const taskTabs = computed(() => [
+  { key: 'all', label: 'Все', count: tasks.value.filter(t => t.status === 'pending').length },
+  { key: 'critical', label: 'Срочные', count: tasks.value.filter(t => (t.priority === 'critical' || t.priority === 'high') && t.status === 'pending').length },
+  { key: 'done', label: 'Выполнено', count: tasks.value.filter(t => t.status === 'done').length },
 ])
 
 const filteredTasks = computed(() => {
-  if (activeTab.value === 'urgent') return tasks.value.filter(t => t.type === 'urgent')
-  if (activeTab.value === 'today') return tasks.value.filter(t => t.type === 'today' || t.type === 'urgent')
-  return tasks.value
+  if (activeTab.value === 'critical') return tasks.value.filter(t => (t.priority === 'critical' || t.priority === 'high') && t.status === 'pending')
+  if (activeTab.value === 'done') return tasks.value.filter(t => t.status === 'done')
+  return tasks.value.filter(t => t.status === 'pending')
 })
 
-const schedule = [
-  { time: '09:00', event: 'Звонок — Каримова А.', detail: 'УЗИ просрочено', active: true },
-  { time: '10:00', event: 'Подключение — Жумабаева К.', detail: 'Новая семья', active: false },
-  { time: '11:30', event: 'Напоминание — Нурланова С.', detail: 'Автоматическое', active: false },
-  { time: '14:00', event: 'Проверка adherence — 5 семей', detail: null, active: false },
-  { time: '16:00', event: 'Отчёт для руководителя', detail: null, active: false },
-]
+function completeTask(id: string) {
+  const task = tasks.value.find(t => t.id === id)
+  if (task) task.status = 'done'
+}
+
+function priorityLabel(priority: string) {
+  const labels: Record<string, string> = { critical: 'Критично', high: 'Высокий', medium: 'Средний', low: 'Низкий' }
+  return labels[priority] || priority
+}
+
+function taskTypeLabel(type: string) {
+  const labels: Record<string, string> = {
+    missed_appointment: 'Неявка',
+    overdue_followup: 'Просрочено',
+    low_adherence: 'Низкий Adherence',
+    vaccination_reminder: 'Вакцинация',
+    welcome_call: 'Звонок',
+    reactivation: 'Реактивация',
+  }
+  return labels[type] || type
+}
+
+function adherenceClass(val: number) {
+  if (val >= 80) return 'adherence--success'
+  if (val >= 60) return 'adherence--warning'
+  return 'adherence--danger'
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+  return `${d.getDate()} ${months[d.getMonth()]}`
+}
 </script>
 
 <style scoped>
@@ -355,59 +386,70 @@ const schedule = [
   cursor: default;
 }
 
-/* Schedule */
-.schedule-timeline {
+/* Schedule → Family list */
+.family-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 8px;
 }
 
-.schedule-slot {
+.family-card {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--color-border-light);
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+  transition: box-shadow var(--transition-fast);
 }
 
-.schedule-slot:last-child {
-  border-bottom: none;
+.family-card:hover {
+  box-shadow: var(--shadow-sm);
 }
 
-.schedule-time {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  width: 44px;
-  flex-shrink: 0;
-  padding-top: 2px;
+.family-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.schedule-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--color-border);
-  flex-shrink: 0;
-  margin-top: 4px;
-}
-
-.dot--active {
-  background: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(139, 126, 200, 0.2);
-}
-
-.schedule-event {
-  flex: 1;
-}
-
-.schedule-event-name {
-  display: block;
+.family-name {
   font-weight: 600;
   font-size: var(--text-sm);
   color: var(--color-text-primary);
 }
 
-.schedule-event-detail {
+.family-stage {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.family-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.family-adherence {
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.adherence--success { color: var(--color-success); }
+.adherence--warning { color: #C4930E; }
+.adherence--danger { color: var(--color-danger); }
+
+.family-overdue {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-danger);
+  background: rgba(212, 114, 124, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.family-activity {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }

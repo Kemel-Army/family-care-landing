@@ -28,9 +28,7 @@
           <Icon name="lucide:chevron-right" size="16" class="doctor-arrow" />
         </button>
       </div>
-      <div v-else class="empty-state">
-        <p>Нет доступных специалистов</p>
-      </div>
+      <AppSharedEmptyState v-else icon="lucide:user-x" title="Нет доступных специалистов" />
     </section>
 
     <!-- Step 2: Select Date & Slot -->

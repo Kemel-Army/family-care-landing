@@ -62,19 +62,8 @@
       </div>
     </div>
 
-    <div v-if="events.length === 0" class="empty-state">
-      <Icon name="lucide:map-pin" size="40" style="opacity: 0.3" />
-      <p>Нет событий в маршруте</p>
-    </div>
+    <AppSharedEmptyState v-if="events.length === 0" icon="lucide:map-pin" title="Нет событий в маршруте" />
     </template>
-
-    <!-- Toast -->
-    <Transition name="toast">
-      <div v-if="toast" class="toast" :class="`toast--${toast.type}`">
-        <Icon :name="toast.type === 'success' ? 'lucide:check-circle' : 'lucide:alert-circle'" size="16" />
-        {{ toast.message }}
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -86,7 +75,7 @@ const authStore = useAuthStore()
 const appData = useAppData()
 
 const completing = ref<string | null>(null)
-const toast = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+const { success: toastSuccess, error: toastError } = useToast()
 const loading = ref(true)
 
 onMounted(async () => {
@@ -138,18 +127,13 @@ async function handleComplete(id: string) {
   completing.value = id
   try {
     const { error } = await journeyStore.completeEvent(id)
-    if (error) showToast('error', 'Не удалось отметить событие')
-    else showToast('success', 'Событие выполнено!')
+    if (error) toastError('Не удалось отметить событие')
+    else toastSuccess('Событие выполнено!')
   } catch {
-    showToast('error', 'Ошибка сети')
+    toastError('Ошибка сети')
   } finally {
     completing.value = null
   }
-}
-
-function showToast(type: 'success' | 'error', message: string) {
-  toast.value = { type, message }
-  setTimeout(() => { toast.value = null }, 3000)
 }
 </script>
 

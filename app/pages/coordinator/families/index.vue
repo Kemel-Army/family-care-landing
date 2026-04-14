@@ -55,10 +55,7 @@
         </div>
       </NuxtLink>
     </div>
-    <div v-else class="empty-card">
-      <Icon name="lucide:search-x" size="32" style="opacity:0.3; color:var(--color-primary)" />
-      <p class="empty-text">Нет семей по запросу</p>
-    </div>
+    <AppSharedEmptyState v-else icon="lucide:search-x" title="Нет семей по запросу" />
     </template>
   </div>
 </template>

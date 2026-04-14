@@ -4,9 +4,9 @@
     <div class="demo-banner">
       <div class="demo-banner-inner">
         <Icon name="lucide:eye" size="16" />
-        <span>Демо-режим — данные не сохраняются</span>
-        <NuxtLink to="/auth/register" class="demo-banner-cta">
-          Зарегистрироваться
+        <span>Демо-режим — тестовые данные</span>
+        <NuxtLink to="/for-clinics#clinic-cta" class="demo-banner-cta">
+          Оставить заявку
           <Icon name="lucide:arrow-right" size="14" />
         </NuxtLink>
       </div>

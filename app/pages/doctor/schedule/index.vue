@@ -54,7 +54,7 @@
             </div>
             <div class="modal-actions">
               <button class="btn-cancel" @click="showAdd = false">Отмена</button>
-              <button class="btn-submit" @click="showAdd = false">Добавить</button>
+            <button class="btn-submit" :disabled="saving" @click="addSlot">{{ saving ? 'Сохр...' : 'Добавить' }}</button>
             </div>
           </div>
         </div>
@@ -69,6 +69,7 @@ definePageMeta({ layout: 'app' })
 const appData = useAppData()
 const selectedIdx = ref(0)
 const showAdd = ref(false)
+const saving = ref(false)
 const newSlot = reactive({ start: '09:00', end: '09:30' })
 
 const bookedCount = computed(() => appData.todaySchedule.filter(s => s.is_booked).length)
@@ -84,6 +85,27 @@ const weekDates = computed(() => {
   }
   return days
 })
+
+async function addSlot() {
+  saving.value = true
+  try {
+    const date = weekDates.value[selectedIdx.value]?.iso
+    if (!date) return
+    await $fetch('/api/doctor/slots', {
+      method: 'POST',
+      body: { date, start_time: newSlot.start, end_time: newSlot.end },
+    })
+    showAdd.value = false
+    // Refresh schedule for the selected date
+    if (appData.fetchDoctorSchedule) {
+      await appData.fetchDoctorSchedule(date)
+    }
+  } catch (err: any) {
+    alert(err?.data?.message || 'Не удалось добавить слот')
+  } finally {
+    saving.value = false
+  }
+}
 
 watch(selectedIdx, (idx) => {
   const iso = weekDates.value[idx]?.iso

@@ -13,7 +13,7 @@
             <Icon :name="item.icon" size="22" :style="{ color: item.iconColor }" />
           </div>
           <span class="number-value font-display">
-            {{ item.prefix }}{{ item.value }}{{ item.suffix }}
+            {{ item.prefix }}{{ displayValues[i] }}{{ item.suffix }}
           </span>
           <p class="number-label">{{ item.label }}</p>
         </div>
@@ -67,6 +67,8 @@ const numbers = [
   },
 ]
 
+const displayValues = reactive(numbers.map(() => 0))
+
 onMounted(() => {
   if (!gsap || !ScrollTrigger || !sectionRef.value) return
 
@@ -85,6 +87,20 @@ onMounted(() => {
         duration: 0.7,
         stagger: 0.1,
         ease: 'back.out(1.7)',
+      })
+
+      // Count-up animation for each number
+      numbers.forEach((item, i) => {
+        const obj = { val: 0 }
+        gsap.to(obj, {
+          val: item.value,
+          duration: 1.6,
+          delay: i * 0.1,
+          ease: 'power2.out',
+          onUpdate: () => {
+            displayValues[i] = Math.round(obj.val)
+          },
+        })
       })
     },
   })
@@ -113,22 +129,46 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+}
+
+.number-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--gradient-cta);
+  border-radius: 3px 3px 0 0;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .number-item:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(139, 126, 200, 0.15);
+}
+
+.number-item:hover::after {
+  width: 40%;
+  left: 30%;
 }
 
 .number-icon-wrap {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
+  transition: transform 0.3s ease;
+}
+
+.number-item:hover .number-icon-wrap {
+  transform: scale(1.1) rotate(-3deg);
 }
 
 .number-value {
