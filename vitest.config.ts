@@ -10,7 +10,7 @@ export default defineConfig({
     include: ['tests/unit/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      include: ['app/utils/**', 'app/composables/**', 'app/stores/**'],
+      include: ['app/utils/**', 'app/composables/**', 'app/stores/**', 'app/components/app/**'],
     },
   },
   resolve: {

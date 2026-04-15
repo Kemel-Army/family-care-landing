@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { isDemoAvailable } from './helpers/auth'
 
 // ─── Helpers ────────────────────────────────────────────
 async function demoLogin(page: import('@playwright/test').Page, role: string, expectedPath: string) {
@@ -31,22 +32,30 @@ test.describe('Demo login — all 4 roles', () => {
   })
 
   test('login as mom → /demo/family', async ({ page }) => {
+    const available = await isDemoAvailable(page)
+    test.skip(!available, 'Supabase not available')
     await demoLogin(page, 'mom', '/demo/family')
     // Should see family dashboard content
     await expect(page.locator('body')).toBeVisible()
   })
 
   test('login as coordinator → /demo/coordinator', async ({ page }) => {
+    const available = await isDemoAvailable(page)
+    test.skip(!available, 'Supabase not available')
     await demoLogin(page, 'coordinator', '/demo/coordinator')
     await expect(page.locator('body')).toBeVisible()
   })
 
   test('login as doctor → /demo/doctor', async ({ page }) => {
+    const available = await isDemoAvailable(page)
+    test.skip(!available, 'Supabase not available')
     await demoLogin(page, 'doctor', '/demo/doctor')
     await expect(page.locator('body')).toBeVisible()
   })
 
   test('login as admin → /demo/coordinator', async ({ page }) => {
+    const available = await isDemoAvailable(page)
+    test.skip(!available, 'Supabase not available')
     await demoLogin(page, 'admin', '/demo/coordinator')
     await expect(page.locator('body')).toBeVisible()
   })
@@ -56,6 +65,8 @@ test.describe('Demo login — all 4 roles', () => {
 
 test.describe('Family demo — critical path', () => {
   test.beforeEach(async ({ page }) => {
+    const available = await isDemoAvailable(page)
+    test.skip(!available, 'Supabase not available')
     await demoLogin(page, 'mom', '/demo/family')
   })
 
@@ -80,6 +91,8 @@ test.describe('Family demo — critical path', () => {
 
 test.describe('Doctor demo — critical path', () => {
   test.beforeEach(async ({ page }) => {
+    const available = await isDemoAvailable(page)
+    test.skip(!available, 'Supabase not available')
     await demoLogin(page, 'doctor', '/demo/doctor')
   })
 
@@ -92,6 +105,8 @@ test.describe('Doctor demo — critical path', () => {
 
 test.describe('Coordinator demo — critical path', () => {
   test.beforeEach(async ({ page }) => {
+    const available = await isDemoAvailable(page)
+    test.skip(!available, 'Supabase not available')
     await demoLogin(page, 'coordinator', '/demo/coordinator')
   })
 

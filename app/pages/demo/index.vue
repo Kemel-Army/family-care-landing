@@ -76,6 +76,7 @@ useSeoMeta({
 })
 
 const supabase = useSupabaseClient()
+const authStore = useAuthStore()
 const loadingRole = ref<string | null>(null)
 const error = ref('')
 
@@ -161,7 +162,11 @@ async function enterDemo(roleKey: string) {
       })
     }
 
-    // Initialize auth store and navigate
+    // Reset and reinitialize auth store for the new demo session
+    authStore.reset()
+    await authStore.initialize()
+
+    // Navigate to demo dashboard
     navigateTo(DEMO_HOME[roleKey] || '/demo/family', { replace: true })
   }
   catch (err: any) {

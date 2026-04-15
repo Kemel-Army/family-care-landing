@@ -24,9 +24,15 @@ test.describe('Auth flow', () => {
     await expect(page.locator('input[type="password"]')).toBeVisible()
   })
 
-  test('register page shows form', async ({ page }) => {
+  test('register page shows form or redirects to demo', async ({ page }) => {
     await page.goto('/auth/register')
-    await expect(page.locator('input[type="email"]')).toBeVisible()
+    // Register page may redirect to /demo via middleware
+    const url = page.url()
+    if (url.includes('/demo')) {
+      await expect(page.locator('.demo-title, .demo-roles').first()).toBeVisible()
+    } else {
+      await expect(page.locator('input[type="email"]')).toBeVisible()
+    }
   })
 
   test('unauthenticated user redirected from /family', async ({ page }) => {

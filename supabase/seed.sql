@@ -6,12 +6,20 @@ BEGIN;
 -- ============================================
 -- 0. DEMO ACCOUNTS (4 records — used by /api/auth/demo-login)
 -- ============================================
-INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
+INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
 VALUES
-('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'p1@demo.kz',      crypt('DemoPass123!', gen_salt('bf')), now(), now(), now(), '', '', '', ''),
-('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'dinara@demo.kz',  crypt('DemoPass123!', gen_salt('bf')), now(), now(), now(), '', '', '', ''),
-('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'admin@demo.kz',   crypt('DemoPass123!', gen_salt('bf')), now(), now(), now(), '', '', '', ''),
-('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated', 'doctor@demo.kz',  crypt('DemoPass123!', gen_salt('bf')), now(), now(), now(), '', '', '', '');
+('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'p1@demo.kz',      crypt('DemoPass123!', gen_salt('bf')), now(), '{"role":"mother","clinic_id":"10000000-0000-0000-0000-000000000001"}'::jsonb,      now(), now(), '', '', '', ''),
+('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'dinara@demo.kz',  crypt('DemoPass123!', gen_salt('bf')), now(), '{"role":"coordinator","clinic_id":"10000000-0000-0000-0000-000000000001"}'::jsonb, now(), now(), '', '', '', ''),
+('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'admin@demo.kz',   crypt('DemoPass123!', gen_salt('bf')), now(), '{"role":"admin","clinic_id":"10000000-0000-0000-0000-000000000001"}'::jsonb,       now(), now(), '', '', '', ''),
+('00000000-0000-0000-0000-000000000000', 'D0000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated', 'doctor@demo.kz',  crypt('DemoPass123!', gen_salt('bf')), now(), '{"role":"doctor","clinic_id":"10000000-0000-0000-0000-000000000001"}'::jsonb,      now(), now(), '', '', '', '');
+
+-- auth.identities required for signInWithPassword to work
+INSERT INTO auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
+VALUES
+('D0000000-0000-0000-0000-000000000001', 'D0000000-0000-0000-0000-000000000001', 'p1@demo.kz',     'email', '{"sub":"D0000000-0000-0000-0000-000000000001","email":"p1@demo.kz","email_verified":true}'::jsonb,     now(), now(), now()),
+('D0000000-0000-0000-0000-000000000002', 'D0000000-0000-0000-0000-000000000002', 'dinara@demo.kz', 'email', '{"sub":"D0000000-0000-0000-0000-000000000002","email":"dinara@demo.kz","email_verified":true}'::jsonb, now(), now(), now()),
+('D0000000-0000-0000-0000-000000000003', 'D0000000-0000-0000-0000-000000000003', 'admin@demo.kz',  'email', '{"sub":"D0000000-0000-0000-0000-000000000003","email":"admin@demo.kz","email_verified":true}'::jsonb,  now(), now(), now()),
+('D0000000-0000-0000-0000-000000000004', 'D0000000-0000-0000-0000-000000000004', 'doctor@demo.kz', 'email', '{"sub":"D0000000-0000-0000-0000-000000000004","email":"doctor@demo.kz","email_verified":true}'::jsonb, now(), now(), now());
 
 INSERT INTO users (id, email, phone, role, clinic_id, first_name, last_name, avatar_url, is_active, last_seen_at, created_at, updated_at)
 VALUES
@@ -19,6 +27,26 @@ VALUES
 ('D0000000-0000-0000-0000-000000000002', 'dinara@demo.kz',  '+77000000002', 'coordinator', '10000000-0000-0000-0000-000000000001', 'Динара',   'Демо',     NULL, true, now(), now(), now()),
 ('D0000000-0000-0000-0000-000000000003', 'admin@demo.kz',   '+77000000003', 'admin',       '10000000-0000-0000-0000-000000000001', 'Аскар',    'Демо',     NULL, true, now(), now(), now()),
 ('D0000000-0000-0000-0000-000000000004', 'doctor@demo.kz',  '+77000000004', 'doctor',      '10000000-0000-0000-0000-000000000001', 'Сауле',    'Демо',     NULL, true, now(), now(), now());
+
+-- Demo family for demo-mom (Айгерим)
+INSERT INTO families (id, clinic_id, primary_parent_id, secondary_parent_id, invite_code, status, created_at, updated_at)
+VALUES
+('F0000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'D0000000-0000-0000-0000-000000000001', NULL, 'DEMO-MOM', 'active', now(), now());
+
+INSERT INTO mother_profiles (id, family_id, user_id, lmp_date, edd_date, blood_type, rh_factor, allergies, chronic_conditions, pregnancy_number, gravida, para, notes, created_at, updated_at)
+VALUES
+('E0000000-0000-0000-0000-000000000001', 'F0000000-0000-0000-0000-000000000001', 'D0000000-0000-0000-0000-000000000001',
+ '2025-04-10', '2026-01-15', 'A', 'positive', '{}', '{}', 1, 1, 1, 'Демо-профиль', now(), now());
+
+INSERT INTO child_profiles (id, family_id, name, dob, gender, birth_weight, birth_height, apgar_1min, apgar_5min, blood_type, allergies, photo_url, is_active, created_at, updated_at)
+VALUES
+('C0000000-0000-0000-0000-000000000001', 'F0000000-0000-0000-0000-000000000001', 'Амира', '2026-01-15', 'female', 3.40, 51.00, 8, 9, 'A+', '{}', NULL, true, now(), now());
+
+-- Demo doctor record for demo-doctor (Сауле)
+INSERT INTO doctors (id, clinic_id, user_id, specialty, bio, experience_years, consultation_fee, is_active, created_at, updated_at)
+VALUES
+('BD000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'D0000000-0000-0000-0000-000000000004',
+ 'Педиатр', 'Демо-врач. Педиатр первой категории, опыт работы 10 лет.', 10, 120.00, true, now(), now());
 
 -- ============================================
 -- 1. AUTH.USERS (48 records)
