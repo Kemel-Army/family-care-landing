@@ -115,7 +115,7 @@ function copyLink() {
 
 function shareWhatsApp() {
   const url = `${window.location.origin}/auth/invite/${appData.referral.code}`
-  window.open(`https://wa.me/?text=${encodeURIComponent(`Присоединяйтесь к Family Care OS! ${url}`)}`, '_blank')
+  window.open(`https://wa.me/?text=${encodeURIComponent(`Присоединяйтесь к UMAI Health! ${url}`)}`, '_blank')
 }
 </script>
 

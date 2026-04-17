@@ -71,8 +71,8 @@
 definePageMeta({ layout: 'landing' })
 
 useSeoMeta({
-  title: 'Попробовать демо — Family Care OS',
-  description: 'Изучите платформу Family Care OS с тестовыми данными. Выберите роль: мама, координатор или руководитель.',
+  title: 'Попробовать демо — UMAI Health',
+  description: 'Изучите платформу UMAI Health с тестовыми данными. Выберите роль: мама, координатор или руководитель.',
 })
 
 const supabase = useSupabaseClient()

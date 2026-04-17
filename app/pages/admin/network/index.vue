@@ -37,9 +37,9 @@
 definePageMeta({ layout: 'app' })
 
 const branches = [
-  { name: 'Family Care Центр', city: 'Алматы', families: 47, completion: 88, nps: 72, revenue: '4.2M' },
-  { name: 'Family Care Бостандык', city: 'Алматы', families: 31, completion: 82, nps: 65, revenue: '2.8M' },
-  { name: 'Family Care Астана', city: 'Астана', families: 28, completion: 79, nps: 68, revenue: '3.1M' },
+  { name: 'UMAI Health Центр', city: 'Алматы', families: 47, completion: 88, nps: 72, revenue: '4.2M' },
+  { name: 'UMAI Health Бостандык', city: 'Алматы', families: 31, completion: 82, nps: 65, revenue: '2.8M' },
+  { name: 'UMAI Health Астана', city: 'Астана', families: 28, completion: 79, nps: 68, revenue: '3.1M' },
 ]
 
 const totalFamilies = computed(() => branches.reduce((s, b) => s + b.families, 0))

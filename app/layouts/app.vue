@@ -15,7 +15,7 @@
               <Icon name="lucide:heart-pulse" size="22" />
             </div>
             <Transition name="fade-text">
-              <span v-if="!sidebarCollapsed" class="sidebar-logo-text">Family Care</span>
+              <span v-if="!sidebarCollapsed" class="sidebar-logo-text">UMAI Health</span>
             </Transition>
           </div>
           <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :aria-label="sidebarCollapsed ? 'Развернуть' : 'Свернуть'">
@@ -116,7 +116,7 @@
         <div class="topbar-logo-icon">
           <Icon name="lucide:heart-pulse" size="18" />
         </div>
-        <span>Family Care</span>
+        <span>UMAI Health</span>
       </div>
       <div class="topbar-actions">
         <button class="topbar-bell" @click="bellOpen = !bellOpen">
@@ -139,7 +139,7 @@
             <div class="sidebar-logo-icon">
               <Icon name="lucide:heart-pulse" size="22" />
             </div>
-            <span class="sidebar-logo-text">Family Care</span>
+            <span class="sidebar-logo-text">UMAI Health</span>
           </div>
           <button class="mobile-drawer-close" @click="mobileMenuOpen = false">
             <Icon name="lucide:x" size="20" />

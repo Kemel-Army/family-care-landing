@@ -3,7 +3,7 @@
     id="before-after"
     badge="До и После"
     title="Как меняется работа клиники"
-    subtitle="Сравните день координатора без платформы и с Family Care OS"
+    subtitle="Сравните день координатора без платформы и с UMAI Health"
   >
     <!-- Tab selector: table vs timeline -->
     <div class="view-tabs" data-reveal="fade-up">
@@ -31,7 +31,7 @@
           <div class="ct-row ct-header">
             <div class="ct-metric">Метрика</div>
             <div class="ct-before">Без платформы</div>
-            <div class="ct-after">С Family Care OS</div>
+            <div class="ct-after">С UMAI Health</div>
           </div>
           <!-- Rows -->
           <div

@@ -2,7 +2,7 @@
   <LandingUiSectionWrapper
     id="what-is"
     badge="Платформа"
-    title="Что такое Family Care OS"
+    title="Что такое UMAI Health"
     subtitle="Три ключевых возможности, которые меняют работу клиники с семьями"
     alternate
   >

@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware((to) => {
   if (isPublic) return
 
   // In production: extract clinic slug from subdomain
-  // e.g. clinic-name.familycare.kz → clinic-name
+  // e.g. clinic-name.umai-health.kz → clinic-name
   // For now, use user metadata or default
   const user = useSupabaseUser()
   if (!user.value) return

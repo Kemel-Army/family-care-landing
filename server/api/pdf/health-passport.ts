@@ -100,7 +100,7 @@ export default defineEventHandler(async (event) => {
 
   // Header
   drawText('ПАСПОРТ ЗДОРОВЬЯ РЕБЁНКА', { size: 18, bold: true, color: rgb(0.3, 0.2, 0.5) })
-  drawText('Family Care OS', { size: 9, color: rgb(0.5, 0.5, 0.5) })
+  drawText('UMAI Health', { size: 9, color: rgb(0.5, 0.5, 0.5) })
   y -= 6
   drawLine()
 
@@ -194,7 +194,7 @@ export default defineEventHandler(async (event) => {
   drawLine()
   const now = new Date()
   drawText(`Документ сформирован: ${now.toLocaleDateString('ru-RU')} ${now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`, { size: 8, color: rgb(0.5, 0.5, 0.5) })
-  drawText('Family Care OS — электронный паспорт здоровья ребёнка', { size: 8, color: rgb(0.5, 0.5, 0.5) })
+  drawText('UMAI Health — электронный паспорт здоровья ребёнка', { size: 8, color: rgb(0.5, 0.5, 0.5) })
 
   const pdfBytes = await pdf.save()
 

@@ -18,7 +18,7 @@
         <div class="demo-logo-icon">
           <Icon name="lucide:heart-pulse" size="20" />
         </div>
-        <span class="demo-logo-text">Family Care</span>
+        <span class="demo-logo-text">UMAI Health</span>
       </NuxtLink>
 
       <nav class="demo-nav">

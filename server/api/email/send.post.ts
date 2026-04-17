@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
     case 'welcome':
       emailContent = welcomeEmail({
         name: body.data.name || '',
-        clinicName: body.data.clinicName || 'Family Care',
+        clinicName: body.data.clinicName || 'UMAI Health',
       })
       break
     default:

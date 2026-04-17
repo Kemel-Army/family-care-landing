@@ -15,11 +15,12 @@
         </div>
 
         <h1 ref="heroTitleRef" class="hero-title font-display">
-          Family Care OS
+          UMAI Health
         </h1>
 
         <p ref="heroSubRef" class="hero-subtitle font-body">
-          Цифровая платформа сопровождения семьи от&nbsp;зачатия до&nbsp;2&nbsp;лет
+          Названа в честь Умай&nbsp;— тюркской богини-покровительницы матерей и&nbsp;детей.
+          Цифровой оберег семьи от&nbsp;зачатия до&nbsp;2&nbsp;лет
           <span class="hero-typewriter" :class="{ 'typewriter-active': isTyping, 'typewriter-done': isDone }">{{ displayText }}</span>
         </p>
 

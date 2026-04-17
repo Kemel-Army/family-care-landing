@@ -9,7 +9,7 @@ const schema = z.object({
   type: z.enum(['clinic_inquiry', 'demand_family']),
 })
 
-const NOTIFY_EMAIL = process.env.CONTACT_NOTIFY_EMAIL || 'hello@familycare.kz'
+const NOTIFY_EMAIL = process.env.CONTACT_NOTIFY_EMAIL || 'info@umai-health.kz'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
     html: `
       <div style="font-family: Inter, sans-serif; max-width: 520px; margin: auto;">
         <div style="background: #6B4EAA; color: white; padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
-          <h1 style="margin: 0; font-size: 20px;">Новая заявка на Family Care</h1>
+          <h1 style="margin: 0; font-size: 20px;">Новая заявка на UMAI Health</h1>
         </div>
         <div style="padding: 24px; background: #f9fafb; border-radius: 0 0 12px 12px;">
           <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 8px 0;">

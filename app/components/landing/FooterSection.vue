@@ -8,10 +8,10 @@
             <span class="logo-icon">
               <Icon name="lucide:heart-pulse" size="20" />
             </span>
-            <span class="logo-text font-display">Family Care OS</span>
+            <span class="logo-text font-display">UMAI Health</span>
           </div>
           <p class="footer-desc">
-            Цифровой маршрут заботы — от зачатия до 2 лет. Платформа для частных клиник под вашим брендом.
+            Под покровительством Умай — цифровой маршрут заботы от зачатия до 2 лет. Платформа для частных клиник под вашим брендом.
           </p>
         </div>
 
@@ -40,7 +40,7 @@
           <ul class="footer-list footer-contacts">
             <li>
               <Icon name="lucide:mail" size="16" />
-              <a href="mailto:hello@familycare.kz">hello@familycare.kz</a>
+              <a href="mailto:info@umai-health.kz">info@umai-health.kz</a>
             </li>
             <li>
               <Icon name="lucide:map-pin" size="16" />
@@ -52,7 +52,7 @@
 
       <div class="footer-bottom">
         <p class="footer-copy">
-          © {{ currentYear }} Family Care OS. Сделано с заботой в Казахстане.
+          © {{ currentYear }} UMAI Health. Сделано с заботой в Казахстане.
         </p>
         <div class="footer-legal">
           <NuxtLink to="/privacy">Политика конфиденциальности</NuxtLink>

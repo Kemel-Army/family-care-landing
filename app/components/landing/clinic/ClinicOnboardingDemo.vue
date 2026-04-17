@@ -62,7 +62,7 @@
                     <rect width="520" height="340" fill="#FEFCFF" />
                     <!-- Header -->
                     <rect x="0" y="0" width="520" height="52" fill="var(--color-primary-ultralight)" />
-                    <text x="24" y="32" font-size="14" font-weight="700" fill="var(--color-primary)" font-family="Satoshi, sans-serif">Family Care OS</text>
+                    <text x="24" y="32" font-size="14" font-weight="700" fill="var(--color-primary)" font-family="Satoshi, sans-serif">UMAI Health</text>
                     <text x="180" y="32" font-size="11" fill="var(--color-text-secondary)">Регистрация клиники</text>
                     <!-- Progress bar -->
                     <rect x="24" y="68" width="472" height="4" rx="2" fill="var(--color-border-light)" />
@@ -404,7 +404,7 @@ const steps = [
     id: 'register',
     short: 'Регистрация',
     title: 'Регистрация клиники',
-    url: 'app.familycare.kz/onboarding',
+    url: 'app.umai-health.kz/onboarding',
     desc: 'Заполняете базовые данные — название, контакт, город. За 2 минуты создаётся аккаунт клиники с вашим брендом.',
     mobile: false,
     highlights: [
@@ -417,7 +417,7 @@ const steps = [
     id: 'routes',
     short: 'Маршруты',
     title: 'Настройка маршрутов',
-    url: 'app.familycare.kz/settings/routes',
+    url: 'app.umai-health.kz/settings/routes',
     desc: 'Платформа автоматически генерирует маршруты наблюдения по протоколам МЗ РК. Беременность, грудничок, малыш — или создайте свой.',
     mobile: false,
     highlights: [
@@ -430,7 +430,7 @@ const steps = [
     id: 'family',
     short: 'Семья',
     title: 'Добавление семьи',
-    url: 'app.familycare.kz/coordinator/new-family',
+    url: 'app.umai-health.kz/coordinator/new-family',
     desc: 'Координатор вносит маму — платформа за 2 секунды создаёт полный маршрут на 24 месяца: визиты, анализы, прививки, скрининги.',
     mobile: false,
     highlights: [
@@ -443,7 +443,7 @@ const steps = [
     id: 'notify',
     short: 'Уведомления',
     title: 'Первое уведомление',
-    url: 'app.familycare.kz/coordinator/tasks',
+    url: 'app.umai-health.kz/coordinator/tasks',
     desc: 'Пропущен визит? Платформа создаёт задачу координатору и отправляет push семье. Один клик — и визит перезаписан.',
     mobile: false,
     highlights: [
@@ -456,7 +456,7 @@ const steps = [
     id: 'dashboard',
     short: 'Результат',
     title: 'Панель координатора',
-    url: 'app.familycare.kz/coordinator',
+    url: 'app.umai-health.kz/coordinator',
     desc: 'Все семьи на одном экране. Приоритеты, просроченные, сегодняшние задачи. KPI в реальном времени. Без Excel, без обзвонов.',
     mobile: false,
     highlights: [

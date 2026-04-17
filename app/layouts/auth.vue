@@ -11,11 +11,11 @@
           <div class="logo-ring">
             <Icon name="lucide:heart-pulse" size="28" />
           </div>
-          <h1 class="auth-brand">Family Care</h1>
+          <h1 class="auth-brand">UMAI Health</h1>
         </div>
         <slot />
       </div>
-      <p class="auth-footer">© {{ new Date().getFullYear() }} Family Care OS · Все права защищены</p>
+      <p class="auth-footer">© {{ new Date().getFullYear() }} UMAI Health · Все права защищены</p>
     </div>
   </div>
 </template>

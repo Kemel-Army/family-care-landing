@@ -19,7 +19,7 @@ interface EmailOptions {
   text?: string
 }
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'Family Care <noreply@familycare.kz>'
+const FROM_EMAIL = process.env.EMAIL_FROM || 'UMAI Health <noreply@umai-health.kz>'
 
 export async function sendEmail(opts: EmailOptions) {
   const resend = getResend()
@@ -47,7 +47,7 @@ export function appointmentConfirmationEmail(opts: {
     html: `
       <div style="font-family: Inter, sans-serif; max-width: 500px; margin: auto;">
         <div style="background: #6B4EAA; color: white; padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
-          <h1 style="margin: 0; font-size: 20px;">Family Care</h1>
+          <h1 style="margin: 0; font-size: 20px;">UMAI Health</h1>
         </div>
         <div style="padding: 24px; background: #f9fafb; border-radius: 0 0 12px 12px;">
           <p>Здравствуйте, <strong>${opts.patientName}</strong>!</p>
@@ -77,7 +77,7 @@ export function reminderEmail(opts: {
     html: `
       <div style="font-family: Inter, sans-serif; max-width: 500px; margin: auto;">
         <div style="background: #6B4EAA; color: white; padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
-          <h1 style="margin: 0; font-size: 20px;">Family Care</h1>
+          <h1 style="margin: 0; font-size: 20px;">UMAI Health</h1>
         </div>
         <div style="padding: 24px; background: #f9fafb; border-radius: 0 0 12px 12px;">
           <p>Здравствуйте, <strong>${opts.patientName}</strong>!</p>
@@ -103,7 +103,7 @@ export function welcomeEmail(opts: { name: string; clinicName: string }) {
         </div>
         <div style="padding: 24px; background: #f9fafb; border-radius: 0 0 12px 12px;">
           <p>Здравствуйте, <strong>${opts.name}</strong>!</p>
-          <p>Добро пожаловать в Family Care — вашу цифровую платформу заботы о здоровье.</p>
+          <p>Добро пожаловать в UMAI Health — вашу цифровую платформу заботы о здоровье.</p>
           <p>Что вас ждёт:</p>
           <ul>
             <li>Персональный маршрут наблюдения</li>
@@ -115,6 +115,6 @@ export function welcomeEmail(opts: { name: string; clinicName: string }) {
         </div>
       </div>
     `,
-    text: `Добро пожаловать, ${opts.name}! Войдите в Family Care, чтобы начать пользоваться платформой.`,
+    text: `Добро пожаловать, ${opts.name}! Войдите в UMAI Health, чтобы начать пользоваться платформой.`,
   }
 }

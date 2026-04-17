@@ -76,13 +76,13 @@ definePageMeta({ layout: 'app' })
 const saved = ref(false)
 
 const clinic = reactive({
-  name: 'Family Care Алматы',
-  slug: 'family-care-almaty',
+  name: 'UMAI Health Алматы',
+  slug: 'umai-health-almaty',
   phone: '+7 (727) 123-45-67',
   address: 'г. Алматы, ул. Абая 52',
   timezone: 'Asia/Almaty',
-  link2gis: 'https://2gis.kz/almaty/firm/family-care',
-  linkGoogle: 'https://g.page/family-care-almaty',
+  link2gis: 'https://2gis.kz/almaty/firm/umai-health',
+  linkGoogle: 'https://g.page/umai-health-almaty',
 })
 
 const weekDays = [

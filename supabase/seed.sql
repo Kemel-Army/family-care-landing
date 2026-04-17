@@ -885,7 +885,7 @@ CROSS JOIN generate_series(0, 4) AS s(n)
 WHERE j.type = 'toddler';
 -- =============================================================================
 -- seed_02b_doctors.sql  –  Doctors, appointment slots, appointments
--- Part of the family-care-landing seed pipeline (no BEGIN/COMMIT)
+-- Part of the umai-health-landing seed pipeline (no BEGIN/COMMIT)
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------
@@ -2081,7 +2081,7 @@ VALUES ('b0000000-0000-0000-0000-000000000001', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '152 days' + interval '10 hours',
   CURRENT_TIMESTAMP - interval '152 days' + interval '10 hours 2 minutes',
   CURRENT_TIMESTAMP - interval '152 days' + interval '10 hours 27 minutes',
-  25, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  25, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Плановый осмотр. Развитие соответствует возрасту. Рекомендована сдача ОАК.',
   CURRENT_TIMESTAMP - interval '152 days', CURRENT_TIMESTAMP - interval '152 days');
 
@@ -2090,7 +2090,7 @@ VALUES ('b0000000-0000-0000-0000-000000000002', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '135 days' + interval '14 hours',
   CURRENT_TIMESTAMP - interval '135 days' + interval '14 hours 1 minute',
   CURRENT_TIMESTAMP - interval '135 days' + interval '14 hours 31 minutes',
-  30, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  30, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Консультация по прикорму. Рекомендовано начать с овощных пюре.',
   CURRENT_TIMESTAMP - interval '135 days', CURRENT_TIMESTAMP - interval '135 days');
 
@@ -2099,7 +2099,7 @@ VALUES ('b0000000-0000-0000-0000-000000000003', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '120 days' + interval '11 hours',
   CURRENT_TIMESTAMP - interval '120 days' + interval '11 hours 3 minutes',
   CURRENT_TIMESTAMP - interval '120 days' + interval '11 hours 18 minutes',
-  15, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  15, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Осмотр новорождённого. Пупочная ранка заживает. Рефлексы в норме.',
   CURRENT_TIMESTAMP - interval '120 days', CURRENT_TIMESTAMP - interval '120 days');
 
@@ -2108,7 +2108,7 @@ VALUES ('b0000000-0000-0000-0000-000000000002', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '105 days' + interval '9 hours',
   CURRENT_TIMESTAMP - interval '105 days' + interval '9 hours 5 minutes',
   CURRENT_TIMESTAMP - interval '105 days' + interval '9 hours 25 minutes',
-  20, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  20, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Обсуждение аллергии на яичный белок. Назначена элиминационная диета.',
   CURRENT_TIMESTAMP - interval '105 days', CURRENT_TIMESTAMP - interval '105 days');
 
@@ -2117,7 +2117,7 @@ VALUES ('b0000000-0000-0000-0000-000000000004', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '90 days' + interval '16 hours',
   CURRENT_TIMESTAMP - interval '90 days' + interval '16 hours 2 minutes',
   CURRENT_TIMESTAMP - interval '90 days' + interval '16 hours 37 minutes',
-  35, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  35, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Жалобы на частые срыгивания. Рекомендовано дробное кормление, вертикальное положение.',
   CURRENT_TIMESTAMP - interval '90 days', CURRENT_TIMESTAMP - interval '90 days');
 
@@ -2126,7 +2126,7 @@ VALUES ('b0000000-0000-0000-0000-000000000001', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '75 days' + interval '10 hours',
   CURRENT_TIMESTAMP - interval '75 days' + interval '10 hours 1 minute',
   CURRENT_TIMESTAMP - interval '75 days' + interval '10 hours 26 minutes',
-  25, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  25, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Консультация по поведению (битьё головой). Нормальный этап развития.',
   CURRENT_TIMESTAMP - interval '75 days', CURRENT_TIMESTAMP - interval '75 days');
 
@@ -2135,7 +2135,7 @@ VALUES ('b0000000-0000-0000-0000-000000000005', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '60 days' + interval '13 hours',
   CURRENT_TIMESTAMP - interval '60 days' + interval '13 hours 4 minutes',
   CURRENT_TIMESTAMP - interval '60 days' + interval '13 hours 24 minutes',
-  20, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  20, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Боли в животе. Исключён аппендицит. Назначен пробиотик.',
   CURRENT_TIMESTAMP - interval '60 days', CURRENT_TIMESTAMP - interval '60 days');
 
@@ -2144,7 +2144,7 @@ VALUES ('b0000000-0000-0000-0000-000000000002', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '45 days' + interval '11 hours',
   CURRENT_TIMESTAMP - interval '45 days' + interval '11 hours 2 minutes',
   CURRENT_TIMESTAMP - interval '45 days' + interval '11 hours 17 minutes',
-  15, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  15, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Осмотр в 1 месяц. Набор веса 800 г. Рефлексы в норме.',
   CURRENT_TIMESTAMP - interval '45 days', CURRENT_TIMESTAMP - interval '45 days');
 
@@ -2153,7 +2153,7 @@ VALUES ('b0000000-0000-0000-0000-000000000006', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '30 days' + interval '15 hours',
   CURRENT_TIMESTAMP - interval '30 days' + interval '15 hours 3 minutes',
   CURRENT_TIMESTAMP - interval '30 days' + interval '15 hours 43 minutes',
-  40, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  40, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Подробная консультация по развитию речи и моторики в 18 месяцев. Всё в норме.',
   CURRENT_TIMESTAMP - interval '30 days', CURRENT_TIMESTAMP - interval '30 days');
 
@@ -2162,7 +2162,7 @@ VALUES ('b0000000-0000-0000-0000-000000000003', '80000000-0000-0000-0000-0000000
   CURRENT_TIMESTAMP - interval '14 days' + interval '10 hours',
   CURRENT_TIMESTAMP - interval '14 days' + interval '10 hours 1 minute',
   CURRENT_TIMESTAMP - interval '14 days' + interval '10 hours 31 minutes',
-  30, 'https://meet.familycare.kz/' || gen_random_uuid(), 'completed',
+  30, 'https://meet.umai-health.kz/' || gen_random_uuid(), 'completed',
   'Консультация аллерголога. Подтверждена аллергия на яйцо. Расписана диета.',
   CURRENT_TIMESTAMP - interval '14 days', CURRENT_TIMESTAMP - interval '14 days');
 
@@ -2170,14 +2170,14 @@ VALUES ('b0000000-0000-0000-0000-000000000003', '80000000-0000-0000-0000-0000000
 INSERT INTO video_consultations (doctor_id, family_id, child_id, scheduled_at, status, room_url, notes, created_at, updated_at)
 VALUES ('b0000000-0000-0000-0000-000000000001', '80000000-0000-0000-0000-000000000014', '90000000-0000-0000-0000-000000000014',
   CURRENT_TIMESTAMP - interval '30 days' + interval '9 hours',
-  'cancelled', 'https://meet.familycare.kz/' || gen_random_uuid(),
+  'cancelled', 'https://meet.umai-health.kz/' || gen_random_uuid(),
   'Отменена по инициативе пациента.',
   CURRENT_TIMESTAMP - interval '32 days', CURRENT_TIMESTAMP - interval '30 days');
 
 INSERT INTO video_consultations (doctor_id, family_id, child_id, scheduled_at, status, room_url, notes, created_at, updated_at)
 VALUES ('b0000000-0000-0000-0000-000000000004', '80000000-0000-0000-0000-000000000017', '90000000-0000-0000-0000-000000000017',
   CURRENT_TIMESTAMP - interval '21 days' + interval '14 hours',
-  'cancelled', 'https://meet.familycare.kz/' || gen_random_uuid(),
+  'cancelled', 'https://meet.umai-health.kz/' || gen_random_uuid(),
   'Отменена: врач заболел. Предложена замена даты.',
   CURRENT_TIMESTAMP - interval '25 days', CURRENT_TIMESTAMP - interval '21 days');
 
@@ -2185,20 +2185,20 @@ VALUES ('b0000000-0000-0000-0000-000000000004', '80000000-0000-0000-0000-0000000
 INSERT INTO video_consultations (doctor_id, family_id, child_id, scheduled_at, status, room_url, created_at, updated_at)
 VALUES ('b0000000-0000-0000-0000-000000000002', '80000000-0000-0000-0000-000000000001', '90000000-0000-0000-0000-000000000002',
   CURRENT_TIMESTAMP + interval '3 days' + interval '10 hours',
-  'scheduled', 'https://meet.familycare.kz/' || gen_random_uuid(),
+  'scheduled', 'https://meet.umai-health.kz/' || gen_random_uuid(),
   CURRENT_TIMESTAMP - interval '2 days', CURRENT_TIMESTAMP - interval '2 days');
 
 INSERT INTO video_consultations (doctor_id, family_id, child_id, scheduled_at, status, room_url, created_at, updated_at)
 VALUES ('b0000000-0000-0000-0000-000000000005', '80000000-0000-0000-0000-000000000007', '90000000-0000-0000-0000-000000000008',
   CURRENT_TIMESTAMP + interval '7 days' + interval '15 hours',
-  'scheduled', 'https://meet.familycare.kz/' || gen_random_uuid(),
+  'scheduled', 'https://meet.umai-health.kz/' || gen_random_uuid(),
   CURRENT_TIMESTAMP - interval '1 day', CURRENT_TIMESTAMP - interval '1 day');
 
 -- 1 missed
 INSERT INTO video_consultations (doctor_id, family_id, child_id, scheduled_at, status, room_url, notes, created_at, updated_at)
 VALUES ('b0000000-0000-0000-0000-000000000003', '80000000-0000-0000-0000-000000000015', '90000000-0000-0000-0000-000000000016',
   CURRENT_TIMESTAMP - interval '10 days' + interval '11 hours',
-  'missed', 'https://meet.familycare.kz/' || gen_random_uuid(),
+  'missed', 'https://meet.umai-health.kz/' || gen_random_uuid(),
   'Пациент не подключился. Отправлено напоминание о переносе.',
   CURRENT_TIMESTAMP - interval '12 days', CURRENT_TIMESTAMP - interval '10 days');
 
@@ -3059,7 +3059,7 @@ VALUES ('aa000000-0000-0000-0000-000000000001', NULL, 'article', 8, 'pregnancy',
 
 Следует ограничить: кофеин (не более 200 мг в день), сырую рыбу и мясо, мягкие сыры из непастеризованного молока, алкоголь полностью исключить. Пейте не менее 2 литров воды в день. При токсикозе ешьте маленькими порциями каждые 2-3 часа.',
   'Правильное питание во время беременности — основа здоровья мамы и малыша.',
-  'https://cdn.familycare.kz/thumbnails/ec01.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec01.jpg',
   ARRAY['беременность','питание','здоровье'], true, CURRENT_TIMESTAMP - interval '180 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3071,7 +3071,7 @@ VALUES ('aa000000-0000-0000-0000-000000000002', NULL, 'article', 6, 'pregnancy',
 
 Обратитесь к врачу, если: рвота более 4 раз в день, потеря веса более 5%, невозможность пить жидкость, тёмная моча, головокружение. Это может быть hyperemesis gravidarum — тяжёлая форма токсикоза, требующая лечения.',
   'Токсикоз затрагивает до 80% женщин в первом триместре.',
-  'https://cdn.familycare.kz/thumbnails/ec02.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec02.jpg',
   ARRAY['беременность','токсикоз','первый триместр'], true, CURRENT_TIMESTAMP - interval '170 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3083,7 +3083,7 @@ VALUES ('aa000000-0000-0000-0000-000000000003', NULL, 'article', 36, 'pregnancy'
 
 Практическая подготовка: выберите роддом и врача, подготовьте план родов (обезболивание, позиции, присутствие партнёра), соберите сумку в роддом, обустройте место для малыша дома. Курсы подготовки к родам помогут справиться с тревогой и дадут практические навыки.',
   'Подготовка к родам включает физическую, психологическую и практическую составляющие.',
-  'https://cdn.familycare.kz/thumbnails/ec03.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec03.jpg',
   ARRAY['беременность','роды','подготовка'], true, CURRENT_TIMESTAMP - interval '160 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3095,7 +3095,7 @@ VALUES ('aa000000-0000-0000-0000-000000000004', NULL, 'article', 14, 'pregnancy'
 
 Противопоказания к физической нагрузке: предлежание плаценты, угроза преждевременных родов, преэклампсия, истмико-цервикальная недостаточность. Прекратите занятия при: кровотечении, головокружении, боли в груди, одышке до начала упражнений, схваткообразных болях.',
   'Физическая активность во время беременности полезна для мамы и малыша.',
-  'https://cdn.familycare.kz/thumbnails/ec04.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec04.jpg',
   ARRAY['беременность','фитнес','упражнения'], true, CURRENT_TIMESTAMP - interval '155 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3107,7 +3107,7 @@ VALUES ('aa000000-0000-0000-0000-000000000005', NULL, 'article', 34, 'pregnancy'
 
 Для малыша: подгузники для новорождённых, пелёнки (тёплые и тонкие), шапочка, носочки, боди, комбинезон. Для выписки: нарядный комплект для малыша, конверт или одеяло по сезону, одежда для мамы (учтите, что живот не уходит сразу — возьмите одежду для 6-7 месяца беременности).',
   'Сумку в роддом лучше собрать к 34-36 неделе беременности.',
-  'https://cdn.familycare.kz/thumbnails/ec05.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec05.jpg',
   ARRAY['беременность','роддом','сумка'], true, CURRENT_TIMESTAMP - interval '145 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3119,7 +3119,7 @@ VALUES ('aa000000-0000-0000-0000-000000000006', NULL, 'article', 10, 'pregnancy'
 
 УЗИ первого триместра (11-14 недель) — это важнейшее исследование. Оно определяет: срок беременности, количество плодов, толщину воротникового пространства (скрининг на хромосомные аномалии), наличие носовой кости. Вместе с анализом крови на PAPP-A и бета-ХГЧ это составляет комбинированный скрининг первого триместра.',
   'Первый триместр — важный период для обследования.',
-  'https://cdn.familycare.kz/thumbnails/ec06.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec06.jpg',
   ARRAY['беременность','анализы','скрининг'], true, CURRENT_TIMESTAMP - interval '140 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3131,7 +3131,7 @@ VALUES ('aa000000-0000-0000-0000-000000000007', NULL, 'article', 20, 'pregnancy'
 
 В третьем триместре идёт набор веса и созревание органов. К 36 неделям вес 2.5-2.7 кг, лёгкие почти зрелые. К 40 неделям средний вес 3.2-3.5 кг, рост 50-52 см. Малыш полностью готов к рождению. Все органы чувств работают — он реагирует на свет, звук, вкус околоплодных вод.',
   'Внутриутробное развитие малыша — удивительный процесс.',
-  'https://cdn.familycare.kz/thumbnails/ec07.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec07.jpg',
   ARRAY['беременность','развитие плода','триместры'], true, CURRENT_TIMESTAMP - interval '135 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3143,7 +3143,7 @@ VALUES ('aa000000-0000-0000-0000-000000000008', NULL, 'article', 30, 'pregnancy'
 
 Важно: если грусть, тревога или апатия длятся более двух недель и мешают повседневной жизни — обратитесь к специалисту. Перинатальная депрессия встречается у 10-15% женщин и хорошо поддаётся лечению. Раннее обращение — залог здоровья мамы и малыша.',
   'Беременность — время не только физических, но и эмоциональных перемен.',
-  'https://cdn.familycare.kz/thumbnails/ec08.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec08.jpg',
   ARRAY['беременность','психология','эмоции'], true, CURRENT_TIMESTAMP - interval '130 days');
 
 -- 8 infant articles
@@ -3156,7 +3156,7 @@ VALUES ('aa000000-0000-0000-0000-000000000009', NULL, 'article', 3, 'infant',
 
 Правильное прикладывание: ребёнок захватывает не только сосок, но и большую часть ареолы; нижняя губа вывернута наружу; подбородок прижат к груди; нет щёлкающих звуков; кормление безболезненно. Кормите по требованию — в первые недели это 8-12 раз в сутки, включая ночные кормления.',
   'Грудное вскармливание — лучшее питание для новорождённого.',
-  'https://cdn.familycare.kz/thumbnails/ec09.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec09.jpg',
   ARRAY['новорождённый','грудное вскармливание','кормление'], true, CURRENT_TIMESTAMP - interval '120 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3168,7 +3168,7 @@ VALUES ('aa000000-0000-0000-0000-000000000010', NULL, 'article', 7, 'infant',
 
 Техника: поддерживайте голову и шею одной рукой, другой мойте тело сверху вниз. Особое внимание складочкам на шее, за ушами, подмышками и в паху. После купания промокните кожу (не растирайте), обработайте пупочную ранку, при сухости нанесите детский крем или масло. Лучшее время — вечером перед сном, как часть ритуала.',
   'Первое купание можно проводить после заживления пупочной ранки.',
-  'https://cdn.familycare.kz/thumbnails/ec10.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec10.jpg',
   ARRAY['новорождённый','купание','уход'], true, CURRENT_TIMESTAMP - interval '115 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3180,7 +3180,7 @@ VALUES ('aa000000-0000-0000-0000-000000000011', NULL, 'article', 30, 'infant',
 
 Методы облегчения: выкладывание на животик, массаж живота по часовой стрелке, ношение в слинге или на руках, белый шум, тёплая ванна, «поза тигра на ветке» (ребёнок животом на предплечье), пробиотики с Lactobacillus reuteri (по рекомендации врача), симетикон для уменьшения газообразования. Главное — не оставайтесь с проблемой одни, просите помощь у близких.',
   'Колики — это эпизоды безутешного плача у здорового ребёнка.',
-  'https://cdn.familycare.kz/thumbnails/ec11.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec11.jpg',
   ARRAY['младенец','колики','плач'], true, CURRENT_TIMESTAMP - interval '110 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3192,7 +3192,7 @@ VALUES ('aa000000-0000-0000-0000-000000000012', NULL, 'article', 180, 'infant',
 
 Начинайте с 0.5 чайной ложки, увеличивая до полной порции за 7-10 дней. Давайте прикорм в первой половине дня. Не добавляйте соль и сахар до 1 года. Текстура: сначала гомогенное пюре, к 8-9 месяцам — с кусочками, к году — мягкая общая пища. Не заставляйте есть — ребёнок сам регулирует аппетит.',
   'ВОЗ рекомендует вводить прикорм с 6 месяцев.',
-  'https://cdn.familycare.kz/thumbnails/ec12.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec12.jpg',
   ARRAY['прикорм','питание','6 месяцев'], true, CURRENT_TIMESTAMP - interval '100 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3204,7 +3204,7 @@ VALUES ('aa000000-0000-0000-0000-000000000013', NULL, 'article', 60, 'infant',
 
 Безопасный сон: укладывайте на спину на ровную жёсткую поверхность; без подушек, одеял, мягких игрушек в кроватке; температура комнаты 18-22°C; не перегревайте ребёнка; совместный сон в одной комнате (но не в одной кровати) до 6-12 месяцев снижает риск СВДС.',
   'Здоровый сон — основа развития ребёнка.',
-  'https://cdn.familycare.kz/thumbnails/ec13.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec13.jpg',
   ARRAY['сон','режим','младенец'], true, CURRENT_TIMESTAMP - interval '95 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3216,7 +3216,7 @@ VALUES ('aa000000-0000-0000-0000-000000000014', NULL, 'article', 30, 'infant',
 
 Базовые приёмы: поглаживание ручек от кисти к плечу, поглаживание ножек от стопы к бедру, круговые движения по животу по часовой стрелке (помогает при коликах), поглаживание спинки снизу вверх. С 3 месяцев добавляйте лёгкие разминания. С 6 месяцев можно добавить элементы гимнастики: сгибание-разгибание ножек, перевороты.',
   'Детский массаж стимулирует развитие и улучшает пищеварение.',
-  'https://cdn.familycare.kz/thumbnails/ec14.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec14.jpg',
   ARRAY['массаж','развитие','грудничок'], true, CURRENT_TIMESTAMP - interval '90 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3228,7 +3228,7 @@ VALUES ('aa000000-0000-0000-0000-000000000015', NULL, 'article', 90, 'infant',
 
 4-6 месяцев: игрушки разной текстуры (гладкие, шершавые, мягкие), прорезыватели, простые игры «ку-ку» и «ладушки», перекатывание мячика, чтение книг с яркими крупными картинками. Важно: не перегружайте ребёнка стимулами, следите за признаками утомления (отворачивается, хнычет, трёт глаза).',
   'Игра — главный способ познания мира для малыша.',
-  'https://cdn.familycare.kz/thumbnails/ec15.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec15.jpg',
   ARRAY['развитие','игры','0-6 месяцев'], true, CURRENT_TIMESTAMP - interval '85 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3240,7 +3240,7 @@ VALUES ('aa000000-0000-0000-0000-000000000016', NULL, 'article', 120, 'infant',
 
 Водные процедуры: начните с умывания лица прохладной водой. Обливание после купания: начните с 36°C, снижая на 1 градус каждые 3-5 дней до 28-26°C. Контрастные обливания ног: тёплая вода 36°C — прохладная 24°C — тёплая. Прогулки на свежем воздухе в любую погоду (кроме экстремальных условий) — важнейший элемент закаливания.',
   'Закаливание укрепляет иммунитет ребёнка.',
-  'https://cdn.familycare.kz/thumbnails/ec16.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec16.jpg',
   ARRAY['закаливание','иммунитет','здоровье'], true, CURRENT_TIMESTAMP - interval '80 days');
 
 -- 4 checklists
@@ -3253,7 +3253,7 @@ VALUES ('aa000000-0000-0000-0000-000000000017', NULL, 'checklist', 34, 'pregnanc
 
 Для малыша: подгузники для новорождённых (1 упаковка), влажные салфетки без отдушки, пелёнки хлопковые (3-4 шт), боди или распашонки (3-4 шт), ползунки (2-3 шт), шапочки (2 шт), носочки, антицарапки, пустышка (по желанию). Для выписки: конверт/одеяло по сезону, нарядный комплект для малыша, одежда для мамы, автокресло-переноска.',
   'Полный список вещей в роддом для мамы и малыша.',
-  'https://cdn.familycare.kz/thumbnails/ec17.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec17.jpg',
   ARRAY['роддом','список','чек-лист'], true, CURRENT_TIMESTAMP - interval '75 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3265,7 +3265,7 @@ VALUES ('aa000000-0000-0000-0000-000000000018', NULL, 'checklist', 0, 'infant',
 
 Антисептики: раствор бриллиантовой зелени (зелёнка), мирамистин. Перевязочные: стерильные бинты, пластырь, ватные диски. Другое: пипетка, мерный шприц для лекарств, стерильная вата. Важно: не давайте ребёнку лекарства без назначения врача. Проверяйте сроки годности каждые 3 месяца.',
   'Необходимые средства для домашней аптечки новорождённого.',
-  'https://cdn.familycare.kz/thumbnails/ec18.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec18.jpg',
   ARRAY['аптечка','новорождённый','уход'], true, CURRENT_TIMESTAMP - interval '70 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3277,7 +3277,7 @@ VALUES ('aa000000-0000-0000-0000-000000000019', NULL, 'checklist', 0, 'infant',
 
 Ожог: охладите прохладной (не ледяной) водой 10-20 минут. Не прокалывайте пузыри, не наносите масло или сметану. Накройте стерильной повязкой. При ожоге больше ладони ребёнка — вызовите скорую. Отравление: не вызывайте рвоту самостоятельно. Позвоните в скорую 103 или токсикологический центр. Сохраните упаковку вещества.',
   'Краткие инструкции по оказанию первой помощи ребёнку.',
-  'https://cdn.familycare.kz/thumbnails/ec19.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec19.jpg',
   ARRAY['первая помощь','безопасность','экстренная помощь'], true, CURRENT_TIMESTAMP - interval '65 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3289,7 +3289,7 @@ VALUES ('aa000000-0000-0000-0000-000000000020', NULL, 'checklist', 36, 'pregnanc
 
 Безопасность: заглушки на розетки, замки на шкафы (пригодятся через 6 месяцев, но лучше подготовить заранее), москитная сетка на коляску, автокресло группы 0+ (обязательно!). Одежда: 5-6 боди, 4-5 ползунков, 3 шапочки, комбинезон по сезону, конверт в коляску. Прогулки: коляска, сумка для прогулок, дождевик.',
   'Чек-лист подготовки дома к появлению новорождённого.',
-  'https://cdn.familycare.kz/thumbnails/ec20.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec20.jpg',
   ARRAY['подготовка','дом','новорождённый'], true, CURRENT_TIMESTAMP - interval '60 days');
 
 -- 5 video/infographic
@@ -3298,8 +3298,8 @@ VALUES ('aa000000-0000-0000-0000-000000000021', NULL, 'video', 3, 'infant',
   'Как правильно прикладывать к груди',
   'Видеоинструкция по правильному прикладыванию к груди. Показаны основные позиции: «колыбелька», «из-под руки», «лёжа на боку». Демонстрация правильного захвата: широко открытый рот, захват ареолы, вывернутая нижняя губа. Признаки правильного кормления: ритмичные глотательные движения, расслабленное тело ребёнка, мягкая грудь после кормления.',
   'Видеоинструкция по правильному прикладыванию к груди.',
-  'https://cdn.familycare.kz/videos/ec21.mp4',
-  'https://cdn.familycare.kz/thumbnails/ec21.jpg',
+  'https://cdn.umai-health.kz/videos/ec21.mp4',
+  'https://cdn.umai-health.kz/thumbnails/ec21.jpg',
   ARRAY['грудное вскармливание','видео','кормление'], true, CURRENT_TIMESTAMP - interval '55 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, media_url, thumbnail_url, tags, is_published, published_at)
@@ -3307,8 +3307,8 @@ VALUES ('aa000000-0000-0000-0000-000000000022', NULL, 'video', 30, 'infant',
   'Детский массаж: видеоинструкция',
   'Пошаговая видеоинструкция по проведению массажа для грудничка. Показаны основные приёмы: поглаживание рук, ног, живота и спины. Массаж живота по часовой стрелке при коликах. Элементы гимнастики: сгибание-разгибание ножек, «велосипед», перевороты. Все движения мягкие, с учётом анатомических особенностей малыша.',
   'Пошаговая видеоинструкция по проведению массажа для грудничка.',
-  'https://cdn.familycare.kz/videos/ec22.mp4',
-  'https://cdn.familycare.kz/thumbnails/ec22.jpg',
+  'https://cdn.umai-health.kz/videos/ec22.mp4',
+  'https://cdn.umai-health.kz/thumbnails/ec22.jpg',
   ARRAY['массаж','видео','грудничок'], true, CURRENT_TIMESTAMP - interval '50 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_week, target_journey_type, title, body, excerpt, media_url, thumbnail_url, tags, is_published, published_at)
@@ -3316,8 +3316,8 @@ VALUES ('aa000000-0000-0000-0000-000000000023', NULL, 'video', 14, 'pregnancy',
   'Гимнастика для беременных',
   'Комплекс упражнений для второго и третьего триместра. Включает: разминку суставов, упражнения для укрепления мышц спины, тазового дна (Кегель), дыхательные техники для родов. Каждое упражнение показано с модификациями для разных сроков. Продолжительность комплекса 20 минут. Противопоказания указаны в начале видео.',
   'Комплекс безопасных упражнений для беременных.',
-  'https://cdn.familycare.kz/videos/ec23.mp4',
-  'https://cdn.familycare.kz/thumbnails/ec23.jpg',
+  'https://cdn.umai-health.kz/videos/ec23.mp4',
+  'https://cdn.umai-health.kz/thumbnails/ec23.jpg',
   ARRAY['беременность','гимнастика','видео'], true, CURRENT_TIMESTAMP - interval '45 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3325,7 +3325,7 @@ VALUES ('aa000000-0000-0000-0000-000000000024', NULL, 'infographic', 0, 'infant'
   'Календарь вакцинации РК',
   'Наглядная инфографика с национальным календарём прививок Республики Казахстан. При рождении: БЦЖ + гепатит B. 2 месяца: АКДС + ИПВ + гепатит B + Hib + пневмококк + ротавирус. 3 месяца: АКДС + ИПВ + Hib. 4 месяца: АКДС + ИПВ + гепатит B + Hib + пневмококк + ротавирус. 12-15 месяцев: КПК + ревакцинация пневмококк. 18 месяцев: АКДС ревакцинация. 6 лет: КПК ревакцинация + АДС-М. Указаны возможные побочные реакции и когда обращаться к врачу.',
   'Национальный календарь прививок Республики Казахстан.',
-  'https://cdn.familycare.kz/thumbnails/ec24.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec24.jpg',
   ARRAY['вакцинация','прививки','календарь','Казахстан'], true, CURRENT_TIMESTAMP - interval '40 days');
 
 INSERT INTO education_content (id, clinic_id, type, target_age_days, target_journey_type, title, body, excerpt, thumbnail_url, tags, is_published, published_at)
@@ -3333,7 +3333,7 @@ VALUES ('aa000000-0000-0000-0000-000000000025', NULL, 'infographic', 0, 'infant'
   'Нормы роста и веса WHO',
   'Инфографика с нормами роста и веса по данным ВОЗ для детей от 0 до 2 лет. Отдельные графики для мальчиков и девочек. Показаны перцентили: 3-й, 15-й, 50-й (медиана), 85-й, 97-й. Вес мальчиков: рождение 3.3 кг, 6 мес 7.9 кг, 12 мес 9.6 кг, 24 мес 12.2 кг. Вес девочек: рождение 3.2 кг, 6 мес 7.3 кг, 12 мес 8.9 кг, 24 мес 11.5 кг. Рост мальчиков: рождение 49.9 см, 6 мес 67.6 см, 12 мес 75.7 см, 24 мес 87.1 см. Рекомендация: отслеживайте динамику, а не абсолютные значения.',
   'Нормы роста и веса ВОЗ для детей от 0 до 2 лет.',
-  'https://cdn.familycare.kz/thumbnails/ec25.jpg',
+  'https://cdn.umai-health.kz/thumbnails/ec25.jpg',
   ARRAY['рост','вес','WHO','нормы'], true, CURRENT_TIMESTAMP - interval '35 days');
 
 

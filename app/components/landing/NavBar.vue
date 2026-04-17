@@ -6,7 +6,7 @@
         <span class="logo-icon">
           <Icon name="lucide:heart-pulse" size="24" />
         </span>
-        <span class="logo-text font-display">Family Care OS</span>
+        <span class="logo-text font-display">UMAI Health</span>
       </NuxtLink>
 
       <!-- Desktop Navigation — page tabs -->

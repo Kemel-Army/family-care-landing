@@ -176,10 +176,10 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page-fade', mode: 'out-in' },
     head: {
       htmlAttrs: { lang: 'ru' },
-      title: 'Family Care OS — Цифровой маршрут заботы',
+      title: 'UMAI Health — Цифровой маршрут заботы',
       meta: [
         { name: 'description', content: 'Платформа под вашим брендом для частных клиник. Ведёт семью по маршруту наблюдения от зачатия до 2 лет ребёнка.' },
-        { property: 'og:title', content: 'Family Care OS — Цифровой маршрут заботы' },
+        { property: 'og:title', content: 'UMAI Health — Цифровой маршрут заботы' },
         { property: 'og:description', content: 'Платформа под вашим брендом для частных клиник. Маршрут от зачатия до 2 лет.' },
         { property: 'og:type', content: 'website' },
         { name: 'theme-color', content: '#8B7EC8' },

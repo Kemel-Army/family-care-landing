@@ -77,7 +77,7 @@
         <div class="ct-row ct-header">
           <div class="ct-metric">Метрика</div>
           <div class="ct-before">Без платформы</div>
-          <div class="ct-after">С Family Care OS</div>
+          <div class="ct-after">С UMAI Health</div>
         </div>
         <div v-for="row in compareRows" :key="row.metric" class="ct-row">
           <div class="ct-metric"><span class="ct-icon">{{ row.icon }}</span> {{ row.metric }}</div>

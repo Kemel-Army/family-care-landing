@@ -8,7 +8,7 @@
         <h2>1. Общие положения</h2>
         <p>
           Настоящая Политика конфиденциальности определяет порядок обработки и защиты персональных данных
-          пользователей сайта familycare.kz (далее — «Сайт»), принадлежащего команде Family Care OS (далее — «Оператор»).
+          пользователей сайта umai-health.kz (далее — «Сайт»), принадлежащего команде UMAI Health (далее — «Оператор»).
         </p>
         <p>
           Политика разработана в соответствии с Законом Республики Казахстан от 21 мая 2013 года № 94-V
@@ -66,7 +66,7 @@
           <li>Потребовать их изменения или удаления</li>
           <li>Отозвать согласие на обработку</li>
         </ul>
-        <p>Для реализации этих прав направьте запрос на <a href="mailto:hello@familycare.kz">hello@familycare.kz</a>.</p>
+        <p>Для реализации этих прав направьте запрос на <a href="mailto:info@umai-health.kz">info@umai-health.kz</a>.</p>
       </section>
 
       <section>
@@ -82,7 +82,7 @@
         <p>
           Оператор вправе вносить изменения в настоящую Политику. Актуальная версия
           всегда доступна по адресу
-          <NuxtLink to="/privacy">familycare.kz/privacy</NuxtLink>.
+          <NuxtLink to="/privacy">umai-health.kz/privacy</NuxtLink>.
         </p>
       </section>
     </div>
@@ -93,8 +93,8 @@
 definePageMeta({ layout: 'landing' })
 
 useSeoMeta({
-  title: 'Политика конфиденциальности — Family Care OS',
-  description: 'Политика обработки персональных данных сайта Family Care OS.',
+  title: 'Политика конфиденциальности — UMAI Health',
+  description: 'Политика обработки персональных данных сайта UMAI Health.',
 })
 </script>
 

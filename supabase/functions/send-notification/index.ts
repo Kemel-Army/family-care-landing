@@ -241,7 +241,7 @@ async function sendEmail(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Family Care <noreply@familycare.kz>',
+        from: 'UMAI Health <noreply@umai-health.kz>',
         to: [user.email],
         subject: title,
         html: `
@@ -249,7 +249,7 @@ async function sendEmail(
             <h2 style="color:#1e293b;margin-bottom:16px">${title}</h2>
             <p style="color:#475569;font-size:16px;line-height:1.6">${body}</p>
             <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0">
-            <p style="color:#94a3b8;font-size:12px">Family Care OS — ${user.first_name || 'Пользователь'}</p>
+            <p style="color:#94a3b8;font-size:12px">UMAI Health — ${user.first_name || 'Пользователь'}</p>
           </div>
         `,
       }),

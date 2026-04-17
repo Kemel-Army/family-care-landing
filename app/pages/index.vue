@@ -9,7 +9,7 @@
     <!-- 3. Проблема — "Знакомая ситуация?" -->
     <LandingProblemSection />
 
-    <!-- 4. Что такое Family Care OS -->
+    <!-- 4. Что такое UMAI Health -->
     <LandingWhatIsSection />
 
     <!-- 5. Как это работает (timeline) -->
@@ -35,8 +35,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Family Care OS — цифровой маршрут семьи от зачатия до 2 лет',
-  ogTitle: 'Family Care OS — цифровой маршрут семьи',
+  title: 'UMAI Health — цифровой маршрут семьи от зачатия до 2 лет',
+  ogTitle: 'UMAI Health — цифровой маршрут семьи',
   description: 'Платформа сопровождения семьи для клиник. Назначения, прививки, осмотры, аналитика. Автоматический маршрут от зачатия до 2 лет.',
   ogDescription: 'Платформа для клиник: автоматический маршрут ведения семьи от зачатия до 2 лет',
   ogType: 'website',
@@ -51,7 +51,7 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
-        name: 'Family Care OS',
+        name: 'UMAI Health',
         applicationCategory: 'HealthApplication',
         operatingSystem: 'Web',
         description: 'Цифровая платформа для частных клиник. Ведёт семью по маршруту наблюдения от зачатия до 2 лет ребёнка.',
@@ -61,7 +61,7 @@ useHead({
         },
         author: {
           '@type': 'Organization',
-          name: 'Family Care OS',
+          name: 'UMAI Health',
         },
       }),
     },

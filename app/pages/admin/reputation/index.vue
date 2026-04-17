@@ -58,8 +58,8 @@ definePageMeta({ layout: 'app' })
 
 const appData = useAppData()
 
-const link2gis = ref('https://2gis.kz/almaty/firm/family-care')
-const linkGoogle = ref('https://g.page/family-care-almaty')
+const link2gis = ref('https://2gis.kz/almaty/firm/umai-health')
+const linkGoogle = ref('https://g.page/umai-health-almaty')
 
 const reviews = [
   { id: 1, stars: 5, date: '12 мая', text: 'Отличный сервис! Координатор всегда на связи, врачи внимательные.', author: 'Айгуль М.' },

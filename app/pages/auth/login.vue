@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="auth-title">Вход</h2>
-    <p class="auth-subtitle">Войдите в свой аккаунт Family Care</p>
+    <p class="auth-subtitle">Войдите в свой аккаунт UMAI Health</p>
 
     <form class="auth-form" @submit.prevent="handleLogin">
       <div class="fg">

@@ -15,7 +15,7 @@
             <div class="step-icon-wrap">
               <Icon name="lucide:heart-pulse" size="48" class="step-icon" />
             </div>
-            <h2>Добро пожаловать в Family Care!</h2>
+            <h2>Добро пожаловать в UMAI Health!</h2>
             <p>Мы поможем вам заботиться о здоровье вашей семьи. Давайте настроим ваш профиль.</p>
           </div>
 

@@ -1,4 +1,4 @@
-# FAMILY CARE OS — Полная база знаний для разработки
+# UMAI HEALTH — Полная база знаний для разработки
 
 > **Статус:** Рабочая версия v1.0  
 > **Дата:** Апрель 2026  
@@ -45,7 +45,7 @@
 
 ### Что мы строим
 
-Family Care OS — white-label платформа для частных клиник. Устанавливается как брендированное приложение клиники. Ведёт семью по цифровому маршруту от зачатия до 2 лет ребёнка.
+UMAI Health — white-label платформа для частных клиник. Устанавливается как брендированное приложение клиники. Ведёт семью по цифровому маршруту от зачатия до 2 лет ребёнка.
 
 ### Почему это не очередной patient cabinet
 
@@ -70,7 +70,7 @@ Family Care OS — white-label платформа для частных клин
 
 - Платформа продаётся клиникам как SaaS. Каждая клиника — отдельный tenant.
 - Клиника видит приложение под своим брендом (логотип, цвета, название).
-- Семья видит приложение клиники, не знает о Family Care OS.
+- Семья видит приложение клиники, не знает о UMAI Health.
 - Данные клиник полностью изолированы друг от друга.
 
 ---
@@ -690,7 +690,7 @@ CREATE TYPE coordinator_task_status AS ENUM (
 CREATE TABLE clinics (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
-  slug text UNIQUE NOT NULL,            -- для white-label URL: {slug}.familycare.kz
+  slug text UNIQUE NOT NULL,            -- для white-label URL: {slug}.umai-health.kz
   logo_url text,
   theme jsonb DEFAULT '{}',             -- TenantTheme object
   settings jsonb DEFAULT '{}',          -- clinic-level settings
@@ -2953,7 +2953,7 @@ export default defineNuxtPlugin(async () => {
 export default defineNuxtRouteMiddleware(async (to) => {
   // Resolve tenant from subdomain or path
   const host = useRequestHeaders()['host'] || window.location.host;
-  const slug = host.split('.')[0]; // clinic-slug.familycare.kz
+  const slug = host.split('.')[0]; // clinic-slug.umai-health.kz
 
   if (slug && slug !== 'app' && slug !== 'www') {
     const { data: clinic } = await supabase
@@ -3024,8 +3024,8 @@ function applyTheme(theme: TenantTheme) {
 | Env | URL | Supabase Project | Назначение |
 |-----|-----|-----------------|-----------|
 | Development | localhost:3000 | Local (supabase start) | Локальная разработка |
-| Staging | staging.familycare.kz | staging project | QA, демо для клиник |
-| Production | {slug}.familycare.kz | production project | Production |
+| Staging | staging.umai-health.kz | staging project | QA, демо для клиник |
+| Production | {slug}.umai-health.kz | production project | Production |
 
 ### CI/CD (GitHub Actions)
 

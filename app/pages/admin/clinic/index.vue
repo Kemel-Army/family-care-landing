@@ -60,13 +60,13 @@ definePageMeta({ layout: 'app' })
 const saved = ref(false)
 
 const form = reactive({
-  name: 'Family Care Алматы',
-  slug: 'familycare-almaty',
+  name: 'UMAI Health Алматы',
+  slug: 'umai-health-almaty',
   logo_url: '',
   primary_color: '#8B7EC8',
   secondary_color: '#E8A0BF',
   phone: '+7 (727) 312-45-67',
-  email: 'info@familycare.kz',
+  email: 'info@umai-health.kz',
   address: 'г. Алматы, ул. Абая 52',
   features: { ai_assistant: true, telemedicine: true, mood_tracking: true, sos_button: false, gamification: true, lab_integration: false } as Record<string, boolean>,
 })

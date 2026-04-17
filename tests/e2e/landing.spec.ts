@@ -6,7 +6,7 @@ test.describe('Landing — Homepage', () => {
   })
 
   test('page loads with correct title', async ({ page }) => {
-    await expect(page).toHaveTitle(/Family Care/)
+    await expect(page).toHaveTitle(/UMAI Health/)
   })
 
   test('hero section is visible', async ({ page }) => {

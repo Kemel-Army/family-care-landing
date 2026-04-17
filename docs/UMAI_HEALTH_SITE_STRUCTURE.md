@@ -1,4 +1,4 @@
-# Family Care OS — Полная структура и анатомия сайта
+# UMAI Health — Полная структура и анатомия сайта
 
 > **Стек**: Nuxt 4 + @nuxt/ui + @nuxt/image + @nuxt/fonts + GSAP + ScrollTrigger  
 > **Шрифты**: Playfair Display (display), DM Sans (heading), Inter (body)  
@@ -34,7 +34,7 @@
 ### NavBar
 | Элемент | Описание |
 |---------|----------|
-| Логотип | `Family Care OS` + иконка `lucide:heart-pulse` с gradient-фоном |
+| Логотип | `UMAI Health` + иконка `lucide:heart-pulse` с gradient-фоном |
 | Табы | Pill-навигация: **Платформа** `/`, **Для клиник** `/for-clinics`, **Для родителей** `/for-families` |
 | CTA | `Запросить демо` → `#contact` (gradient кнопка) |
 | Scroll-эффект | `backdrop-filter: blur(16px)`, transparent → solid bg при скролле >20px |
@@ -221,7 +221,7 @@
 
 ---
 
-### 5.3 WhatIsSection — «Что такое Family Care OS»
+### 5.3 WhatIsSection — «Что такое UMAI Health»
 **Контент:**
 - Badge: `О платформе`
 - **3 карты**:
@@ -315,8 +315,8 @@
 ### 5.8 FooterSection
 **Контент:**
 - 4 колонки: лого + описание | Платформа (3 ссылки) | Страницы (2 ссылки) | Контакты
-- `hello@familycare.kz`, `+7 700 123 45 67`, `Алматы, Казахстан`
-- © {year} Family Care OS. Сделано с заботой в Казахстане.
+- `info@umai-health.kz`, `+7 700 123 45 67`, `Алматы, Казахстан`
+- © {year} UMAI Health. Сделано с заботой в Казахстане.
 
 ---
 
@@ -450,7 +450,7 @@
 ### 6.10 ClinicFaqSection — 7 вопросов
 | Вопрос |
 |--------|
-| Сколько стоит Family Care OS? |
+| Сколько стоит UMAI Health? |
 | Как быстро можно внедрить? |
 | Интеграция с МИС? |
 | Безопасность данных? |
@@ -493,7 +493,7 @@
 4. Не понимаю, нормально ли развивается ребёнок
 5. После выписки клиника просто забыла о нас
 
-**Resolve**: `Family Care OS решает это.`
+**Resolve**: `UMAI Health решает это.`
 
 **Анимации (CSS-only):**
 - Hover: SVG чекмарк `stroke-dashoffset: 24→0` (рисуется галочка)
@@ -618,7 +618,7 @@
 
 ### 7.10 FamilyCtaSection — Финальный призыв
 **Контент:**
-- **H2**: `Спросите у вашей клиники о Family Care OS`
+- **H2**: `Спросите у вашей клиники о UMAI Health`
 - **P**: `Приложение бесплатно для семей. Доступ — через вашу клинику.`
 - **Note**: `Бесплатно · Работает offline · Все данные защищены`
 - Нет кнопки/формы — только текст

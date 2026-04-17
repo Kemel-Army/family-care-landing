@@ -1,4 +1,4 @@
-# FAMILY CARE OS — Ultimate Landing Blueprint v3.0
+# UMAI HEALTH — Ultimate Landing Blueprint v3.0
 
 > **Цель документа:** Исчерпывающая спецификация лендинга уровня $10M+ продукта
 > **Стек:** Nuxt 4 · @nuxt/ui · GSAP + ScrollTrigger + ScrollSmoother · Lenis · Three.js (hero) · Rive (micro-animations) · Motion One · Shiki (code highlighting)
@@ -552,7 +552,7 @@ HEADLINE (Satoshi 900, --text-hero):
 Мы возвращаем их.
 
 BODY (Inter 400, --text-body-lg, --color-neutral-500, max-width: 520px):
-Family Care OS — платформа, которая превращает разовый визит
+UMAI Health — платформа, которая превращает разовый визит
 в 2-летний цифровой маршрут. Больше повторных визитов,
 выше LTV семьи, меньше ручной работы.
 
@@ -1196,10 +1196,10 @@ BADGE: Бесплатно · Offline · Защищено
 ```typescript
 // pages/index.vue
 useHead({
-  title: 'Family Care OS — цифровой маршрут семьи от зачатия до 2 лет',
+  title: 'UMAI Health — цифровой маршрут семьи от зачатия до 2 лет',
   meta: [
     { name: 'description', content: 'Платформа сопровождения семьи для клиник. Назначения, прививки, осмотры, аналитика. Увеличьте retention семей в 3-5 раз.' },
-    { property: 'og:title', content: 'Family Care OS — цифровой маршрут семьи' },
+    { property: 'og:title', content: 'UMAI Health — цифровой маршрут семьи' },
     { property: 'og:description', content: 'Платформа для клиник: ведение семьи от зачатия до 2 лет' },
     { property: 'og:image', content: '/og/main.png' },
   ]
@@ -1207,7 +1207,7 @@ useHead({
 
 // pages/for-clinics.vue
 useHead({
-  title: 'Family Care OS для клиник — удержание семей, рост LTV',
+  title: 'UMAI Health для клиник — удержание семей, рост LTV',
   meta: [
     { name: 'description', content: '67% семей уходят после родов. Платформа возвращает их. ROI от 160%. Внедрение за 4 недели.' },
   ]
@@ -1215,7 +1215,7 @@ useHead({
 
 // pages/for-families.vue
 useHead({
-  title: 'Family Care OS для родителей — всё о малыше в одном приложении',
+  title: 'UMAI Health для родителей — всё о малыше в одном приложении',
   meta: [
     { name: 'description', content: 'Маршрут ребёнка, напоминания о витаминах, прививки, анализы — бесплатно от вашей клиники.' },
   ]

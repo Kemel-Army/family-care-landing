@@ -2,7 +2,7 @@
   <LandingUiSectionWrapper
     badge="Истории успеха"
     title="Реальные результаты клиник"
-    subtitle="Как Family Care OS меняет показатели бизнеса"
+    subtitle="Как UMAI Health меняет показатели бизнеса"
     alternate
   >
     <div class="cases-grid" data-stagger="fade-up">

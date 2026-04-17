@@ -1,12 +1,12 @@
-# Family Care OS — Полная инструкция по реализации интерфейса v1.0
+# UMAI Health — Полная инструкция по реализации интерфейса v1.0
 # Единственный источник истины. Добавь в контекст при работе с любым файлом проекта.
 
 ---
 
 ## 0. КОНТЕКСТ
 
-**Платформа:** Family Care OS — B2B SaaS для частных клиник, цифровой маршрут сопровождения семьи от зачатия до 2 лет
-**Домен:** family-care-landing.vercel.app → familycare.kz (prod)
+**Платформа:** UMAI Health — B2B SaaS для частных клиник, цифровой маршрут сопровождения семьи от зачатия до 2 лет
+**Домен:** umai-health-landing.vercel.app → umai-health.kz (prod)
 **Рынок:** Казахстан (Алматы, Астана, Шымкент, регионы) | Языки: ru, kz
 **Стек:** Nuxt 4, Tailwind CSS, Supabase (Auth, DB, Realtime, Storage), GSAP, Lenis
 **Шрифты:** Manrope (UI, кириллица) — через @nuxt/fonts
@@ -26,7 +26,7 @@
 
 ---
 
-## 0.2 ДИАГНОСТИКА ТЕКУЩЕГО САЙТА (family-care-landing.vercel.app)
+## 0.2 ДИАГНОСТИКА ТЕКУЩЕГО САЙТА (umai-health-landing.vercel.app)
 
 ### Что уже хорошо:
 - Чёткая B2B-ценность: «67% семей уходят после родов — мы возвращаем их»
@@ -666,9 +666,9 @@ Task (id, coordinatorId, familyId, type, priority, dueDate, status, completedAt)
 Скопируй и вставь при запуске работы:
 
 ```
-Ты — senior fullstack-разработчик, работающий над проектом Family Care OS.
+Ты — senior fullstack-разработчик, работающий над проектом UMAI Health.
 
-Тебе предоставлен документ FAMILY_CARE_OS_IMPLEMENTATION_GUIDE.md — единственный источник истины по интерфейсу платформы.
+Тебе предоставлен документ UMAI_HEALTH_IMPLEMENTATION_GUIDE.md — единственный источник истины по интерфейсу платформы.
 
 Также: main.css (CSS-переменные, dark mode), текущие компоненты лендинга.
 

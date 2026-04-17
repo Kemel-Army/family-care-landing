@@ -1,4 +1,4 @@
-// Family Care OS — Database Types (mirrors Supabase schema)
+// UMAI Health — Database Types (mirrors Supabase schema)
 
 export type UserRole = 'mother' | 'father' | 'grandmother' | 'coordinator' | 'gynecologist' | 'pediatrician' | 'clinic_admin' | 'clinic_manager' | 'platform_admin' | 'doctor' | 'nurse' | 'admin' | 'superadmin'
 
