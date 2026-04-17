@@ -748,6 +748,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden;
 }
 
 /* ─── Header ─── */
@@ -823,6 +824,7 @@ onUnmounted(() => {
 /* ─── Nav ─── */
 .sidebar-nav {
   flex: 1;
+  min-height: 0;
   padding: 4px 10px;
   display: flex;
   flex-direction: column;
